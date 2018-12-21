@@ -1,18 +1,18 @@
 #!/bin/bash
 
-file1="/tmp/d.sock"
-file2="/dev/shm/daqd shm"
+fileA="/tmp/d.sock"
+fileB="/dev/shm/daqd_shm"
 
-if [ -f "$file1" ]
+if [ -f "$fileA" ]
 then
-    echo "removing $file1"
-    rm -i $file1
+    echo "removing $fileA"
+    rm -i $fileA
 fi
 
-if [ -f "$file2" ]
+if [ -f "$fileB" ]
 then
-    echo "removing $file2"
-    rm -i $file2
+    echo "removing $fileB"
+    rm -i $fileB
 fi
 
 ./daqd --socket-name=/tmp/d.sock --daq-type=GBE
