@@ -1,9 +1,11 @@
 #!/usr/bin/sh
-CONFIG_FILE=config.ini
-DATA_DIR=data
+CONFIG_FILE=config_example.ini
+DATA_DIR=data/calib_example
+
+mkdir -p $DATA_DIR
 
 ./acquire_threshold_calibration --config ${CONFIG_FILE} -o ${DATA_DIR}/disc_calibration
-./process_threshold_calibration --config ${CONFIG_FILE} -i  ${DATA_DIR}/disc_calibration -o ${DATA_DIR}/disc_calibration.tsv 
+./process_threshold_calibration --config ${CONFIG_FILE} -i  ${DATA_DIR}/disc_calibration -o ${DATA_DIR}/disc_calibration.tsv --root-file ${DATA_DIR}/disc_calibration.root
 
 ./make_simple_disc_table --config ${CONFIG_FILE} --vth_t1 20 --vth_t2 20 --vth_e 15 > ${DATA_DIR}/disc_settings.tsv
 
