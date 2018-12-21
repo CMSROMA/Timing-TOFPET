@@ -1,6 +1,6 @@
 #!/usr/bin/sh
 CONFIG_FILE=config_example.ini
-DATA_DIR=data/calib_example
+DATA_DIR=data
 
 mkdir -p $DATA_DIR
 
