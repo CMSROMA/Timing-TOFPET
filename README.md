@@ -31,11 +31,13 @@ FrameServer::startWorker exiting...
 UDPFrameServer::runWorker starting...
 ```
 
-Alway keep this process active during a run.
+Always keep this process active during a run in this terminal.
 
 # Run TOFPET
 
-Edit configuration file 
+Open a new terminal. 
+
+Edit configuration file:
 ```
 config_main.txt
 ```
