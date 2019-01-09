@@ -50,7 +50,8 @@ python run_TOFPET.py -c config_main.txt
 ## Notes
 - The calibration (RUN_CALIB 1 in config file) should be re-run each time there is a new hardware configuration (e.g. different SiPMs, different hardware settings). It takes about 30-40 minutes to finish. 
 - Once the calibration step is done, the following runs can be taken using the existing calibration files (RUN_CALIB 0 in config file) 
-- The output file contains a root tree (xxx_singles.root): 
-  - the root tree contains one event for each channel passing the trigger selection  
+- Two output root files are produced: 
+  - xxx_singles.root: the tree contains one event for each channel passing the trigger selection  
+  - xxx_coincidences.root: the tree contains one event for each pair of channels passing the trigger selection if they are in time coincidence (default t2-t1<20 ns)  
 - Channel numbering in root file: Absolute channel ID (root file) = 64 x NCHIP + NCH  where NCHIP, NCH are reported in the config file.
 

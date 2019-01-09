@@ -50,6 +50,7 @@ lsb_t1 = ""
 lsb_t2 = ""
 daqscript = ""
 convertsinglescript = ""
+convertcoincidencescript = ""
 mode = ""
 runtime = ""
 output_dir = ""
@@ -115,6 +116,9 @@ for line in cfg:
     if (linetype == "CONVERTSINGLESCRIPT" and linesize==2):
         convertsinglescript = splitline[1]
 
+    if (linetype == "CONVERTCOINCIDENCESCRIPT" and linesize==2):
+        convertcoincidencescript = splitline[1]
+
     if (linetype == "MODE" and linesize==2):
         mode = splitline[1]
 
@@ -164,7 +168,7 @@ for line in cfg:
         dic_channels[(chId,"Z")]=Z
         dic_channels[(chId,"CRYSTAL")]=CRYSTAL
 
-#print config_template_file, hv_dac, run_calib, calib_dir, tdc_calib, qdc_calib, disc_calib, sipm_bias, disc_settings, channel_map, trigger_map, lsb_t1, lsb_t2, daqscript, convertsinglescript, mode, runtime,  output_dir, output_label
+#print config_template_file, hv_dac, run_calib, calib_dir, tdc_calib, qdc_calib, disc_calib, sipm_bias, disc_settings, channel_map, trigger_map, lsb_t1, lsb_t2, daqscript, convertsinglescript, convertcoincidencescript, mode, runtime,  output_dir, output_label
 #print dic_channels[("0","VBR")]
 print "Active channels: ", channels
 
@@ -389,6 +393,13 @@ print "Creating root file with tree (singles)..."
 commandConvertSingles = "./"+convertsinglescript+" --config "+ config_current +" -i "+newname+" -o "+newname+"_singles.root"+" --writeRoot"
 print commandConvertSingles
 os.system(commandConvertSingles)
+print "File created."
+print "\n"
+
+print "Creating root file with tree (coincidences)..."
+commandConvertCoincidences = "./"+convertcoincidencescript+" --config "+ config_current +" -i "+newname+" -o "+newname+"_coincidences.root"+" --writeRoot"
+print commandConvertCoincidences
+os.system(commandConvertCoincidences)
 print "File created."
 print "\n"
 

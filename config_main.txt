@@ -9,7 +9,7 @@ LSB_T1 60
 LSB_T2 60
 
 #Calibration
-RUN_CALIB 1
+RUN_CALIB 0
 CALIB_DIR data/calib/Test
 DISC_CALIB disc_calibration.tsv
 TDC_CALIB tdc_calibration.tsv
@@ -26,8 +26,9 @@ QDC_CALIB qdc_calibration.tsv
 #Run settings
 DAQSCRIPT acquire_sipm_data
 CONVERTSINGLESCRIPT convert_raw_to_singles
+CONVERTCOINCIDENCESCRIPT convert_raw_to_coincidence
 MODE qdc
-TIME 60
+TIME 10
 OUTPUT_DIR output/Test
 OUTPUT_LABEL Test
 
