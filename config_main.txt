@@ -1,9 +1,6 @@
 #Configuration
-CONFIG_INI_TEMPLATE /home/cmsdaq/Workspace/TOFPET/Timing-TOFPET/config_template.ini
+CONFIG_INI_TEMPLATE config_template.ini
 HV_DAC data/hvdacMezz27_ad5535_cal.tsv
-TDC_CALIB data/tdc_calibration.tsv
-QDC_CALIB data/qdc_calibration.tsv
-DISC_CALIB data/disc_calibration.tsv
 SIPM_BIAS data/sipm_bias_template.tsv
 DISC_SETTINGS data/disc_settings_template.tsv
 CHANNEL_MAP petsys_tables/febd_tofpet2tb_fake_channel_map.tsv 
@@ -11,16 +8,31 @@ TRIGGER_MAP petsys_tables/febd_gbe_trigger_map.tsv
 LSB_T1 60
 LSB_T2 60
 
+#Calibration
+RUN_CALIB 1
+CALIB_DIR data/calib/Test
+DISC_CALIB disc_calibration.tsv
+TDC_CALIB tdc_calibration.tsv
+QDC_CALIB qdc_calibration.tsv
+# Notes: 
+# use a different directory (different CALIB_DIR) for each calibration set
+# xxx_CALIB names must end with ".tsv"
+# if RUN_CALIB=1 and at least one of the xxx_CALIB already exist, the script stops (in order not to cancel an existing calibration file).
+# if RUN_CALIB=0 and at least one of the xxx_CALIB does not exist, the script stops (since there is no valid calibration)
+# if one of the two conditions above is passed, then:
+# if RUN_CALIB=1 (since none of the xxx_CALIB exists) xxx_CALIB are created [takes ~30-40 min.] and used to run daq
+# if RUN_CALIB=0 (since all the xxx_CALIB already exists) existing xxx_CALIB are used to run daq
+
 #Run settings
 DAQSCRIPT acquire_sipm_data
 CONVERTSINGLESCRIPT convert_raw_to_singles
 MODE qdc
-TIME 10
-OUTPUT_DIR /home/cmsdaq/Workspace/TOFPET/Timing-TOFPET/output/Test1
-OUTPUT_LABEL Test1
+TIME 60
+OUTPUT_DIR output/Test
+OUTPUT_LABEL Test
 
 #Channels
 #  ID	NHV    VBR    OV    NCHIP    NCH    VTH_1    VTH_2    VTH_E    SIPM_CODE    SIPM_TYPE     X    Y    Z    CRYSTAL	
-CH 0	11     51.74  7.00  0	     59	    23	     23	      16       10580	    S13360-3025CS --   --   360  LYSO_3_3_5
-CH 1	29     52.25  7.00  4	     59	    24	     24	      17       10579	    S13360-3025CS --   --   170  LYSO_3_3_5
-#Note on VBR: Different CHs can be connected to the same NHV. If different values of VBR are provided only the first one is set for a given NHV. 
+CH 0	11     51.74  7.00  0	     59	    20	     20	      15       10580	    S13360-3025CS --   --   360  LYSO_3_3_5
+CH 1	29     52.25  7.00  4	     59	    20	     20	      15       10579	    S13360-3025CS --   --   170  LYSO_3_3_5
+# Note on VBR: Different CHs can be connected to the same NHV. If different values of VBR are provided only the first one is set for a given NHV. 

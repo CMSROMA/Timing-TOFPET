@@ -30,11 +30,15 @@ gROOT.SetBatch(True)
 current_time = datetime.datetime.now()
 simpletimeMarker = "%04d-%02d-%02d__%02d-%02d-%02d" % (current_time.year,current_time.month,current_time.day,current_time.hour,current_time.minute,current_time.second)
 
-### 1) Read config file
+###############################
+### 0) Read config file
+###############################
 cfg = open(opt.configFile, "r")
 
 config_template_file = ""
 hv_dac = ""
+run_calib = ""
+calib_dir = ""
 tdc_calib = ""
 qdc_calib = ""
 disc_calib = ""
@@ -71,6 +75,12 @@ for line in cfg:
 
     if (linetype == "HV_DAC" and linesize==2):
         hv_dac = splitline[1]
+
+    if (linetype == "RUN_CALIB" and linesize==2):
+        run_calib = splitline[1]
+
+    if (linetype == "CALIB_DIR" and linesize==2):
+        calib_dir = splitline[1]
 
     if (linetype == "TDC_CALIB" and linesize==2):
         tdc_calib = splitline[1]
@@ -154,11 +164,34 @@ for line in cfg:
         dic_channels[(chId,"Z")]=Z
         dic_channels[(chId,"CRYSTAL")]=CRYSTAL
 
-#print config_template_file, hv_dac, tdc_calib, qdc_calib, disc_calib, sipm_bias, disc_settings, channel_map, trigger_map, lsb_t1, lsb_t2, daqscript, convertsinglescript, mode, runtime,  output_dir, output_label
+#print config_template_file, hv_dac, run_calib, calib_dir, tdc_calib, qdc_calib, disc_calib, sipm_bias, disc_settings, channel_map, trigger_map, lsb_t1, lsb_t2, daqscript, convertsinglescript, mode, runtime,  output_dir, output_label
 #print dic_channels[("0","VBR")]
 print "Active channels: ", channels
 
+###############################
+### 1) Check calibration status
+###############################
+tdc_calib_path = calib_dir+"/"+tdc_calib
+qdc_calib_path = calib_dir+"/"+qdc_calib
+disc_calib_path = calib_dir+"/"+disc_calib
+
+tdc_calib_exists = os.path.isfile(tdc_calib_path)
+qdc_calib_exists = os.path.isfile(qdc_calib_path)
+disc_calib_exists = os.path.isfile(disc_calib_path)
+
+if run_calib=="1" and (tdc_calib_exists or qdc_calib_exists or disc_calib_exists):
+    print "WARNING: Not possible to run calibration since at least one calibration file already exists"
+    print "Exit..."
+    sys.exit()
+
+if run_calib=="0" and ( not (tdc_calib_exists and qdc_calib_exists and disc_calib_exists) ):
+    print "WARNING: Not possible to run daq since at least one calibration file is missing"
+    print "Exit..."
+    sys.exit()
+
+###############################
 ### 2) Create new sipm bias table
+###############################
 sipm_bias_table_template = sipm_bias
 sipm_bias_table_current = "data/sipm_bias_current.tsv"
 sipmbiasTemplate = open(sipm_bias_table_template, "r")
@@ -194,7 +227,9 @@ for line in sipmbiasTemplate:
 sipmbiasCurrent.close()
 sipmbiasTemplate.close()
 
+###############################
 ### 3) Create new discriminator threshold table
+###############################
 disc_settings_table_template = disc_settings
 disc_settings_table_current = "data/disc_settings_current.tsv"
 discSetTemplate = open(disc_settings_table_template, "r")
@@ -233,7 +268,9 @@ for line in discSetTemplate:
 discSetCurrent.close()
 discSetTemplate.close()
 
+###############################
 ### 4) Create new configuration file
+###############################
 config_template = config_template_file
 config_current = "config_current.ini"
 configFileTemplate = open(config_template, "r")
@@ -253,11 +290,11 @@ for line in configFileTemplate:
     if "HV_DAC" in line:
         line = line.replace("HV_DAC",hv_dac)
     if "TDC_CALIB" in line:
-        line = line.replace("TDC_CALIB",tdc_calib)
+        line = line.replace("TDC_CALIB",tdc_calib_path)
     if "QDC_CALIB" in line:
-        line = line.replace("QDC_CALIB",qdc_calib)
+        line = line.replace("QDC_CALIB",qdc_calib_path)
     if "DISC_CALIB" in line:
-        line = line.replace("DISC_CALIB",disc_calib)
+        line = line.replace("DISC_CALIB",disc_calib_path)
     if "SIPM_BIAS" in line:
         line = line.replace("SIPM_BIAS",sipm_bias_table_current)
     if "DISC_SETTINGS" in line:
@@ -276,7 +313,56 @@ for line in configFileTemplate:
 configFileCurrent.close()
 configFileTemplate.close()
 
-### 5) Run daq
+###############################
+### 6) Run calibration
+###############################
+#calibration scripts
+disc_calib_script = "acquire_threshold_calibration"
+disc_calib_process_script = "process_threshold_calibration"
+tdc_calib_script = "acquire_tdc_calibration"
+tdc_calib_process_script = "process_tdc_calibration"
+qdc_calib_script = "acquire_qdc_calibration"
+qdc_calib_process_script = "process_qdc_calibration"
+
+if run_calib=="1":
+    
+    commandOutputCalibDir = "mkdir -p "+calib_dir
+    print commandOutputCalibDir
+    os.system(commandOutputCalibDir)
+
+    print "Starting discriminator calibration..."
+    commandDiscCalib = "./"+disc_calib_script+" --config "+config_current+" -o "+calib_dir+"/"+"disc_calibration"
+    commandDiscCalibProcess = "./"+disc_calib_process_script+" --config "+config_current+" -i "+calib_dir+"/"+"disc_calibration"+" -o "+disc_calib_path+" --root-file "+disc_calib_path.split(".tsv")[0]+".root"
+    print commandDiscCalib    
+    os.system(commandDiscCalib)
+    print commandDiscCalibProcess    
+    os.system(commandDiscCalibProcess)
+    print "End discriminator calibration"
+    print "\n"
+
+    print "Starting TDC and QDC calibration..."
+    commandTdcCalib = "./"+tdc_calib_script+" --config "+config_current+" -o "+calib_dir+"/"+"tdc_calibration"
+    commandTdcCalibProcess = "./"+tdc_calib_process_script+" --config "+config_current+" -i "+calib_dir+"/"+"tdc_calibration"+" -o "+tdc_calib_path.split(".tsv")[0]
+    commandQdcCalib = "./"+qdc_calib_script+" --config "+config_current+" -o "+calib_dir+"/"+"qdc_calibration"
+    commandQdcCalibProcess = "./"+qdc_calib_process_script+" --config "+config_current+" -i "+calib_dir+"/"+"qdc_calibration"+" -o "+qdc_calib_path.split(".tsv")[0]
+    print commandTdcCalib    
+    os.system(commandTdcCalib)
+    print commandQdcCalib    
+    os.system(commandQdcCalib)
+    print commandTdcCalibProcess    
+    os.system(commandTdcCalibProcess)
+    print commandQdcCalibProcess    
+    os.system(commandQdcCalibProcess)
+    print "End TDC and QDC calibration"
+    print "\n"
+
+    commandCpConfigForCalib = "cp "+opt.configFile+" "+calib_dir+"/"+"config_for_calibration.txt"
+    print commandCpConfigForCalib
+    os.system(commandCpConfigForCalib)
+
+###############################
+### 6) Run daq
+###############################
 commandOutputDir = "mkdir -p "+output_dir
 print commandOutputDir
 os.system(commandOutputDir)
@@ -296,7 +382,9 @@ os.system(commandRun)
 print "End run"
 print "\n"
 
-### 6) Convert output to ROOT trees
+###############################
+### 7) Convert output to ROOT trees
+###############################
 print "Creating root file with tree (singles)..."
 commandConvertSingles = "./"+convertsinglescript+" --config "+ config_current +" -i "+newname+" -o "+newname+"_singles.root"+" --writeRoot"
 print commandConvertSingles
