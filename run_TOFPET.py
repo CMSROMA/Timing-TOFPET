@@ -314,7 +314,7 @@ configFileCurrent.close()
 configFileTemplate.close()
 
 ###############################
-### 6) Run calibration
+### 5) Run calibration
 ###############################
 #calibration scripts
 disc_calib_script = "acquire_threshold_calibration"
