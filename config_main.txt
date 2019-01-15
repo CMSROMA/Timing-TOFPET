@@ -26,12 +26,12 @@ QDC_CALIB qdc_calibration.tsv
 #Run settings
 DAQSCRIPT acquire_sipm_data
 CONVERTSINGLESCRIPT convert_raw_to_singles
-CONVERTCOINCIDENCESCRIPT convert_raw_to_coincidence
-CONVERTNCOINCIDENCESCRIPT analysis/find_coincidences.py
+CONVERTCOINCIDENCESCRIPT analysis/find_coincidences.py
+#CONVERTCOINCIDENCESCRIPT convert_raw_to_coincidence
 MODE qdc
 TIME 10
 OUTPUT_DIR output/Test2
-OUTPUT_LABEL TestSource1
+OUTPUT_LABEL TestSource8
 
 #Channels
 #  ID	NHV    VBR    OV    NCHIP    NCH    VTH_1    VTH_2    VTH_E    SIPM_CODE    SIPM_TYPE     X    Y    Z    CRYSTAL	

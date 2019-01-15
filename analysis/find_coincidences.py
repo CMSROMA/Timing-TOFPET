@@ -12,9 +12,12 @@ from array import array
 
 from ROOT import *
 
-usage = "usage: run from Timing-TOFPET: python analysis/find_coincidences.py -i xxx_singles.root -o xxx_coincidences.root -n 3"
+usage = "usage: run from Timing-TOFPET: python analysis/find_coincidences.py -c config_main.txt -i xxx_singles.root -o xxx_coincidences.root -n 3"
 
 parser = optparse.OptionParser(usage)
+
+parser.add_option("-c", "--config", dest="configFile",
+                  help="config file")
 
 parser.add_option("-i", "--input", dest="inputRootFile",
                   help="input root file with singles")
@@ -26,6 +29,9 @@ parser.add_option("-n", "--nch", dest="nch",
                   help="number of active channels")
 
 (opt, args) = parser.parse_args()
+
+if not opt.configFile:   
+    parser.error('config file not provided')
 
 if not opt.inputRootFile:   
     parser.error('input root file not provided')
@@ -40,6 +46,44 @@ if not opt.nch:
 
 gROOT.SetBatch(True)
 
+###############################
+### 0) Read config file
+###############################
+cfg = open(opt.configFile, "r")
+
+channel_map = {}
+channels = []
+
+for line in cfg:
+
+    #skip commented out lines or empty lines
+    if (line.startswith("#")):
+        continue
+    if line in ['\n','\r\n']:
+        continue
+
+    line = line.rstrip('\n')
+    splitline = line.split()
+    linetype = splitline[0]
+    linesize = len(splitline)
+
+    if (linetype == "CH" and linesize==16):
+        #read channel settings
+        chId = splitline[1]
+        channels.append(chId)        
+
+        NCHIP = splitline[5]
+        NCH = splitline[6]
+        ABS_CHID = int(64 * int(NCHIP) + int(NCH))
+
+        channel_map[ABS_CHID]=chId
+
+print "Channel Map: key=absolute Ch. in hardware ; element=Channel Idx from config file"
+print channel_map
+
+###############################
+### 1) Create root file
+###############################
 tfileinput = TFile.Open(opt.inputRootFile)
 treeInput = tfileinput.Get("data")
 nEntries = treeInput.GetEntries()
@@ -53,6 +97,9 @@ n_coincidences = array( 'i', [ -9 ] )
 a_chId = array( 'd', maxn*[ -9. ] )
 a_energy = array( 'd', maxn*[ -9. ] )
 a_time = array( 'd', maxn*[ -9. ] )
+
+for absChId in channel_map:
+    a_chId[ int(channel_map[int(absChId)]) ] = absChId
 
 treeOutput.Branch( 'nch', n_channels, 'nch/I' )
 treeOutput.Branch( 'ncoinc', n_coincidences, 'ncoinc/I' )
@@ -74,11 +121,12 @@ while i_singles<nEntries:
 
     n_channels[0] = int(opt.nch)
 
-    #ref channel
+    #ref (first in the list) channel
     t_ref = treeInput.time
-    a_chId[0] = treeInput.channelID
-    a_energy[0] = treeInput.energy
-    a_time[0] = treeInput.time
+    #print str(treeInput.channelID)+ " --> "+ str(channel_map[int(treeInput.channelID)])
+    a_chId[ int(channel_map[int(treeInput.channelID)]) ] = treeInput.channelID
+    a_energy[ int(channel_map[int(treeInput.channelID)]) ] = treeInput.energy
+    a_time[ int(channel_map[int(treeInput.channelID)]) ] = treeInput.time
 
     n_coinc=0
     nch_check_coinc = (int(opt.nch)-1)
@@ -100,10 +148,10 @@ while i_singles<nEntries:
             i_singles = k
             break
         else: #time coincidence found
-            channelIdx = k - i_singles
-            a_chId[channelIdx] = treeInput.channelID
-            a_energy[channelIdx] = treeInput.energy
-            a_time[channelIdx] = treeInput.time
+            #channelIdx = k - i_singles
+            a_chId[ int(channel_map[int(treeInput.channelID)]) ] = treeInput.channelID
+            a_energy[ int(channel_map[int(treeInput.channelID)]) ] = treeInput.energy
+            a_time[ int(channel_map[int(treeInput.channelID)]) ] = treeInput.time
             n_coinc=n_coinc+1 
             #print "===> i_singles= ", i_singles
             #print "k= ", k
@@ -127,6 +175,7 @@ while i_singles<nEntries:
 tfileoutput.cd()
 tfileoutput.Write()
 tfileoutput.Close()
+print opt.outputRootFile+" created."
 
 tfileinput.cd()
 tfileinput.Close()
