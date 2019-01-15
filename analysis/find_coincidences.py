@@ -12,7 +12,7 @@ from array import array
 
 from ROOT import *
 
-usage = "usage: run from Timing-TOFPET: python find_coincidences.py -i xxx_singles.root -o xxx_coincidences.root -n 3"
+usage = "usage: run from Timing-TOFPET: python analysis/find_coincidences.py -i xxx_singles.root -o xxx_coincidences.root -n 3"
 
 parser = optparse.OptionParser(usage)
 
@@ -107,9 +107,9 @@ while i_singles<nEntries:
             n_coinc=n_coinc+1 
             #print "===> i_singles= ", i_singles
             #print "k= ", k
-            print "t_current="+str(t_current)+" t_ref="+str(t_ref)+" t_diff="+str(t_diff)                    
-            print "coincidence found between "+str(i_singles)+" and "+str(k)
-            print a_time[channelIdx]
+            #print "t_current="+str(t_current)+" t_ref="+str(t_ref)+" t_diff="+str(t_diff)
+            #print "coincidence found between "+str(i_singles)+" and "+str(k)
+            #print a_time[channelIdx]
 
             if k==i_singles+1+nch_check_coinc-1:
                 i_singles = k+1
