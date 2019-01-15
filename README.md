@@ -53,5 +53,6 @@ python run_TOFPET.py -c config_main.txt
 - Two output root files are produced: 
   - xxx_singles.root: the tree contains one event for each channel passing the trigger selection  
   - xxx_coincidences.root: the tree contains one event for each pair of channels passing the trigger selection if they are in time coincidence (default t2-t1<20 ns)  
+  - xxx_Ncoincidences.root: each event in the tree contains info up to N channels if they pass the trigger selection and if there is a time coincidence in at least one pair of channels (default t2-t1<20 ns). In case of 2 active channels it contains the same events of xxx_coincidences.root . Values "-9" in the root tree should be ignored in the data analysis.  
 - Channel numbering in root file: Absolute channel ID (root file) = 64 x NCHIP + NCH  where NCHIP, NCH are reported in the config file.
 
