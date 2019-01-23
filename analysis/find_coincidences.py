@@ -92,6 +92,7 @@ tfileoutput = TFile( opt.outputRootFile, 'recreate' )
 treeOutput = TTree( 'data', 'tree with coincidences' )
 
 maxn = int(opt.nch)
+unixTime = array( 'l' , [0])
 n_channels = array( 'i', [ -9 ] )
 n_coincidences = array( 'i', [ -9 ] )
 a_chId = array( 'd', maxn*[ -9. ] )
@@ -106,6 +107,7 @@ treeOutput.Branch( 'ncoinc', n_coincidences, 'ncoinc/I' )
 treeOutput.Branch( 'chId', a_chId, 'chId[nch]/D' )
 treeOutput.Branch( 'energy', a_energy, 'energy[nch]/D' )
 treeOutput.Branch( 'time', a_time, 'time[nch]/D' )
+treeOutput.Branch( 'unixTime', unixTime, 'unixTime/L' )
 
 i_singles=0
 while i_singles<nEntries:
@@ -120,6 +122,7 @@ while i_singles<nEntries:
     treeInput.GetEntry(i_singles)
 
     n_channels[0] = int(opt.nch)
+    unixTime[0] = long(treeInput.unixTime)
 
     #ref (first in the list) channel
     t_ref = treeInput.time

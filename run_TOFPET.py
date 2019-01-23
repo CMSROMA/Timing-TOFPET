@@ -8,6 +8,8 @@ import subprocess
 from glob import glob
 from collections import defaultdict
 from collections import OrderedDict
+from array import array
+import time
 
 from ROOT import *
 
@@ -29,6 +31,8 @@ gROOT.SetBatch(True)
 
 current_time = datetime.datetime.now()
 simpletimeMarker = "%04d-%02d-%02d__%02d-%02d-%02d" % (current_time.year,current_time.month,current_time.day,current_time.hour,current_time.minute,current_time.second)
+
+unixTimeStart = long(time.time())
 
 ###############################
 ### 0) Read config file
@@ -398,6 +402,21 @@ commandConvertSingles = "./"+convertsinglescript+" --config "+ config_current +"
 print commandConvertSingles
 os.system(commandConvertSingles)
 print "File created."
+print "\n"
+
+## Add branches to root tree (singles)
+print "Update root file with tree (singles)..."
+inputfilename = newname+"_singles.root"
+tfileinput = TFile.Open(inputfilename,"update")
+treeInput = tfileinput.Get("data")
+unixTime = array( 'l' , [0])
+unixTimeBranch = treeInput.Branch( 'unixTime', unixTime, 'unixTime/L' )
+for event in treeInput:
+    unixTime[0] = long(event.time * 10**-12) + unixTimeStart #unix time in seconds of the current event
+    unixTimeBranch.Fill()
+treeInput.Write("",TFile.kOverwrite)
+tfileinput.Close()
+print "File updated."
 print "\n"
 
 #print "Creating root file with tree (coincidences)..."
