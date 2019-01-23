@@ -1,5 +1,6 @@
 # Table of Contents
 - [Setup](#user-content-setup)
+- [Read temperature sensors](#user-content-read-temperature-sensors)
 - [Connect TOFPET](#user-content-connect-tofpet)
 - [Run TOFPET](#user-content-run-tofpet)
 
@@ -13,9 +14,39 @@ cd Timing-TOFPET
 cmake .
 make
 ```
+
+# Read temperature sensors
+
+Load firmware to arduino (only the first time):
+```
+arduino/temperature/temp_LM35D_multi.ino
+```
+The default setup reads three temperature sensors
+- temp1: close to patch panel
+- temp2: in the middle, close to test channel
+- temp3: on the other side, close to reference channel
+
+Open a new terminal
+```
+python3 temp_LM35D.py -o temperature.txt -p /dev/ttyACM0 -r 9600
+```
+
+It will add (append) a line every second (configurable from arduino firmware) in the output file "temperature.txt" with this format: "unix_time temp1 temp2 temp3". Temperatures are reported in Celsius degrees; unix epoch time in seconds (https://www.epochconverter.com). 
+
+Example:
+```
+[...]
+1548254554 21.16 21.16 21.05
+1548254555 21.05 21.27 21.05
+1548254556 21.16 21.16 21.16
+1548254557 21.16 21.05 21.27
+1548254558 20.95 21.27 21.16
+[...]
+```
+
 # Connect TOFPET
 
-From a terminal
+Open a new terminal
 ```
 cd Workspace/TOFPET/Timing-TOFPET
 ./connect_TOFPET.sh
