@@ -56,6 +56,7 @@ daqscript = ""
 convertsinglescript = ""
 convertcoincidencescript = ""
 #convertNcoincidencescript = ""
+temperaturefile = ""
 mode = ""
 runtime = ""
 output_dir = ""
@@ -127,6 +128,9 @@ for line in cfg:
     #if (linetype == "CONVERTNCOINCIDENCESCRIPT" and linesize==2):
     #    convertNcoincidencescript = splitline[1]
 
+    if (linetype == "TEMPERATUREFILE" and linesize==2):
+        temperaturefile = splitline[1]
+
     if (linetype == "MODE" and linesize==2):
         mode = splitline[1]
 
@@ -176,7 +180,7 @@ for line in cfg:
         dic_channels[(chId,"Z")]=Z
         dic_channels[(chId,"CRYSTAL")]=CRYSTAL
 
-#print config_template_file, hv_dac, run_calib, calib_dir, tdc_calib, qdc_calib, disc_calib, sipm_bias, disc_settings, channel_map, trigger_map, lsb_t1, lsb_t2, daqscript, convertsinglescript, convertcoincidencescript, mode, runtime,  output_dir, output_label
+#print config_template_file, hv_dac, run_calib, calib_dir, tdc_calib, qdc_calib, disc_calib, sipm_bias, disc_settings, channel_map, trigger_map, lsb_t1, lsb_t2, daqscript, convertsinglescript, convertcoincidencescript, temperaturefile, mode, runtime,  output_dir, output_label
 #print dic_channels[("0","VBR")]
 print "Active channels: ", channels
 
@@ -410,10 +414,42 @@ inputfilename = newname+"_singles.root"
 tfileinput = TFile.Open(inputfilename,"update")
 treeInput = tfileinput.Get("data")
 unixTime = array( 'l' , [0])
+temp1 = array( 'd' , [-999.])
+temp2 = array( 'd' , [-999.])
+temp3 = array( 'd' , [-999.])
 unixTimeBranch = treeInput.Branch( 'unixTime', unixTime, 'unixTime/L' )
+temp1Branch = treeInput.Branch( 'temp1', temp1, 'temp1/D' )
+temp2Branch = treeInput.Branch( 'temp2', temp2, 'temp2/D' )
+temp3Branch = treeInput.Branch( 'temp3', temp3, 'temp3/D' )
+
 for event in treeInput:
     unixTime[0] = long(event.time * 10**-12) + unixTimeStart #unix time in seconds of the current event
+
+    tempFile = open(temperaturefile, "r")    
+    for line in tempFile:
+        #skip commented out lines or empty lines
+        if (line.startswith("#")):
+            continue
+        if line in ['\n','\r\n']:
+            continue
+        
+        line = line.rstrip('\n')
+        splitline = line.split()
+
+        linesize = len(splitline)
+        if (linesize==4):
+            if((long(unixTime[0])-long(splitline[0]))<7):
+                temp1[0]=float(splitline[1])
+                temp2[0]=float(splitline[2])
+                temp3[0]=float(splitline[3])
+                break
+    tempFile.close()
+
     unixTimeBranch.Fill()
+    temp1Branch.Fill()
+    temp2Branch.Fill()
+    temp3Branch.Fill()
+
 treeInput.Write("",TFile.kOverwrite)
 tfileinput.Close()
 print "File updated."
