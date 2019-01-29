@@ -422,29 +422,52 @@ temp1Branch = treeInput.Branch( 'temp1', temp1, 'temp1/D' )
 temp2Branch = treeInput.Branch( 'temp2', temp2, 'temp2/D' )
 temp3Branch = treeInput.Branch( 'temp3', temp3, 'temp3/D' )
 
+ReadNewTemperature = 0 
+T1 = -999.
+T2 = -999.
+T3 = -999.
+previousTime = 0
 for event in treeInput:
     unixTime[0] = long(event.time * 10**-12) + unixTimeStart #unix time in seconds of the current event
 
-    tempFile = open(temperaturefile, "r")    
-    for line in tempFile:
-        #skip commented out lines or empty lines
-        if (line.startswith("#")):
-            continue
-        if line in ['\n','\r\n']:
-            continue
+    ## Read temperatures from file every fixed DeltaT (10^11 ps = 0.1 s by default)
+    if previousTime==0:
+        ReadNewTemperature=1 
+        previousTime = event.time
+    elif (event.time - previousTime) <= 10**11:
+        temp1[0] = T1
+        temp2[0] = T2
+        temp3[0] = T3
+    elif (event.time - previousTime) > 10**11:
+        ReadNewTemperature=1
+        previousTime = event.time
+
+    if ReadNewTemperature==1:
+        tempFile = open(temperaturefile, "r")    
+        for line in tempFile:
+            #skip commented out lines or empty lines
+            if (line.startswith("#")):
+                continue
+            if line in ['\n','\r\n']:
+                continue
         
-        line = line.rstrip('\n')
-        splitline = line.split()
+            line = line.rstrip('\n')
+            splitline = line.split()
 
-        linesize = len(splitline)
-        if (linesize==4):
-            if((long(unixTime[0])-long(splitline[0]))<7):
-                temp1[0]=float(splitline[1])
-                temp2[0]=float(splitline[2])
-                temp3[0]=float(splitline[3])
-                break
-    tempFile.close()
-
+            linesize = len(splitline)
+            if (linesize==4):
+                # find match within 2 seconds
+                if( abs(long(unixTime[0])-long(splitline[0])) < 2):
+                    T1 = float(splitline[1])
+                    T2 = float(splitline[2])
+                    T3 = float(splitline[3])
+                    temp1[0]=T1
+                    temp2[0]=T2
+                    temp3[0]=T3
+                    break
+        ReadNewTemperature=0
+        tempFile.close()
+        
     unixTimeBranch.Fill()
     temp1Branch.Fill()
     temp2Branch.Fill()

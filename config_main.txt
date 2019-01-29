@@ -32,7 +32,7 @@ TEMPERATUREFILE arduino/temperature/temperature.txt
 MODE qdc
 TIME 30
 OUTPUT_DIR output/SourceNa22
-OUTPUT_LABEL Test2
+OUTPUT_LABEL SourceNa22_Test10
 
 #Channels
 #  ID	NHV    VBR    OV    NCHIP    NCH    VTH_1    VTH_2    VTH_E    SIPM_CODE    SIPM_TYPE     X    Y    Z    CRYSTAL	
