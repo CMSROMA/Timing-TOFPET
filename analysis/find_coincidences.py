@@ -28,6 +28,10 @@ parser.add_option("-o", "--output", dest="outputRootFile",
 parser.add_option("-n", "--nch", dest="nch",
                   help="number of active channels")
 
+parser.add_option("-p", "--prescale", dest="prescale",
+                  default=1,
+                  help="prescale of singles")
+
 (opt, args) = parser.parse_args()
 
 if not opt.configFile:   
@@ -121,7 +125,14 @@ while i_singles<nEntries:
     if i_singles == nEntries-1:
         break
 
-    #if i_singles>200:
+    if int(i_singles)%int(opt.prescale) != 0:
+        i_singles += 1
+        continue
+
+    if int(i_singles)%100000 == 0:
+        print i_singles
+
+    #if i_singles>1000:
     #    break
 
     #print "===> i_singles= ", i_singles
@@ -135,7 +146,11 @@ while i_singles<nEntries:
 
     #ref (first in the list) channel
     t_ref = treeInput.time
+
     #print str(treeInput.channelID)+ " --> "+ str(channel_map[int(treeInput.channelID)])
+    if treeInput.channelID not in channel_map.keys():
+        continue
+
     a_chId[ int(channel_map[int(treeInput.channelID)]) ] = treeInput.channelID
     a_energy[ int(channel_map[int(treeInput.channelID)]) ] = treeInput.energy
     a_time[ int(channel_map[int(treeInput.channelID)]) ] = treeInput.time
@@ -147,6 +162,10 @@ while i_singles<nEntries:
 
         #print "k= ", k
         treeInput.GetEntry(k)
+
+        if treeInput.channelID not in channel_map.keys():
+            i_singles = k
+            break
 
         #time coincidence
         time_coinc = 0
