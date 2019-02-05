@@ -430,15 +430,15 @@ previousTime = 0
 for event in treeInput:
     unixTime[0] = long(event.time * 10**-12) + unixTimeStart #unix time in seconds of the current event
 
-    ## Read temperatures from file every fixed DeltaT (10^11 ps = 0.1 s by default)
+    ## Read temperatures from file every fixed DeltaT (10^12 ps = 1 s by default)
     if previousTime==0:
         ReadNewTemperature=1 
         previousTime = event.time
-    elif (event.time - previousTime) <= 10**11:
+    elif (event.time - previousTime) <= 10**12:
         temp1[0] = T1
         temp2[0] = T2
         temp3[0] = T3
-    elif (event.time - previousTime) > 10**11:
+    elif (event.time - previousTime) > 10**12:
         ReadNewTemperature=1
         previousTime = event.time
 
