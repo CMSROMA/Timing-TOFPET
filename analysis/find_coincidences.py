@@ -149,6 +149,7 @@ while i_singles<nEntries:
 
     #print str(treeInput.channelID)+ " --> "+ str(channel_map[int(treeInput.channelID)])
     if treeInput.channelID not in channel_map.keys():
+        i_singles += 1
         continue
 
     a_chId[ int(channel_map[int(treeInput.channelID)]) ] = treeInput.channelID
