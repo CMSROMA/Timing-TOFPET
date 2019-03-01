@@ -20,7 +20,10 @@ EventBuffer<Hit> * ProcessHit::handleEvents (EventBuffer<RawHit> *inBuffer)
 	EventBuffer<Hit> * outBuffer = new EventBuffer<Hit>(N, inBuffer);
 	
 	bool useTDC = systemConfig->useTDCCalibration();
-	bool useQDC = systemConfig->useQDCCalibration();
+	//FIXME - IGNORE CALIBRATION
+	//bool useQDC = systemConfig->useQDCCalibration(); 
+	bool useQDC = false;
+	//
 	bool useXYZ = systemConfig->useXYZ();
 	
 	uint32_t lReceived = 0;
