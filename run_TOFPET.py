@@ -10,15 +10,38 @@ from collections import defaultdict
 from collections import OrderedDict
 from array import array
 import time
+import re
 
 from ROOT import *
 
-usage = "usage: run from Timing-TOFPET: python run_TOFPET.py -c config_main.txt"
+usage = "usage: run from Timing-TOFPET: python run_TOFPET.py -c config_main.txt [--runType PHYS -d acquire_sipm_data -t 2 -v 3 -l NoSource_13 -o output/ScanTest]"
 
 parser = optparse.OptionParser(usage)
 
 parser.add_option("-c", "--config", dest="configFile",
                   help="config file")
+
+parser.add_option("-v", "--ov", dest="overVoltage",
+                  help="sipm over voltage")
+
+##FIXME: Add gate option
+parser.add_option("-g", "--gate", dest="gate",
+                  help="signal integration gate")
+
+parser.add_option("-t", "--time", dest="duration",
+                  help="run duration")
+
+parser.add_option("-d", "--daq", dest="daqType",
+                  help="data acquisition type (i.e. pedestal or SiPM data)")
+
+parser.add_option("-l", "--label", dest="outputLabel",
+                  help="label of output file")
+
+parser.add_option("-o", "--outFolder", dest="outputFolder",
+                  help="output directory")
+
+parser.add_option("--runType", dest="runType",
+                  help="runType (PHYS or PED)")
 
 (opt, args) = parser.parse_args()
 
@@ -34,8 +57,61 @@ simpletimeMarker = "%04d-%02d-%02d__%02d-%02d-%02d" % (current_time.year,current
 
 unixTimeStart = long(time.time())
 
+#####################################################
+### 0) Edit config file based on command line options
+#####################################################
+
+tempConfig = "config_main_temp.txt"
+file_tempConfig = open(tempConfig, "w")
+cfg = open(opt.configFile, "r")
+for line in cfg:
+
+    #skip commented out lines or empty lines
+    if (line.startswith("#")):
+        file_tempConfig.write(line)
+        continue
+    if line in ['\n','\r\n']:
+        file_tempConfig.write(line)
+        continue
+
+    line = line.rstrip('\n')
+    splitline = line.split()
+    linetype = splitline[0]
+    linesize = len(splitline)
+    #print line
+
+    if (linetype == "TIME" and linesize==2 and opt.duration):
+        line = re.sub(splitline[1],opt.duration,line)
+        print "Line of config file changed: ... ", line
+
+    if (linetype == "DAQSCRIPT" and linesize==3 and opt.daqType):
+        line = re.sub(splitline[1],opt.daqType,line)
+        line = re.sub(splitline[2],opt.runType,line)
+        print "Line of config file changed: ... ", line
+
+    if (linetype == "OUTPUT_DIR" and linesize==2 and opt.outputFolder):
+        line = re.sub(splitline[1],opt.outputFolder,line)
+        print "Line of config file changed: ... ", line
+
+    if (linetype == "OUTPUT_LABEL" and linesize==2 and opt.outputLabel):
+        line = re.sub(splitline[1],opt.outputLabel ,line)
+        print "Line of config file changed: ... ", line
+
+    if (linetype == "OVERWRITE_OV" and linesize==2 and opt.overVoltage):
+        line = re.sub(splitline[1],opt.overVoltage ,line)
+        print "Line of config file changed: ... ", line
+
+    file_tempConfig.write(line+'\n')
+
+cfg.close()    
+file_tempConfig.close()
+
+commandCpConfigtxt = "mv "+tempConfig+" "+opt.configFile
+print commandCpConfigtxt
+os.system(commandCpConfigtxt)
+
 ###############################
-### 0) Read config file
+### 0.1) Read config file
 ###############################
 cfg = open(opt.configFile, "r")
 
@@ -53,6 +129,7 @@ trigger_map = ""
 lsb_t1 = ""
 lsb_t2 = ""
 daqscript = ""
+daqscriptlabel = ""
 convertsinglescript = ""
 convertcoincidencescript = ""
 #convertNcoincidencescript = ""
@@ -61,6 +138,7 @@ mode = ""
 runtime = ""
 output_dir = ""
 output_label = ""
+overwrite_ov = -99
 dic_channels = {}
 channels = []
 
@@ -116,8 +194,9 @@ for line in cfg:
     if (linetype == "LSB_T2" and linesize==2):
         lsb_t2 = splitline[1]
 
-    if (linetype == "DAQSCRIPT" and linesize==2):
+    if (linetype == "DAQSCRIPT" and linesize==3):
         daqscript = splitline[1]
+        daqscriptlabel = splitline[2]
 
     if (linetype == "CONVERTSINGLESCRIPT" and linesize==2):
         convertsinglescript = splitline[1]
@@ -142,6 +221,9 @@ for line in cfg:
 
     if (linetype == "OUTPUT_LABEL" and linesize==2):
         output_label = splitline[1]
+
+    if (linetype == "OVERWRITE_OV" and linesize==2):
+        overwrite_ov = splitline[1]
 
     #print linetype, linesize
 
@@ -179,8 +261,13 @@ for line in cfg:
         dic_channels[(chId,"Y")]=Y
         dic_channels[(chId,"Z")]=Z
         dic_channels[(chId,"CRYSTAL")]=CRYSTAL
+        #overwrite overvoltage
+        if(float(overwrite_ov) > 0.):
+            dic_channels[(chId,"OV")]=overwrite_ov
 
-#print config_template_file, hv_dac, run_calib, calib_dir, tdc_calib, qdc_calib, disc_calib, sipm_bias, disc_settings, channel_map, trigger_map, lsb_t1, lsb_t2, daqscript, convertsinglescript, convertcoincidencescript, temperaturefile, mode, runtime,  output_dir, output_label
+cfg.close()
+
+#print config_template_file, hv_dac, run_calib, calib_dir, tdc_calib, qdc_calib, disc_calib, sipm_bias, disc_settings, channel_map, trigger_map, lsb_t1, lsb_t2, daqscript, convertsinglescript, convertcoincidencescript, temperaturefile, mode, runtime,  output_dir, output_label, overwrite_ov
 #print dic_channels[("0","VBR")]
 print "Active channels: ", channels
 
@@ -383,13 +470,20 @@ commandOutputDir = "mkdir -p "+output_dir
 print commandOutputDir
 os.system(commandOutputDir)
 
-outputFileLabel = output_label+"_"+mode+"_"+runtime
+outputFileLabel = output_label+"_"+daqscriptlabel+"_"+mode+"_Time"+runtime
+if opt.overVoltage:
+    outputFileLabel = output_label+"_"+daqscriptlabel+"_"+mode+"_Time"+runtime+"_Ov"+opt.overVoltage
 newname = output_dir+"/"+outputFileLabel
-newconfigname = newname+".ini"
+newconfignametxt = newname+".txt"
+newconfignameini = newname+".ini"
 
-commandCpConfig = "cp "+opt.configFile+" "+newconfigname
-print commandCpConfig
-os.system(commandCpConfig)
+commandCpConfigtxt = "cp "+opt.configFile+" "+newconfignametxt
+print commandCpConfigtxt
+os.system(commandCpConfigtxt)
+
+commandCpConfigini = "cp "+config_current+" "+newconfignameini
+print commandCpConfigini
+os.system(commandCpConfigini)
 
 print "Starting run..."
 commandRun = "./"+daqscript+" --config "+ config_current +" --mode "+ mode +" --time "+ runtime +" -o "+newname
