@@ -14,7 +14,7 @@ import re
 
 from ROOT import *
 
-usage = "usage: run from Timing-TOFPET: python run_TOFPET.py -c config_main.txt [--runType PHYS -d acquire_sipm_data -t 2 -v 3 -l NoSource_13 -o output/ScanTest]"
+usage = "usage: run from Timing-TOFPET: python run_TOFPET.py -c config_main.txt [--runType PHYS -d acquire_sipm_data -t 2 -v 3 -l NoSource_13 -o output/ScanTest -g 15]"
 
 parser = optparse.OptionParser(usage)
 
@@ -24,7 +24,6 @@ parser.add_option("-c", "--config", dest="configFile",
 parser.add_option("-v", "--ov", dest="overVoltage",
                   help="sipm over voltage")
 
-##FIXME: Add gate option
 parser.add_option("-g", "--gate", dest="gate",
                   help="signal integration gate")
 
@@ -101,6 +100,14 @@ for line in cfg:
         line = re.sub(splitline[1],opt.overVoltage ,line)
         print "Line of config file changed: ... ", line
 
+    if (linetype == "MIN_INTG_TIME" and linesize==2 and opt.gate):
+        line = re.sub(splitline[1],opt.gate ,line)
+        print "Line of config file changed: ... ", line
+
+    if (linetype == "MAX_INTG_TIME" and linesize==2 and opt.gate):
+        line = re.sub(splitline[1],opt.gate ,line)
+        print "Line of config file changed: ... ", line
+
     file_tempConfig.write(line+'\n')
 
 cfg.close()    
@@ -128,6 +135,8 @@ channel_map = ""
 trigger_map = ""
 lsb_t1 = ""
 lsb_t2 = ""
+min_intg_time = 0
+max_intg_time = 0
 daqscript = ""
 daqscriptlabel = ""
 convertsinglescript = ""
@@ -193,6 +202,12 @@ for line in cfg:
 
     if (linetype == "LSB_T2" and linesize==2):
         lsb_t2 = splitline[1]
+
+    if (linetype == "MIN_INTG_TIME" and linesize==2):
+        min_intg_time = splitline[1]
+
+    if (linetype == "MAX_INTG_TIME" and linesize==2):
+        max_intg_time = splitline[1]
 
     if (linetype == "DAQSCRIPT" and linesize==3):
         daqscript = splitline[1]
@@ -267,7 +282,7 @@ for line in cfg:
 
 cfg.close()
 
-#print config_template_file, hv_dac, run_calib, calib_dir, tdc_calib, qdc_calib, disc_calib, sipm_bias, disc_settings, channel_map, trigger_map, lsb_t1, lsb_t2, daqscript, convertsinglescript, convertcoincidencescript, temperaturefile, mode, runtime,  output_dir, output_label, overwrite_ov
+#print config_template_file, hv_dac, run_calib, calib_dir, tdc_calib, qdc_calib, disc_calib, sipm_bias, disc_settings, channel_map, trigger_map, lsb_t1, lsb_t2, min_intg_time, max_intg_time, daqscript, convertsinglescript, convertcoincidencescript, temperaturefile, mode, runtime,  output_dir, output_label, overwrite_ov
 #print dic_channels[("0","VBR")]
 print "Active channels: ", channels
 
@@ -410,6 +425,10 @@ for line in configFileTemplate:
         line = line.replace("LSB_T1",lsb_t1)
     if "LSB_T2" in line:
         line = line.replace("LSB_T2",lsb_t2)
+    if "MIN_INTG_TIME" in line:
+        line = line.replace("MIN_INTG_TIME",min_intg_time)
+    if "MAX_INTG_TIME" in line:
+        line = line.replace("MAX_INTG_TIME",max_intg_time)
 
     configFileCurrent.write(line+"\n")
  
@@ -470,9 +489,13 @@ commandOutputDir = "mkdir -p "+output_dir
 print commandOutputDir
 os.system(commandOutputDir)
 
-outputFileLabel = output_label+"_"+daqscriptlabel+"_"+mode+"_Time"+runtime
+#integration gate in ns (min_intg_time=max_intg_time)
+integration_gate = int(min_intg_time) * 4 * 5 
+print integration_gate 
+
+outputFileLabel = output_label+"_"+daqscriptlabel+"_"+mode+"_Time"+runtime+"_Gate"+str(integration_gate)
 if opt.overVoltage:
-    outputFileLabel = output_label+"_"+daqscriptlabel+"_"+mode+"_Time"+runtime+"_Ov"+opt.overVoltage
+    outputFileLabel = output_label+"_"+daqscriptlabel+"_"+mode+"_Time"+runtime+"_Gate"+str(integration_gate)+"_Ov"+opt.overVoltage
 newname = output_dir+"/"+outputFileLabel
 newconfignametxt = newname+".txt"
 newconfignameini = newname+".ini"

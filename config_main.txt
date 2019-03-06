@@ -7,6 +7,9 @@ CHANNEL_MAP petsys_tables/febd_tofpet2tb_fake_channel_map.tsv
 TRIGGER_MAP petsys_tables/febd_gbe_trigger_map.tsv
 LSB_T1 60
 LSB_T2 60
+MIN_INTG_TIME 20
+MAX_INTG_TIME 20
+# MIN_INTG_TIME/MAX_INTG_TIME 15 = 15 x 4 x 5 ns = 300ns
 
 #Calibration
 RUN_CALIB 0
@@ -36,12 +39,12 @@ TIME 2
 #TIME 1
 OUTPUT_DIR output/ScanTest
 #OUTPUT_DIR output/Pedestal
-OUTPUT_LABEL NoSource15
+OUTPUT_LABEL NoSource_21
 #OUTPUT_LABEL PedestalTest13_2ch_100000delay
 
 #Channels
 
-OVERWRITE_OV 5
+OVERWRITE_OV 3
 #If OVERWRITE_OV -1, use the OV values in the table below. If OVERWRITE_OV > 0 set all channels to this OV value.
 
 #  ID	NHV    VBR    OV    NCHIP    NCH    VTH_1    VTH_2    VTH_E    SIPM_CODE    SIPM_TYPE     X    Y    Z    CRYSTAL	
