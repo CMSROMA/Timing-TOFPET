@@ -14,7 +14,7 @@ import re
 
 from ROOT import *
 
-usage = "usage: run from Timing-TOFPET: python run_TOFPET.py -c config_main.txt [--runType PHYS -d acquire_sipm_data -t 2 -v 3 -l NoSource_13 -o output/ScanTest -g 15]"
+usage = "usage: run from Timing-TOFPET: \n Test (options from config_main.txt): python run_TOFPET.py -c config_main.txt \n Physics run (with options): python run_TOFPET.py -c config_main.txt --runType PHYS -d acquire_sipm_data -t 10 -v 3 -l NoSource_1 -g 15 -o output/ScanTest \n Pedestal run (with options): python run_TOFPET.py -c config_main.txt --runType PED -d acquire_pedestal_data -t 1 -v 3 -l Ped_1 -g 15 -o output/ScanTest"
 
 parser = optparse.OptionParser(usage)
 
@@ -490,7 +490,8 @@ print commandOutputDir
 os.system(commandOutputDir)
 
 #integration gate in ns (min_intg_time=max_intg_time)
-integration_gate = int(min_intg_time) * 4 * 5 
+#integration_gate = int(min_intg_time) * 4 * 5 
+integration_gate = int(min_intg_time)
 print integration_gate 
 
 outputFileLabel = output_label+"_"+daqscriptlabel+"_"+mode+"_Time"+runtime+"_Gate"+str(integration_gate)
@@ -509,7 +510,12 @@ print commandCpConfigini
 os.system(commandCpConfigini)
 
 print "Starting run..."
-commandRun = "./"+daqscript+" --config "+ config_current +" --mode "+ mode +" --time "+ runtime +" -o "+newname
+commandRun = ""
+print daqscript
+if (daqscript == "acquire_pedestal_data"):
+    commandRun = "./"+daqscript+" --config "+ config_current +" --mode "+ mode +" --time "+ runtime +" -o "+newname+" --cfgChannels "+opt.configFile
+else:
+    commandRun = "./"+daqscript+" --config "+ config_current +" --mode "+ mode +" --time "+ runtime +" -o "+newname
 print commandRun
 os.system(commandRun)
 print "End run"
@@ -601,6 +607,9 @@ print "\n"
 #os.system(commandConvertCoincidences)
 #print "File created."
 #print "\n"
+
+if( len(channels)<2 ):
+    sys.exit()
 
 print "Creating root file with tree (N-coincidences) from singles..."
 commandConvertCoincidences = "python "+convertcoincidencescript+" -c "+ opt.configFile +" -i "+ newname+"_singles.root" +" -n "+str(len(channels))+" -o "+newname+"_coincidences.root"

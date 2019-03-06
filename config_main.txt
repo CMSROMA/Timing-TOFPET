@@ -7,8 +7,8 @@ CHANNEL_MAP petsys_tables/febd_tofpet2tb_fake_channel_map.tsv
 TRIGGER_MAP petsys_tables/febd_gbe_trigger_map.tsv
 LSB_T1 60
 LSB_T2 60
-MIN_INTG_TIME 20
-MAX_INTG_TIME 20
+MIN_INTG_TIME 15
+MAX_INTG_TIME 15
 # MIN_INTG_TIME/MAX_INTG_TIME 15 = 15 x 4 x 5 ns = 300ns
 
 #Calibration
@@ -30,16 +30,17 @@ QDC_CALIB qdc_calibration.tsv
 #Run settings
 DAQSCRIPT acquire_sipm_data PHYS
 #DAQSCRIPT acquire_pedestal_data PED
+#DAQSCRIPT acquire_sipm_data PHYS
 CONVERTSINGLESCRIPT convert_raw_to_singles
 CONVERTCOINCIDENCESCRIPT analysis/find_coincidences.py
 #CONVERTCOINCIDENCESCRIPT convert_raw_to_coincidence
 TEMPERATUREFILE arduino/temperature/temperature11.txt
 MODE qdc
-TIME 2
+TIME 10
 #TIME 1
 OUTPUT_DIR output/ScanTest
 #OUTPUT_DIR output/Pedestal
-OUTPUT_LABEL NoSource_21
+OUTPUT_LABEL NoSource_1
 #OUTPUT_LABEL PedestalTest13_2ch_100000delay
 
 #Channels
