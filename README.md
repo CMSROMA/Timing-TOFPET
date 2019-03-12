@@ -66,6 +66,8 @@ Always keep this process active during a run in this terminal.
 
 # Run TOFPET
 
+## Single run
+
 Open a new terminal. 
 
 Edit configuration file:
@@ -74,11 +76,22 @@ config_main.txt
 ```
 
 Start data taking
+
+Take all options from config_main.txt:
 ```
 python run_TOFPET.py -c config_main.txt
 ```
 
-## Notes
+Physics run (overwrite options from command line):
+```
+python run_TOFPET.py -c config_main.txt --runType PHYS -d acquire_sipm_data -t 10 -v 3 -l Na22_1 -g 15 -o output/Test 
+```
+Pedestal run (overwrite options from command line):
+```
+python run_TOFPET.py -c config_main.txt --runType PED -d acquire_pedestal_data -t 1 -v 3 -l Ped_1 -g 15 -o output/Test
+```
+
+### Notes
 - The calibration (RUN_CALIB 1 in config file) should be re-run each time there is a new hardware configuration (e.g. different SiPMs, different hardware settings). It takes about 30-40 minutes to finish. 
 - Once the calibration step is done, the following runs can be taken using the existing calibration files (RUN_CALIB 0 in config file) 
 - Two output root files are produced: 
@@ -95,3 +108,11 @@ python run_TOFPET.py -c config_main.txt
 ```
 - Channel numbering in root file: Absolute channel ID (root file) = 64 x NCHIP + NCH  where NCHIP, NCH are reported in the config file.
 
+
+## Run sequences
+
+Edit last part of "run_DAQ.py" ("Run daq sequence") to define the sequence.
+Then launch the script
+```
+python run_DAQ.py  -c config_main.txt -o output/TestSequence
+```
