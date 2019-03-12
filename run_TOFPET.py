@@ -25,7 +25,7 @@ parser.add_option("-v", "--ov", dest="overVoltage",
                   help="sipm over voltage")
 
 parser.add_option("-g", "--gate", dest="gate",
-                  help="signal integration gate")
+                  help="signal integration gate = DeltaT[ns]/20: gate=15 -> DeltaT=300 ns")
 
 parser.add_option("-t", "--time", dest="duration",
                   help="run duration")
