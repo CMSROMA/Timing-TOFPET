@@ -18,6 +18,8 @@ parser.add_option("-c", "--config", dest="configFile",
                   help="config file")
 parser.add_option("-o", "--outFolder", dest="outputFolder",
                   help="output directory")
+parser.add_option("--pedAllChannels", dest="pedAllChannels", default=0, 
+                  help="Set to 1 to collect pedestals for all channels (default is 0)")
 (opt, args) = parser.parse_args()
 if not opt.configFile:   
     parser.error('config file not provided')
@@ -65,13 +67,13 @@ def RUN(runtype,time,ov,gate,label):
     newlabel = "Run"+str(currentRun).zfill(6)+"_"+simpletimeMarker+"_"+label
 
     if(runtype == "PED"):
-        commandRun = "python run_TOFPET.py -c "+ opt.configFile+" --runType PED -d acquire_pedestal_data " + "-t "+ str(time)+" -v "+str(ov)+" -l "+str(newlabel)+" -g "+str(gate)+" -o "+opt.outputFolder
+        commandRun = "python run_TOFPET.py -c "+ opt.configFile+" --runType PED -d acquire_pedestal_data " + "-t "+ str(time)+" -v "+str(ov)+" -l "+str(newlabel)+" -g "+str(gate)+" -o "+opt.outputFolder+" --pedAllChannels " + str(opt.pedAllChannels)
 
     if(runtype == "PHYS"):
         commandRun = "python run_TOFPET.py -c "+ opt.configFile+" --runType PHYS -d acquire_sipm_data " + "-t "+ str(time)+" -v "+str(ov)+" -l "+str(newlabel)+" -g "+str(gate)+" -o "+opt.outputFolder
 
     print commandRun
-    #os.system(commandRun)
+    os.system(commandRun)
 
     return;
 
@@ -79,14 +81,25 @@ def RUN(runtype,time,ov,gate,label):
 ## Run daq sequence
 ###################
 
+#Test sequence
+#RUN("PED",0.1,-1,15,"PedestalTestAllCh10kHz")
+
+
 #Main sequence
-t_ped = 10 #s
+n_ch = 2 #number of channels in config file (2 for 2 pixels, 3 for 1 pixel and 1 bar, ..)
+n_chip = 2 #number of active TOFPET2 chips
+t_ped = 0.1 #s
 t_phys = 300 #s
-t_tot = 400 #s
-ov_values = [3,5,7] #V
-gate_values = [10,15] # DeltaT[ns]/20: gate=15 -> DeltaT=300 ns 
-name = "Na22"
-nseq = int( t_tot / ( (2*t_ped+t_phys)*len(ov_values)*len(gate_values) ) )
+t_tot = 10800 #s this is approximate (it is 20-30% less of true value due to cpu processing time to make root files)
+#ov_values = [-1] #V
+ov_values = [4,5,7] #V
+gate_values = [15] # DeltaT[ns]/20: gate=15 -> DeltaT=300 ns 
+name = "Na22PedAllChannels"
+
+if int(opt.pedAllChannels)==1:
+    n_ch = n_chip*64
+
+nseq = int( t_tot / ( (2*t_ped*n_ch+t_phys)*len(ov_values)*len(gate_values) ) )
 print "Number of sequences in "+str(t_tot)+" seconds = "+ str(nseq)
 if nseq==0:
     print "==> Please increase total time of the run (t_tot)"

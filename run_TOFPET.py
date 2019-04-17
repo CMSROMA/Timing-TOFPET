@@ -42,6 +42,9 @@ parser.add_option("-o", "--outFolder", dest="outputFolder",
 parser.add_option("--runType", dest="runType",
                   help="runType (PHYS or PED)")
 
+parser.add_option("--pedAllChannels", dest="pedAllChannels", default=0, 
+                  help="Set to 1 to collect pedestals for all channels (default is 0)")
+
 (opt, args) = parser.parse_args()
 
 if not opt.configFile:   
@@ -513,7 +516,7 @@ print "Starting run..."
 commandRun = ""
 print daqscript
 if (daqscript == "acquire_pedestal_data"):
-    commandRun = "./"+daqscript+" --config "+ config_current +" --mode "+ mode +" --time "+ runtime +" -o "+newname+" --cfgChannels "+opt.configFile
+    commandRun = "./"+daqscript+" --config "+ config_current +" --mode "+ mode +" --time "+ runtime +" -o "+newname+" --cfgChannels "+opt.configFile+" --pedAllChannels " + str(opt.pedAllChannels)
 else:
     commandRun = "./"+daqscript+" --config "+ config_current +" --mode "+ mode +" --time "+ runtime +" -o "+newname
 print commandRun
