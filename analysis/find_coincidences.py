@@ -138,6 +138,11 @@ while i_singles<nEntries:
     #print "===> i_singles= ", i_singles
     treeInput.GetEntry(i_singles)
 
+    for j in range(0, int(opt.nch)):
+        a_chId[j] = -9 
+        a_energy[j] = -9 
+        a_time[j] = -9 
+
     n_channels[0] = int(opt.nch)
     unixTime[0] = long(treeInput.unixTime)
     temp1[0] = treeInput.temp1
