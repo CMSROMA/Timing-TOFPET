@@ -1,0 +1,119 @@
+
+Grbl 0.8c ['$' for help]
+['$H'|'$X' to unlock]
+error: Unsupported statement
+ok
+ok
+$0=133.000 (x, step/mm)
+$1=133.000 (y, step/mm)
+$2=755.906 (z, step/mm)
+$3=10 (step pulse, usec)
+$4=500.000 (default feed, mm/min)
+$5=500.000 (default seek, mm/min)
+$6=28 (step port invert mask, int:00011100)
+$7=25 (step idle delay, msec)
+$8=50.000 (acceleration, mm/sec^2)
+$9=0.050 (junction deviation, mm)
+$10=0.100 (arc, mm/segment)
+$11=25 (n-arc correction, int)
+$12=3 (n-decimals, int)
+$13=0 (report inches, bool)
+$14=1 (auto start, bool)
+$15=0 (invert step enable, bool)
+$16=1 (hard limits, bool)
+$17=1 (homing cycle, bool)
+$18=0 (homing dir invert mask, int:00000000)
+$19=500.000 (homing feed, mm/min)
+$20=250.000 (homing seek, mm/min)
+$21=100 (homing debounce, msec)
+$22=1.000 (homing pull-off, mm)
+ok
+
+Grbl 0.8c ['$' for help]
+['$H'|'$X' to unlock]
+[Caution: Unlocked]
+ok
+$0=133.000 (x, step/mm)
+$1=133.000 (y, step/mm)
+$2=755.906 (z, step/mm)
+$3=10 (step pulse, usec)
+$4=500.000 (default feed, mm/min)
+$5=500.000 (default seek, mm/min)
+$6=28 (step port invert mask, int:00011100)
+$7=25 (step idle delay, msec)
+$8=50.000 (acceleration, mm/sec^2)
+$9=0.050 (junction deviation, mm)
+$10=0.100 (arc, mm/segment)
+$11=25 (n-arc correction, int)
+$12=3 (n-decimals, int)
+$13=0 (report inches, bool)
+$14=1 (auto start, bool)
+$15=0 (invert step enable, bool)
+$16=1 (hard limits, bool)
+$17=1 (homing cycle, bool)
+$18=0 (homing dir invert mask, int:00000000)
+$19=500.000 (homing feed, mm/min)
+$20=250.000 (homing seek, mm/min)
+$21=100 (homing debounce, msec)
+$22=1.000 (homing pull-off, mm)
+ok
+<Idle,MPos:0.000,0.000,0.000,WPos:0.000,0.000,0.000>
+ALARM: Abort during cycle. MPos?
+ok
+
+Grbl 0.8c ['$' for help]
+['$H'|'$X' to unlock]
+
+Grbl 0.8c ['$' for help]
+['$H'|'$X' to unlock]
+$$ (view Grbl settings)
+$# (view # parameters)
+$G (view parser state)
+$N (view startup blocks)
+$x=value (save Grbl setting)
+$Nx=line (save startup block)
+$C (check gcode mode)
+$X (kill alarm lock)
+$H (run homing cycle)
+~ (cycle start)
+! (feed hold)
+? (current status)
+ctrl-x (reset Grbl)
+ok
+$0=133.000 (x, step/mm)
+$1=133.000 (y, step/mm)
+$2=755.906 (z, step/mm)
+$3=10 (step pulse, usec)
+$4=500.000 (default feed, mm/min)
+$5=500.000 (default seek, mm/min)
+$6=28 (step port invert mask, int:00011100)
+$7=25 (step idle delay, msec)
+$8=50.000 (acceleration, mm/sec^2)
+$9=0.050 (junction deviation, mm)
+$10=0.100 (arc, mm/segment)
+$11=25 (n-arc correction, int)
+$12=3 (n-decimals, int)
+$13=0 (report inches, bool)
+$14=1 (auto start, bool)
+$15=0 (invert step enable, bool)
+$16=1 (hard limits, bool)
+$17=1 (homing cycle, bool)
+$18=0 (homing dir invert mask, int:00000000)
+$19=500.000 (homing feed, mm/min)
+$20=250.000 (homing seek, mm/min)
+$21=100 (homing debounce, msec)
+$22=1.000 (homing pull-off, mm)
+ok
+ok
+
+Grbl 0.8c ['$' for help]
+
+Grbl 0.8c ['$' for help]
+
+Grbl 0.8c ['$' for help]
+
+Grbl 0.8c ['$' for help]
+
+Grbl 0.8c ['$' for help]
+
+Grbl 0.8c ['$' for help]

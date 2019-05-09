@@ -1,0 +1,60 @@
+<H1>Documentation</H1>
+<P>
+<b>grblServer.py</b> is the interface with the motors. It receives commands
+and executes them. To launch it use
+
+<pre>
+python3 grblServer.py -u /dev/ttyACM0
+</pre>
+Other options are shown with
+
+<pre>
+python3 grblServer.py -v
+</pre>
+Connect to the server using
+
+<pre>
+python3 client.py
+</pre>
+
+<h2>Debugging</h2>
+The grbl 0.8 documentation is <a href='https://github.com/grbl/grbl/wiki/Configuring-Grbl-v0.8'>here</a>.
+
+To connect directly with the grbl card, use <b>screen</b>. The usage is the 
+following:
+
+<pre>
+screen -L /dev/ttyACM0 9600
+</pre>
+Typing in the window does not echo. Type <pre>$X</pre> to unlock the card.
+<pre>$$</pre> shows the current configuration. grbl commands can be typed
+in the screen and are soon executed.
+
+Once finished, type 
+
+<pre>
+Ctrl+A, Ctrl+D
+</pre>
+Then kill the connection, if needed,
+
+<pre>
+cmsdaq@pccmsdaq01:~/TableXY$ screen -ls
+There is a screen on:
+	26134.pts-24.pccmsdaq01	(25/01/2019 09:46:54)	(Detached)
+1 Socket in /var/run/screen/S-cmsdaq.
+
+cmsdaq@pccmsdaq01:~/TableXY$ screen -X -S 26134.pts-24.pccmsdaq01 quit
+cmsdaq@pccmsdaq01:~/TableXY$ screen -ls
+No Sockets found in /var/run/screen/S-cmsdaq.
+</pre>
+
+The get the current status:
+<pre>
+?
+</pre>
+
+The result is like
+<pre>
+<Idle,MPos:0.000,0.000,0.000,WPos:0.000,0.000,0.000>
+</pre>
+
