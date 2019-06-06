@@ -34,10 +34,14 @@ def version():
     print("Accepted commands are in the following regexp format:")
     print("[+-][0-9]+ [+-][0-9]+  (e.g. +82 -56) performs a relative movement w.r.t. the current position")
     print("[0-9]+ [0-9]+          (e.g. 180 290) moves to the given coordinates")
+    print("home                   perform a home search")
+    print("reset                  perform a reset - be careful: reset may be needed after limits are reached")
+    print("position               returns the current absolute position of the table")
     print("quit                   exit")
     exit(0)
 
 def help():
+    version()
     return ret
 
 # Gcommand
