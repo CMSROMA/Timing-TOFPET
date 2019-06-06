@@ -35,7 +35,7 @@ os.system(commandOutputDir)
 #############################
 ## Daq setup
 #############################
-def RUN(runtype,time,ov,gate,label):
+def RUN(runtype,time,ov,ovref,gate,label):
 
     ###############
     ## Current time
@@ -67,10 +67,10 @@ def RUN(runtype,time,ov,gate,label):
     newlabel = "Run"+str(currentRun).zfill(6)+"_"+simpletimeMarker+"_"+label
 
     if(runtype == "PED"):
-        commandRun = "python run_TOFPET.py -c "+ opt.configFile+" --runType PED -d acquire_pedestal_data " + "-t "+ str(time)+" -v "+str(ov)+" -l "+str(newlabel)+" -g "+str(gate)+" -o "+opt.outputFolder+" --pedAllChannels " + str(opt.pedAllChannels)
+        commandRun = "python run_TOFPET.py -c "+ opt.configFile+" --runType PED -d acquire_pedestal_data " + "-t "+ str(time)+" -v "+str(ov)+" --ovref "+str(ovref)+" -l "+str(newlabel)+" -g "+str(gate)+" -o "+opt.outputFolder+" --pedAllChannels " + str(opt.pedAllChannels)
 
     if(runtype == "PHYS"):
-        commandRun = "python run_TOFPET.py -c "+ opt.configFile+" --runType PHYS -d acquire_sipm_data " + "-t "+ str(time)+" -v "+str(ov)+" -l "+str(newlabel)+" -g "+str(gate)+" -o "+opt.outputFolder
+        commandRun = "python run_TOFPET.py -c "+ opt.configFile+" --runType PHYS -d acquire_sipm_data " + "-t "+ str(time)+" -v "+str(ov)+" --ovref "+str(ovref)+" -l "+str(newlabel)+" -g "+str(gate)+" -o "+opt.outputFolder
 
     print commandRun
     os.system(commandRun)
@@ -101,9 +101,10 @@ name = "Na22PedAllChannels"
 n_ch = 3 #number of channels in config file (2 for 2 pixels, 3 for 1 pixel and 1 bar, ..)
 n_chip = 2 #number of active TOFPET2 chips
 t_ped = 1 #s
-t_phys = 300 #s
-t_tot = 14400 #s this is approximate (it is 20-30% less of true value due to cpu processing time to make root files)
-ov_values = [-1] #V
+t_phys = 30 #s
+t_tot = 80  #s this is approximate (it is 20-30% less of true value due to cpu processing time to make root files)
+ov_values = [5,6] #V
+ovref_values = [7] #V
 #ov_values = [4,5,7] #V
 gate_values = [15] # DeltaT[ns]/20: gate=15 -> DeltaT=300 ns 
 name = "Na22Bar"
@@ -118,8 +119,9 @@ if nseq==0:
 
 for seq in range(0,nseq):
     for ov in ov_values:
-        for gate in gate_values:
-            RUN("PED",t_ped,ov,gate,name)
-            RUN("PHYS",t_phys,ov,gate,name)
-            RUN("PED",t_ped,ov,gate,name)
+        for ovref in ovref_values:
+            for gate in gate_values:
+                RUN("PED",t_ped,ov,ovref,gate,name)
+                RUN("PHYS",t_phys,ov,ovref,gate,name)
+                RUN("PED",t_ped,ov,ovref,gate,name)
 

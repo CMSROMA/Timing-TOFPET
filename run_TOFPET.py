@@ -14,7 +14,7 @@ import re
 
 from ROOT import *
 
-usage = "usage: run from Timing-TOFPET: \n Test (options from config_main.txt): python run_TOFPET.py -c config_main.txt \n Physics run (with options): python run_TOFPET.py -c config_main.txt --runType PHYS -d acquire_sipm_data -t 10 -v 3 -l NoSource_1 -g 15 -o output/ScanTest \n Pedestal run (with options): python run_TOFPET.py -c config_main.txt --runType PED -d acquire_pedestal_data -t 1 -v 3 -l Ped_1 -g 15 -o output/ScanTest"
+usage = "usage: run from Timing-TOFPET: \n Test (options from config_main.txt): python run_TOFPET.py -c config_main.txt \n Physics run (with options): python run_TOFPET.py -c config_main.txt --runType PHYS -d acquire_sipm_data -t 10 -v 3 --ovref 3 -l NoSource_1 -g 15 -o output/ScanTest \n Pedestal run (with options): python run_TOFPET.py -c config_main.txt --runType PED -d acquire_pedestal_data -t 1 -v 3 --ovref 3 -l Ped_1 -g 15 -o output/ScanTest"
 
 parser = optparse.OptionParser(usage)
 
@@ -23,6 +23,9 @@ parser.add_option("-c", "--config", dest="configFile",
 
 parser.add_option("-v", "--ov", dest="overVoltage",
                   help="sipm over voltage")
+
+parser.add_option("--ovref", dest="overVoltageRef",
+                  help="reference sipm over voltage")
 
 parser.add_option("-g", "--gate", dest="gate",
                   help="signal integration gate = DeltaT[ns]/20: gate=15 -> DeltaT=300 ns")
@@ -99,6 +102,10 @@ for line in cfg:
         line = re.sub(splitline[1],opt.outputLabel ,line)
         print "Line of config file changed: ... ", line
 
+    if (linetype == "OVERWRITE_OV_REF" and linesize==2 and opt.overVoltageRef):
+        line = re.sub(splitline[1],opt.overVoltageRef ,line)
+        print "Line of config file changed: ... ", line
+
     if (linetype == "OVERWRITE_OV" and linesize==2 and opt.overVoltage):
         line = re.sub(splitline[1],opt.overVoltage ,line)
         print "Line of config file changed: ... ", line
@@ -151,6 +158,7 @@ runtime = ""
 output_dir = ""
 output_label = ""
 overwrite_ov = -99
+overwrite_ov_ref = -99
 dic_channels = {}
 channels = []
 
@@ -243,6 +251,9 @@ for line in cfg:
     if (linetype == "OVERWRITE_OV" and linesize==2):
         overwrite_ov = splitline[1]
 
+    if (linetype == "OVERWRITE_OV_REF" and linesize==2):
+        overwrite_ov_ref = splitline[1]
+
     #print linetype, linesize
 
     if (linetype == "CH" and linesize==16):
@@ -280,12 +291,15 @@ for line in cfg:
         dic_channels[(chId,"Z")]=Z
         dic_channels[(chId,"CRYSTAL")]=CRYSTAL
         #overwrite overvoltage
-        if(float(overwrite_ov) > 0.):
+        if(float(overwrite_ov) > 0. and float(chId) > 0.):
             dic_channels[(chId,"OV")]=overwrite_ov
+        if(float(overwrite_ov_ref) > 0. and float(chId) == 0.):
+            dic_channels[(chId,"OV")]=overwrite_ov_ref
+
 
 cfg.close()
 
-#print config_template_file, hv_dac, run_calib, calib_dir, tdc_calib, qdc_calib, disc_calib, sipm_bias, disc_settings, channel_map, trigger_map, lsb_t1, lsb_t2, min_intg_time, max_intg_time, daqscript, convertsinglescript, convertcoincidencescript, temperaturefile, mode, runtime,  output_dir, output_label, overwrite_ov
+#print config_template_file, hv_dac, run_calib, calib_dir, tdc_calib, qdc_calib, disc_calib, sipm_bias, disc_settings, channel_map, trigger_map, lsb_t1, lsb_t2, min_intg_time, max_intg_time, daqscript, convertsinglescript, convertcoincidencescript, temperaturefile, mode, runtime,  output_dir, output_label, overwrite_ov, overwrite_ov_ref
 #print dic_channels[("0","VBR")]
 print "Active channels: ", channels
 
@@ -500,6 +514,11 @@ print integration_gate
 outputFileLabel = output_label+"_"+daqscriptlabel+"_"+mode+"_Time"+runtime+"_Gate"+str(integration_gate)
 if opt.overVoltage:
     outputFileLabel = output_label+"_"+daqscriptlabel+"_"+mode+"_Time"+runtime+"_Gate"+str(integration_gate)+"_Ov"+opt.overVoltage
+if opt.overVoltageRef:
+    outputFileLabel = output_label+"_"+daqscriptlabel+"_"+mode+"_Time"+runtime+"_Gate"+str(integration_gate)+"_OvRef"+opt.overVoltageRef
+if opt.overVoltage and opt.overVoltageRef:
+    outputFileLabel = output_label+"_"+daqscriptlabel+"_"+mode+"_Time"+runtime+"_Gate"+str(integration_gate)+"_OvRef"+opt.overVoltageRef+"_Ov"+opt.overVoltage
+
 newname = output_dir+"/"+outputFileLabel
 newconfignametxt = newname+".txt"
 newconfignameini = newname+".ini"

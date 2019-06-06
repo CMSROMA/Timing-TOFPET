@@ -84,11 +84,11 @@ python run_TOFPET.py -c config_main.txt
 
 Physics run (overwrite options from command line):
 ```
-python run_TOFPET.py -c config_main.txt --runType PHYS -d acquire_sipm_data -t 10 -v 3 -l Na22_1 -g 15 -o output/Test 
+python run_TOFPET.py -c config_main.txt --runType PHYS -d acquire_sipm_data -t 10 -v 3 --ovref 3 -l NoSource_1 -g 15 -o output/ScanTest
 ```
 Pedestal run (overwrite options from command line):
 ```
-python run_TOFPET.py -c config_main.txt --runType PED -d acquire_pedestal_data -t 1 -v 3 -l Ped_1 -g 15 -o output/Test
+python run_TOFPET.py -c config_main.txt --runType PED -d acquire_pedestal_data -t 1 -v 3 --ovref 3 -l Ped_1 -g 15 -o output/ScanTest
 ```
 
 ### Notes
