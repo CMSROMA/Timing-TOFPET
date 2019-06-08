@@ -562,15 +562,18 @@ unixTime = array( 'l' , [0])
 temp1 = array( 'd' , [-999.])
 temp2 = array( 'd' , [-999.])
 temp3 = array( 'd' , [-999.])
+temp4 = array( 'd' , [-999.])
 unixTimeBranch = treeInput.Branch( 'unixTime', unixTime, 'unixTime/L' )
 temp1Branch = treeInput.Branch( 'temp1', temp1, 'temp1/D' )
 temp2Branch = treeInput.Branch( 'temp2', temp2, 'temp2/D' )
 temp3Branch = treeInput.Branch( 'temp3', temp3, 'temp3/D' )
+temp4Branch = treeInput.Branch( 'temp4', temp4, 'temp4/D' )
 
 ReadNewTemperature = 0 
 T1 = -999.
 T2 = -999.
 T3 = -999.
+T4 = -999.
 previousTime = 0
 for event in treeInput:
     unixTime[0] = long(event.time * 10**-12) + unixTimeStart #unix time in seconds of the current event
@@ -583,6 +586,7 @@ for event in treeInput:
         temp1[0] = T1
         temp2[0] = T2
         temp3[0] = T3
+        temp4[0] = T4
     elif (event.time - previousTime) > 10**12:
         ReadNewTemperature=1
         previousTime = event.time
@@ -600,15 +604,17 @@ for event in treeInput:
             splitline = line.split()
 
             linesize = len(splitline)
-            if (linesize==4):
+            if (linesize==5):
                 # find match within 2 seconds
                 if( abs(long(unixTime[0])-long(splitline[0])) < 2):
                     T1 = float(splitline[1])
                     T2 = float(splitline[2])
                     T3 = float(splitline[3])
+                    T4 = float(splitline[4])
                     temp1[0]=T1
                     temp2[0]=T2
                     temp3[0]=T3
+                    temp4[0]=T4
                     break
         ReadNewTemperature=0
         tempFile.close()
@@ -617,6 +623,7 @@ for event in treeInput:
     temp1Branch.Fill()
     temp2Branch.Fill()
     temp3Branch.Fill()
+    temp4Branch.Fill()
 
 treeInput.Write("",TFile.kOverwrite)
 tfileinput.Close()
