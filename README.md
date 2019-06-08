@@ -19,7 +19,7 @@ make
 
 Load firmware to arduino (only the first time):
 ```
-arduino/temperature/temp_LM35D_multi.ino
+arduino/temperature/temp_LM35D_multi/temp_LM35D_multi.ino
 ```
 The default setup reads three temperature sensors
 - temp1: close to patch panel
@@ -31,16 +31,15 @@ Open a new terminal
 python3 temp_LM35D.py -o temperature.txt -p /dev/ttyACM0 -r 9600
 ```
 
-It will add (append) a line every second (configurable from arduino firmware) in the output file "temperature.txt" with this format: "unix_time temp1 temp2 temp3". Temperatures are reported in Celsius degrees; unix epoch time in seconds (https://www.epochconverter.com). 
+It will add (append) a line every second (configurable from arduino firmware) in the output file "temperature.txt" with this format: "unix_time temp1 temp2 temp3 temp4". Temperatures are reported in Celsius degrees; unix epoch time in seconds (https://www.epochconverter.com). 
 
 Example:
 ```
 [...]
-1548254554 21.16 21.16 21.05
-1548254555 21.05 21.27 21.05
-1548254556 21.16 21.16 21.16
-1548254557 21.16 21.05 21.27
-1548254558 20.95 21.27 21.16
+1559985310 25.46 25.67 25.46 24.81
+1559985310 25.46 25.67 25.46 24.81
+1559985310 25.46 25.67 25.46 24.81
+1559985310 25.46 25.67 25.46 24.81
 [...]
 ```
 
@@ -70,9 +69,13 @@ Always keep this process active during a run in this terminal.
 
 Open a new terminal. 
 
-Edit configuration file:
+Edit configuration file for pixels:
 ```
 config_main.txt
+```
+or for pixel + bar:
+```
+config_main_bar.txt
 ```
 
 Start data taking
