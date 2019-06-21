@@ -40,7 +40,9 @@ void loop(void)
     //Serial.print(" : ");
     tempC = sensors.getTempCByIndex(i);
     Serial.print(tempC);
-    Serial.print(" ");
+    if(i<deviceCount-1){
+      Serial.print (" ");
+    }
     //Serial.print((char)176);//shows degrees character
     //Serial.print("C  |  ");
     //Serial.print(DallasTemperature::toFahrenheit(tempC));

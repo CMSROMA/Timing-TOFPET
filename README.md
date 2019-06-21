@@ -19,27 +19,30 @@ make
 
 Load firmware to arduino (only the first time):
 ```
-arduino/temperature/temp_LM35D_multi/temp_LM35D_multi.ino
+arduino/temperature/temp_DS18B20/temp_DS18B20.ino
 ```
-The default setup reads three temperature sensors
-- temp1: close to patch panel
-- temp2: in the middle, close to test channel
-- temp3: on the other side, close to reference channel
+The default setup reads 6 temperature sensors (DS18B20)
+- temp1: 
+- temp2: 
+- temp3: 
+- temp4: 
+- temp5: 
+- temp6: 
 
 Open a new terminal
 ```
-python3 temp_LM35D.py -o temperature.txt -p /dev/ttyACM0 -r 9600
+python3 read_temp.py -o temperature.txt -p /dev/ttyACM1 -r 9600
 ```
 
-It will add (append) a line every second (configurable from arduino firmware) in the output file "temperature.txt" with this format: "unix_time temp1 temp2 temp3 temp4". Temperatures are reported in Celsius degrees; unix epoch time in seconds (https://www.epochconverter.com). 
+It will add (append) a line every second (configurable from arduino firmware) in the output file "temperature.txt" with this format: "unix_time temp1 temp2 temp3 temp4 temp5 temp6". Temperatures are reported in Celsius degrees; unix epoch time in seconds (https://www.epochconverter.com). 
 
 Example:
 ```
 [...]
-1559985310 25.46 25.67 25.46 24.81
-1559985310 25.46 25.67 25.46 24.81
-1559985310 25.46 25.67 25.46 24.81
-1559985310 25.46 25.67 25.46 24.81
+1561125966 28.00 27.12 27.31 28.19 27.06 27.19
+1561125968 28.00 27.12 27.31 28.12 27.06 27.19
+1561125970 28.06 27.12 27.31 28.12 27.06 27.19
+1561125972 28.00 27.12 27.31 28.12 27.06 27.19
 [...]
 ```
 
