@@ -21,13 +21,14 @@ Load firmware to arduino (only the first time):
 ```
 arduino/temperature/temp_DS18B20/temp_DS18B20.ino
 ```
-The default setup reads 6 temperature sensors (DS18B20)
-- temp1: 
-- temp2: 
-- temp3: 
-- temp4: 
-- temp5: 
-- temp6: 
+The default setup reads 6 temperature sensors (DS18B20).
+The sensors are positioned in the following way in order:
+- 1: Reference TOFPET board (on the metallic plate)   
+- 2: Internal (air)
+- 3: External (air)
+- 4: Test TOFPET board (on the metallic plate) 
+- 5: Reference SiPM (air)
+- 6: Test SiPM (air)
 
 Open a new terminal
 ```

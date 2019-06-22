@@ -559,21 +559,29 @@ inputfilename = newname+"_singles.root"
 tfileinput = TFile.Open(inputfilename,"update")
 treeInput = tfileinput.Get("data")
 unixTime = array( 'l' , [0])
-temp1 = array( 'd' , [-999.])
-temp2 = array( 'd' , [-999.])
-temp3 = array( 'd' , [-999.])
-temp4 = array( 'd' , [-999.])
+tempInt = array( 'd' , [-999.])
+tempExt = array( 'd' , [-999.])
+tempBoardTest = array( 'd' , [-999.])
+tempBoardRef = array( 'd' , [-999.])
+tempSiPMTest = array( 'd' , [-999.])
+tempSiPMRef = array( 'd' , [-999.])
+
 unixTimeBranch = treeInput.Branch( 'unixTime', unixTime, 'unixTime/L' )
-temp1Branch = treeInput.Branch( 'temp1', temp1, 'temp1/D' )
-temp2Branch = treeInput.Branch( 'temp2', temp2, 'temp2/D' )
-temp3Branch = treeInput.Branch( 'temp3', temp3, 'temp3/D' )
-temp4Branch = treeInput.Branch( 'temp4', temp4, 'temp4/D' )
+tempIntBranch = treeInput.Branch( 'tempInt', tempInt, 'tempInt/D' )
+tempExtBranch = treeInput.Branch( 'tempExt', tempExt, 'tempExt/D' )
+tempBoardTestBranch = treeInput.Branch( 'tempBoardTest', tempBoardTest, 'tempBoardTest/D' )
+tempBoardRefBranch = treeInput.Branch( 'tempBoardRef', tempBoardRef, 'tempBoardRef/D' )
+tempSiPMTestBranch = treeInput.Branch( 'tempSiPMTest', tempSiPMTest, 'tempSiPMTest/D' )
+tempSiPMRefBranch = treeInput.Branch( 'tempSiPMRef', tempSiPMRef, 'tempSiPMRef/D' )
 
 ReadNewTemperature = 0 
-T1 = -999.
-T2 = -999.
-T3 = -999.
-T4 = -999.
+TInt = -999. 
+TExt = -999.
+TBoardTest = -999. 
+TBoardRef = -999. 
+TSiPMTest = -999.
+TSiPMRef = -999.
+
 previousTime = 0
 for event in treeInput:
     unixTime[0] = long(event.time * 10**-12) + unixTimeStart #unix time in seconds of the current event
@@ -583,10 +591,12 @@ for event in treeInput:
         ReadNewTemperature=1 
         previousTime = event.time
     elif (event.time - previousTime) <= 10**12:
-        temp1[0] = T1
-        temp2[0] = T2
-        temp3[0] = T3
-        temp4[0] = T4
+        tempInt[0] = TInt
+        tempExt[0] = TExt
+        tempBoardTest[0] = TBoardTest
+        tempBoardRef[0] = TBoardRef
+        tempSiPMTest[0] = TSiPMTest
+        tempSiPMRef[0] = TSiPMRef
     elif (event.time - previousTime) > 10**12:
         ReadNewTemperature=1
         previousTime = event.time
@@ -604,26 +614,32 @@ for event in treeInput:
             splitline = line.split()
 
             linesize = len(splitline)
-            if (linesize==5):
+            if (linesize==7):
                 # find match within 2 seconds
                 if( abs(long(unixTime[0])-long(splitline[0])) < 2):
-                    T1 = float(splitline[1])
-                    T2 = float(splitline[2])
-                    T3 = float(splitline[3])
-                    T4 = float(splitline[4])
-                    temp1[0]=T1
-                    temp2[0]=T2
-                    temp3[0]=T3
-                    temp4[0]=T4
+                    TInt = float(splitline[2])
+                    TExt = float(splitline[3])
+                    TBoardTest = float(splitline[4])
+                    TBoardRef = float(splitline[1])
+                    TSiPMTest = float(splitline[6])
+                    TSiPMRef = float(splitline[5])
+                    tempInt[0] = TInt
+                    tempExt[0] = TExt
+                    tempBoardTest[0] = TBoardTest
+                    tempBoardRef[0] = TBoardRef
+                    tempSiPMTest[0] = TSiPMTest
+                    tempSiPMRef[0] = TSiPMRef
                     break
         ReadNewTemperature=0
         tempFile.close()
         
     unixTimeBranch.Fill()
-    temp1Branch.Fill()
-    temp2Branch.Fill()
-    temp3Branch.Fill()
-    temp4Branch.Fill()
+    tempIntBranch.Fill()
+    tempExtBranch.Fill()
+    tempBoardTestBranch.Fill()
+    tempBoardRefBranch.Fill()
+    tempSiPMTestBranch.Fill()
+    tempSiPMRefBranch.Fill()
 
 treeInput.Write("",TFile.kOverwrite)
 tfileinput.Close()

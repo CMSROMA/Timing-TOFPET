@@ -97,10 +97,12 @@ treeOutput = TTree( 'data', 'tree with coincidences' )
 
 maxn = int(opt.nch)
 unixTime = array( 'l' , [0])
-temp1 = array( 'd' , [-999.])
-temp2 = array( 'd' , [-999.])
-temp3 = array( 'd' , [-999.])
-temp4 = array( 'd' , [-999.])
+tempInt = array( 'd' , [-999.])
+tempExt = array( 'd' , [-999.])
+tempBoardTest = array( 'd' , [-999.])
+tempBoardRef = array( 'd' , [-999.])
+tempSiPMTest = array( 'd' , [-999.])
+tempSiPMRef = array( 'd' , [-999.])
 n_channels = array( 'i', [ -9 ] )
 n_coincidences = array( 'i', [ -9 ] )
 a_chId = array( 'd', maxn*[ -9. ] )
@@ -116,10 +118,12 @@ treeOutput.Branch( 'chId', a_chId, 'chId[nch]/D' )
 treeOutput.Branch( 'energy', a_energy, 'energy[nch]/D' )
 treeOutput.Branch( 'time', a_time, 'time[nch]/D' )
 treeOutput.Branch( 'unixTime', unixTime, 'unixTime/L' )
-treeOutput.Branch( 'temp1', temp1, 'temp1/D' )
-treeOutput.Branch( 'temp2', temp2, 'temp2/D' )
-treeOutput.Branch( 'temp3', temp3, 'temp3/D' )
-treeOutput.Branch( 'temp4', temp4, 'temp4/D' )
+treeOutput.Branch( 'tempInt', tempInt, 'tempInt/D' )
+treeOutput.Branch( 'tempExt', tempExt, 'tempExt/D' )
+treeOutput.Branch( 'tempBoardTest', tempBoardTest, 'tempBoardTest/D' )
+treeOutput.Branch( 'tempBoardRef', tempBoardRef, 'tempBoardRef/D' )
+treeOutput.Branch( 'tempSiPMTest', tempSiPMTest, 'tempSiPMTest/D' )
+treeOutput.Branch( 'tempSiPMRef', tempSiPMRef, 'tempSiPMRef/D' )
 
 i_singles=0
 while i_singles<nEntries:
@@ -147,10 +151,12 @@ while i_singles<nEntries:
 
     n_channels[0] = int(opt.nch)
     unixTime[0] = long(treeInput.unixTime)
-    temp1[0] = treeInput.temp1
-    temp2[0] = treeInput.temp2
-    temp3[0] = treeInput.temp3
-    temp4[0] = treeInput.temp4
+    tempInt[0] = treeInput.tempInt
+    tempExt[0] = treeInput.tempExt
+    tempBoardTest[0] = treeInput.tempBoardTest
+    tempBoardRef[0] = treeInput.tempBoardRef
+    tempSiPMTest[0] = treeInput.tempSiPMTest
+    tempSiPMRef[0] = treeInput.tempSiPMRef
 
     #ref (first in the list) channel
     t_ref = treeInput.time
