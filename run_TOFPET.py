@@ -617,12 +617,12 @@ for event in treeInput:
             if (linesize==7):
                 # find match within 2 seconds
                 if( abs(long(unixTime[0])-long(splitline[0])) < 2):
-                    TInt = float(splitline[2])
-                    TExt = float(splitline[3])
-                    TBoardTest = float(splitline[4])
-                    TBoardRef = float(splitline[1])
-                    TSiPMTest = float(splitline[6])
-                    TSiPMRef = float(splitline[5])
+                    TInt = float(splitline[2])+0.16
+                    TExt = float(splitline[3])-0.03
+                    TBoardTest = float(splitline[4])-0.88
+                    TBoardRef = float(splitline[1])-0.75
+                    TSiPMTest = float(splitline[6])+0.09
+                    TSiPMRef = float(splitline[5])+0.22
                     tempInt[0] = TInt
                     tempExt[0] = TExt
                     tempBoardTest[0] = TBoardTest

@@ -8,11 +8,12 @@ import re
 from ROOT import *
 
 ## Inputs
-#f = open("temperature_TestCoolingWithElectronics_06_06_2019.txt", "r")
+f = open("temperature.txt", "r")
 #f = open("temperature_TestCoolingWithElectronics_19_06_2019.txt", "r")
-f = open("temperature_calibration_DS18B20_21_06_2019_good.txt", "r")
+#f = open("/media/cmsdaq/ext/TOFPET/data/Temperature/Calibration_21_06_2019/temperature_calibration_DS18B20_21_06_2019_good_realTemp_27p33.txt", "r")
 
 nSensors = 6
+corrections = [-0.75,+0.16,-0.03,-0.88,+0.22,+0.09]
 
 ## Create root file
 outfile = TFile( 'TempTree.root', 'recreate' )
@@ -50,7 +51,7 @@ for line in lines:
         #print time[0]
         for sens in xrange(0,nSensors):
             #print splittedline[0]
-            temp[sens] = float(splittedline[sens+1])
+            temp[sens] = float(splittedline[sens+1])+float(corrections[sens])
             #print temp[sens]
         
         nSens[0]=nSensors            
