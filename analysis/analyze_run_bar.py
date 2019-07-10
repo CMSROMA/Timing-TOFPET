@@ -127,10 +127,11 @@ def fitSpectrum(histo,function,xmin,xmax,canvas,fitres,label):
     goodChi2 = 0.
     previousChi2overNdf = -99.
     while goodChi2==0.:
-        histo.Fit(function.GetName(),"LR+0","",xmin,min(peak*2.4,xmax))
+        histo.Fit(function.GetName(),"LR+0N","",xmin,min(peak*2.4,xmax))
         print function.GetChisquare(), function.GetNDF(), function.GetChisquare()/function.GetNDF()
         if abs(function.GetChisquare()/function.GetNDF()-previousChi2overNdf)<0.01*previousChi2overNdf:
             histo.Fit(function.GetName(),"LR+","",xmin,min(peak*2.4,xmax))
+            canvas.Update()
             goodChi2 = 1.
         previousChi2overNdf = function.GetChisquare()/function.GetNDF()
     print function.GetChisquare(), function.GetNDF(), function.GetChisquare()/function.GetNDF()
