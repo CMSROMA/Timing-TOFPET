@@ -155,12 +155,10 @@ def fitSaturation(function,xmin,xmax,canvas,fitres,label):
     n_points = 2
     a_true_energy = [511.,1275.]
     a_err_true_energy = [0.,0.]
-    a_meas_energy = [#fitResults[(label,"backpeak","mean","value")],
-        fitResults[(label,"peak1","mean","value")],
-        fitResults[(label,"peak2","mean","value")]]
-    a_err_meas_energy = [#fitResults[(label,"backpeak","mean","sigma")],
-        fitResults[(label,"peak1","mean","sigma")],
-        fitResults[(label,"peak2","mean","sigma")]]
+    a_meas_energy = [fitResults[(label,"peak1","mean","value")],
+                     fitResults[(label,"peak2","mean","value")]]
+    a_err_meas_energy = [fitResults[(label,"peak1","mean","sigma")],
+                         fitResults[(label,"peak2","mean","sigma")]]
     g_sat = TGraphErrors(n_points,
                          array('d',a_true_energy),array('d',a_meas_energy),
                          array('d',a_err_true_energy),array('d',a_err_meas_energy))
@@ -191,7 +189,7 @@ def fitSaturation(function,xmin,xmax,canvas,fitres,label):
 channels = [59,315,291]
 ###############
 
-usage = "usage: python analysis/analyze_run_bar.py --run 2 -i /media/cmsdaq/ext/TOFPET/data/BarReproducibility__Temp24__03_07_2019 -o /home/cmsdaq/Workspace/TOFPET/Timing-TOFPET/analysis"
+usage = "usage: python analysis/analyze_run_bar.py --run 2 -i /media/cmsdaq/ext/TOFPET/data/BarReproducibility__Temp24__03_07_2019 -o /home/cmsdaq/Workspace/TOFPET/Timing-TOFPET/analysis --barCode 99"
 
 parser = optparse.OptionParser(usage)
 
@@ -204,6 +202,9 @@ parser.add_option("-i", "--input", dest="inputDir",
 parser.add_option("-o", "--output", dest="outputDir",
                   help="output directory")
 
+parser.add_option("-b", "--barCode", dest="barCode", default=-9,
+                  help="code of the crystal bar")
+
 (opt, args) = parser.parse_args()
 
 if not opt.run:   
@@ -214,6 +215,9 @@ if not opt.inputDir:
 
 if not opt.outputDir:   
     parser.error('output directory not provided')
+
+#if not opt.barCode:   
+#    parser.error('code of the crystal bar not provided')
 
 ################################################
 
@@ -338,15 +342,25 @@ treeSingles = tfileSingles.Get("data")
 h1_energy_pixel = TH1F("h1_energy_pixel", "", 200, 0, 200)
 c1_energy_pixel = TCanvas("c1_energy_pixel", "", 900, 700)
 c1_sat_pixel = TCanvas("c1_sat_pixel", "", 900, 700)
+h1_temp_pixel = TH1F("h1_temp_pixel", "", 1000, 15, 50)
+h1_temp_bar = TH1F("h1_temp_bar", "", 1000, 15, 50)
+h1_temp_int = TH1F("h1_temp_int", "", 1000, 15, 50)
 
 tfileSingles.cd()
 for event in range (0,treeSingles.GetEntries()):
     treeSingles.GetEntry(event)
     if( treeSingles.channelID==channels[0]):
         h1_energy_pixel.Fill(treeSingles.energy-mean_PedTot[channels[0]])
+    h1_temp_pixel.Fill(treeSingles.tempSiPMRef)
+    h1_temp_bar.Fill(treeSingles.tempSiPMTest)
+    h1_temp_int.Fill(treeSingles.tempInt)
+
+Temp_pixel = h1_temp_pixel.GetMean()
+Temp_bar = h1_temp_bar.GetMean()
+Temp_internal = h1_temp_int.GetMean()
 
 ################################################
-## 3) Analyze coincidences
+## 4) Analyze coincidences
 ################################################
 
 tfileCoinc = TFile.Open(input_filename_coinc)
@@ -372,14 +386,14 @@ for event in range (0,treeCoinc.GetEntries()):
         h2_energy1VSenergy2_bar.Fill(energy1,energy2)
 
 ################################################
-## 4) Output file
+## 5) Output file
 ################################################
 
-tfileoutput = TFile( "output_Run"+run+".root", "recreate" )
+tfileoutput = TFile( "histo_Run"+run+".root", "recreate" )
 tfileoutput.cd()
 
 ################################################
-## 5) Fit energy spectra
+## 6) Fit energy spectra
 ################################################
 
 fitResults = {}
@@ -400,7 +414,7 @@ fTot_bar.SetNpx(1000)
 fitSpectrum(h1_energyTot_bar,fTot_bar,minEnergy,maxEnergy,c1_energyTot_bar,fitResults,"bar")
 
 ################################################
-## 6) Fit response vs photon energy
+## 7) Fit response vs photon energy
 ################################################
 
 ## Setup
@@ -416,7 +430,7 @@ fExpo_bar = TF1("fExpo_bar","[0]*(1-TMath::Exp(-[1]*x))",minE,maxE)
 fitSaturation(fExpo_bar,minE,maxE,c1_sat_bar,fitResults,"bar")
 
 ################################################
-## 6) Write and close
+## 8) Write histograms
 ################################################
 
 #Pedestals
@@ -436,8 +450,8 @@ print "--- Pixel ---"
 print "Pixel Peak 1: "+str(fitResults[('pixel',"peak1","mean","value")])+" +/- "+str(fitResults[('pixel',"peak1","mean","sigma")]) 
 print "Pixel Peak 2: "+str(fitResults[('pixel',"peak2","mean","value")])+" +/- "+str(fitResults[('pixel',"peak2","mean","sigma")]) 
 print "Pixel Backpeak : "+str(fitResults[('pixel',"backpeak","mean","value")])+" +/- "+str(fitResults[('pixel',"backpeak","mean","sigma")]) 
-print "Pixel Alpha:"+str(fitResults[('pixel',"peak12","alpha","value")])+" +/- "+str(fitResults[('pixel',"peak12","alpha","sigma")]) 
-print "Pixel Beta:"+str(fitResults[('pixel',"peak12","beta","value")])+" +/- "+str(fitResults[('pixel',"peak12","beta","sigma")]) 
+print "Pixel Alpha: "+str(fitResults[('pixel',"peak12","alpha","value")])+" +/- "+str(fitResults[('pixel',"peak12","alpha","sigma")]) 
+print "Pixel Beta: "+str(fitResults[('pixel',"peak12","beta","value")])+" +/- "+str(fitResults[('pixel',"peak12","beta","sigma")]) 
 
 #Bar
 h1_energyTot_bar.Write()
@@ -448,8 +462,8 @@ print "--- Bar ---"
 print "Bar Peak 1: "+str(fitResults[('bar',"peak1","mean","value")])+" +/- "+str(fitResults[('bar',"peak1","mean","sigma")]) 
 print "Bar Peak 2: "+str(fitResults[('bar',"peak2","mean","value")])+" +/- "+str(fitResults[('bar',"peak2","mean","sigma")]) 
 print "Bar Backpeak : "+str(fitResults[('bar',"backpeak","mean","value")])+" +/- "+str(fitResults[('bar',"backpeak","mean","sigma")]) 
-print "Pixel Alpha:"+str(fitResults[('bar',"peak12","alpha","value")])+" +/- "+str(fitResults[('bar',"peak12","alpha","sigma")]) 
-print "Pixel Beta:"+str(fitResults[('bar',"peak12","beta","value")])+" +/- "+str(fitResults[('bar',"peak12","beta","sigma")]) 
+print "Pixel Alpha: "+str(fitResults[('bar',"peak12","alpha","value")])+" +/- "+str(fitResults[('bar',"peak12","alpha","sigma")]) 
+print "Pixel Beta: "+str(fitResults[('bar',"peak12","beta","value")])+" +/- "+str(fitResults[('bar',"peak12","beta","sigma")]) 
 
 tfileoutput.Close()
 tfilePed1.cd()
@@ -460,6 +474,116 @@ tfileSingles.cd()
 tfileSingles.Close()
 tfileCoinc.cd()
 tfileCoinc.Close()
+
+################################################
+## 8) Write root tree with measurements
+################################################
+
+tfileoutputtree = TFile( "tree_Run"+run+".root", "recreate" )
+tfileoutputtree.cd()
+
+treeOutput = TTree( 'results', 'root tree with measurements' )
+
+peak1_mean_pixel = array( 'd', [ -999. ] )
+err_peak1_mean_pixel = array( 'd', [ -999. ] )
+peak2_mean_pixel = array( 'd', [ -999. ] )
+err_peak2_mean_pixel = array( 'd', [ -999. ] )
+peak1_sigma_pixel = array( 'd', [ -999. ] )
+err_peak1_sigma_pixel = array( 'd', [ -999. ] )
+peak2_sigma_pixel = array( 'd', [ -999. ] )
+err_peak2_sigma_pixel = array( 'd', [ -999. ] )
+alpha_pixel = array( 'd', [ -999. ] )
+err_alpha_pixel = array( 'd', [ -999. ] )
+beta_pixel = array( 'd', [ -999. ] )
+err_beta_pixel = array( 'd', [ -999. ] )
+#
+peak1_mean_bar = array( 'd', [ -999. ] )
+err_peak1_mean_bar = array( 'd', [ -999. ] )
+peak2_mean_bar = array( 'd', [ -999. ] )
+err_peak2_mean_bar = array( 'd', [ -999. ] )
+peak1_sigma_bar = array( 'd', [ -999. ] )
+err_peak1_sigma_bar = array( 'd', [ -999. ] )
+peak2_sigma_bar = array( 'd', [ -999. ] )
+err_peak2_sigma_bar = array( 'd', [ -999. ] )
+alpha_bar = array( 'd', [ -999. ] )
+err_alpha_bar = array( 'd', [ -999. ] )
+beta_bar = array( 'd', [ -999. ] )
+err_beta_bar = array( 'd', [ -999. ] )
+#
+temp_pixel = array( 'd', [ -999. ] )
+temp_bar = array( 'd', [ -999. ] )
+temp_int = array( 'd', [ -999. ] )
+#
+code_bar = array( 'i', [ -9 ] )
+
+treeOutput.Branch( 'peak1_mean_pixel', peak1_mean_pixel, 'peak1_mean_pixel/D' )
+treeOutput.Branch( 'err_peak1_mean_pixel', err_peak1_mean_pixel, 'err_peak1_mean_pixel/D' )
+treeOutput.Branch( 'peak2_mean_pixel', peak2_mean_pixel, 'peak2_mean_pixel/D' )
+treeOutput.Branch( 'err_peak2_mean_pixel', err_peak2_mean_pixel, 'err_peak2_mean_pixel/D' )
+treeOutput.Branch( 'peak1_sigma_pixel', peak1_sigma_pixel, 'peak1_sigma_pixel/D' )
+treeOutput.Branch( 'err_peak1_sigma_pixel', err_peak1_sigma_pixel, 'err_peak1_sigma_pixel/D' )
+treeOutput.Branch( 'peak2_sigma_pixel', peak2_sigma_pixel, 'peak2_sigma_pixel/D' )
+treeOutput.Branch( 'err_peak2_sigma_pixel', err_peak2_sigma_pixel, 'err_peak2_sigma_pixel/D' )
+treeOutput.Branch( 'alpha_pixel', alpha_pixel, 'alpha_pixel/D' )
+treeOutput.Branch( 'err_alpha_pixel', err_alpha_pixel, 'err_alpha_pixel/D' )
+treeOutput.Branch( 'beta_pixel', beta_pixel, 'beta_pixel/D' )
+treeOutput.Branch( 'err_beta_pixel', err_beta_pixel, 'err_beta_pixel/D' )
+#
+treeOutput.Branch( 'peak1_mean_bar', peak1_mean_bar, 'peak1_mean_bar/D' )
+treeOutput.Branch( 'err_peak1_mean_bar', err_peak1_mean_bar, 'err_peak1_mean_bar/D' )
+treeOutput.Branch( 'peak2_mean_bar', peak2_mean_bar, 'peak2_mean_bar/D' )
+treeOutput.Branch( 'err_peak2_mean_bar', err_peak2_mean_bar, 'err_peak2_mean_bar/D' )
+treeOutput.Branch( 'peak1_sigma_bar', peak1_sigma_bar, 'peak1_sigma_bar/D' )
+treeOutput.Branch( 'err_peak1_sigma_bar', err_peak1_sigma_bar, 'err_peak1_sigma_bar/D' )
+treeOutput.Branch( 'peak2_sigma_bar', peak2_sigma_bar, 'peak2_sigma_bar/D' )
+treeOutput.Branch( 'err_peak2_sigma_bar', err_peak2_sigma_bar, 'err_peak2_sigma_bar/D' )
+treeOutput.Branch( 'alpha_bar', alpha_bar, 'alpha_bar/D' )
+treeOutput.Branch( 'err_alpha_bar', err_alpha_bar, 'err_alpha_bar/D' )
+treeOutput.Branch( 'beta_bar', beta_bar, 'beta_bar/D' )
+treeOutput.Branch( 'err_beta_bar', err_beta_bar, 'err_beta_bar/D' )
+#
+treeOutput.Branch( 'temp_pixel', temp_pixel, 'temp_pixel/D' )
+treeOutput.Branch( 'temp_bar', temp_bar, 'temp_bar/D' )
+treeOutput.Branch( 'temp_int', temp_int, 'temp_int/D' )
+#
+treeOutput.Branch( 'code_bar', code_bar, 'code_bar/I' )
+
+peak1_mean_pixel[0] = fitResults[('pixel',"peak1","mean","value")]
+err_peak1_mean_pixel[0] = fitResults[('pixel',"peak1","mean","sigma")]
+peak2_mean_pixel[0] = fitResults[('pixel',"peak2","mean","value")]
+err_peak2_mean_pixel[0] = fitResults[('pixel',"peak2","mean","sigma")]
+peak1_sigma_pixel[0] = fitResults[('pixel',"peak1","sigma","value")]
+err_peak1_sigma_pixel[0] = fitResults[('pixel',"peak1","sigma","sigma")]
+peak2_sigma_pixel[0] = fitResults[('pixel',"peak2","sigma","value")]
+err_peak2_sigma_pixel[0] = fitResults[('pixel',"peak2","sigma","sigma")]
+alpha_pixel[0] = fitResults[('pixel',"peak12","alpha","value")]
+err_alpha_pixel[0] = fitResults[('pixel',"peak12","alpha","sigma")]
+beta_pixel[0] = fitResults[('pixel',"peak12","beta","value")]
+err_beta_pixel[0] = fitResults[('pixel',"peak12","beta","sigma")]
+#
+peak1_mean_bar[0] = fitResults[('bar',"peak1","mean","value")]
+err_peak1_mean_bar[0] = fitResults[('bar',"peak1","mean","sigma")]
+peak2_mean_bar[0] = fitResults[('bar',"peak2","mean","value")]
+err_peak2_mean_bar[0] = fitResults[('bar',"peak2","mean","sigma")]
+peak1_sigma_bar[0] = fitResults[('bar',"peak1","sigma","value")]
+err_peak1_sigma_bar[0] = fitResults[('bar',"peak1","sigma","sigma")]
+peak2_sigma_bar[0] = fitResults[('bar',"peak2","sigma","value")]
+err_peak2_sigma_bar[0] = fitResults[('bar',"peak2","sigma","sigma")]
+alpha_bar[0] = fitResults[('bar',"peak12","alpha","value")]
+err_alpha_bar[0] = fitResults[('bar',"peak12","alpha","sigma")]
+beta_bar[0] = fitResults[('bar',"peak12","beta","value")]
+err_beta_bar[0] = fitResults[('bar',"peak12","beta","sigma")]
+#
+temp_pixel[0] = Temp_pixel
+temp_bar[0] = Temp_bar
+temp_int[0] = Temp_internal
+#
+if opt.barCode:
+    code_bar[0] = int(opt.barCode)
+
+treeOutput.Fill()
+tfileoutputtree.Write()
+tfileoutputtree.Close()
 
 '''
 
