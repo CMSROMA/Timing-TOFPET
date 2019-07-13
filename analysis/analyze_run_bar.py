@@ -196,13 +196,13 @@ parser = optparse.OptionParser(usage)
 parser.add_option("-r", "--run", dest="run",
                   help="run number")
 
-parser.add_option("-i", "--input", dest="inputDir",
+parser.add_option("-i", "--input", dest="inputDir",default="/data/TOFPET/LYSOBARS",
                   help="input directory")
 
-parser.add_option("-o", "--output", dest="outputDir",
+parser.add_option("-o", "--output", dest="outputDir",default="/data/TOFPET/LYSOBARS/RESULTS",
                   help="output directory")
 
-parser.add_option("-b", "--barCode", dest="barCode", default=-9,
+parser.add_option("-b", "--barCode", dest="barCode", default=-99,
                   help="code of the crystal bar")
 
 (opt, args) = parser.parse_args()
@@ -233,7 +233,7 @@ gStyle.SetStatH(0.09)
 ################################################
 
 run = opt.run.zfill(6)
-#print run
+print run
 
 input_filename_ped1 = ""
 input_filename_ped2 = ""
@@ -245,19 +245,19 @@ list_allfiles = os.listdir(opt.inputDir)
 
 for file in list_allfiles:
 
-    if (str(int(run)-1).zfill(6) in file and "_singles.root" in file):
+    if ("Run"+str(int(opt.run)-1).zfill(6) in file and "_singles.root" in file):
         input_filename_ped1 = opt.inputDir + "/" + file
         print input_filename_ped1
 
-    if (str(int(run)+1).zfill(6) in file and "_singles.root" in file):
+    if ("Run"+str(int(opt.run)+1).zfill(6) in file and "_singles.root" in file):
         input_filename_ped2 = opt.inputDir + "/" + file
         print input_filename_ped2
 
-    if (run in file and "_singles.root" in file):
+    if ("Run"+run in file and "_singles.root" in file):
         input_filename_singles = opt.inputDir + "/" + file
         print input_filename_singles
 
-    if (run in file and "_coincidences.root" in file):
+    if ("Run"+run in file and "_coincidences.root" in file):
         input_filename_coinc = opt.inputDir + "/" + file
         print input_filename_coinc
     
@@ -368,6 +368,7 @@ treeCoinc = tfileCoinc.Get("data")
 h1_energyTot_bar = TH1F("h1_energyTot_bar", "", 200, 0, 200)
 h1_energy1_bar = TH1F("h1_energy1_bar", "", 200, 0, 200)
 h1_energy2_bar = TH1F("h1_energy2_bar", "", 200, 0, 200)
+h1_energyDiff_bar = TH1F("h1_energyDiff_bar", "", 100, -50, 50)
 h2_energy1VSenergy2_bar = TH2F("h2_energy1VSenergy2_bar", "", 200, 0, 200, 200, 0, 200)
 c1_energy1_bar = TCanvas("c1_energy1_bar", "", 900, 700)
 c1_energyTot_bar = TCanvas("c1_energyTot_bar", "", 900, 700)
@@ -383,13 +384,18 @@ for event in range (0,treeCoinc.GetEntries()):
         h1_energyTot_bar.Fill(energyBar)
         h1_energy1_bar.Fill(energy1)
         h1_energy2_bar.Fill(energy2)
+        h1_energyDiff_bar.Fill(energy1-energy2)
         h2_energy1VSenergy2_bar.Fill(energy1,energy2)
 
 ################################################
 ## 5) Output file
 ################################################
 
-tfileoutput = TFile( "histo_Run"+run+".root", "recreate" )
+commandOutputDir = "mkdir -p "+opt.outputDir
+print commandOutputDir
+os.system(commandOutputDir)
+
+tfileoutput = TFile( opt.outputDir+"/"+"histo_Run"+run+"_BAR"+str(str(opt.barCode).zfill(6))+".root", "recreate" )
 tfileoutput.cd()
 
 ################################################
@@ -457,6 +463,7 @@ print "Pixel Beta: "+str(fitResults[('pixel',"peak12","beta","value")])+" +/- "+
 h1_energyTot_bar.Write()
 h1_energy1_bar.Write()
 h1_energy2_bar.Write()
+h1_energyDiff_bar.Write()
 h2_energy1VSenergy2_bar.Write()
 print "--- Bar ---"
 print "Bar Peak 1: "+str(fitResults[('bar',"peak1","mean","value")])+" +/- "+str(fitResults[('bar',"peak1","mean","sigma")]) 
@@ -479,7 +486,7 @@ tfileCoinc.Close()
 ## 8) Write root tree with measurements
 ################################################
 
-tfileoutputtree = TFile( "tree_Run"+run+".root", "recreate" )
+tfileoutputtree = TFile( opt.outputDir+"/"+"tree_Run"+run+"_BAR"+str(str(opt.barCode).zfill(6))+".root", "recreate" )
 tfileoutputtree.cd()
 
 treeOutput = TTree( 'results', 'root tree with measurements' )
@@ -515,6 +522,7 @@ temp_bar = array( 'd', [ -999. ] )
 temp_int = array( 'd', [ -999. ] )
 #
 code_bar = array( 'i', [ -9 ] )
+runNumber = array( 'i', [ -9 ] )
 
 treeOutput.Branch( 'peak1_mean_pixel', peak1_mean_pixel, 'peak1_mean_pixel/D' )
 treeOutput.Branch( 'err_peak1_mean_pixel', err_peak1_mean_pixel, 'err_peak1_mean_pixel/D' )
@@ -547,6 +555,7 @@ treeOutput.Branch( 'temp_bar', temp_bar, 'temp_bar/D' )
 treeOutput.Branch( 'temp_int', temp_int, 'temp_int/D' )
 #
 treeOutput.Branch( 'code_bar', code_bar, 'code_bar/I' )
+treeOutput.Branch( 'runNumber', runNumber, 'runNumber/I' )
 
 peak1_mean_pixel[0] = fitResults[('pixel',"peak1","mean","value")]
 err_peak1_mean_pixel[0] = fitResults[('pixel',"peak1","mean","sigma")]
@@ -578,6 +587,7 @@ temp_pixel[0] = Temp_pixel
 temp_bar[0] = Temp_bar
 temp_int[0] = Temp_internal
 #
+runNumber[0] = int(opt.run)
 if opt.barCode:
     code_bar[0] = int(opt.barCode)
 
