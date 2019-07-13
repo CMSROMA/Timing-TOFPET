@@ -101,13 +101,16 @@ name = "Na22PedAllChannels"
 n_ch = 3 #number of channels in config file (2 for 2 pixels, 3 for 1 pixel and 1 bar, ..)
 n_chip = 2 #number of active TOFPET2 chips
 t_ped = 1 #s
-t_phys = 30 #s
-t_tot = 80  #s this is approximate (it is 20-30% less of true value due to cpu processing time to make root files)
-ov_values = [5,6] #V
+t_phys = 300 #s
+t_tot = 320  #s this is approximate (it is 20-30% less of true value due to cpu processing time to make root files)
+#t_tot = 7200  #s this is approximate (it is 20-30% less of true value due to cpu processing time to make root files)
+ov_values = [7] #V
 ovref_values = [7] #V
 #ov_values = [4,5,7] #V
 gate_values = [15] # DeltaT[ns]/20: gate=15 -> DeltaT=300 ns 
-name = "Na22Bar"
+#name = "TEST_WS1_NW_NC"
+#name = "REF_WS1_NW_NC"
+name = "BAR000098_WS1_NW_NC"
 
 if int(opt.pedAllChannels)==1:
     n_ch = n_chip*64

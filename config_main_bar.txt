@@ -35,13 +35,13 @@ DAQSCRIPT acquire_pedestal_data PED
 CONVERTSINGLESCRIPT convert_raw_to_singles
 CONVERTCOINCIDENCESCRIPT analysis/find_coincidences.py
 #CONVERTCOINCIDENCESCRIPT convert_raw_to_coincidence
-TEMPERATUREFILE arduino/temperature/temperature.txt
+TEMPERATUREFILE arduino/temperature/temperature_2.txt
 MODE qdc
 TIME 1
 #TIME 1
-OUTPUT_DIR /media/cmsdaq/ext/TOFPET/data/BarReproducibility__Temp24__03_07_2019
+OUTPUT_DIR /data/TOFPET/LYSOBARS
 #OUTPUT_DIR output/Pedestal
-OUTPUT_LABEL Run000030_2019-07-03-19-20-48_Na22
+OUTPUT_LABEL Run000036_2019-07-12-18-27-05_REF_WS1_NW_NC
 #OUTPUT_LABEL PedestalTest13_2ch_100000delay
 
 #Channels
