@@ -507,7 +507,7 @@ print commandOutputDir
 os.system(commandOutputDir)
 
 #integration gate in ns (min_intg_time=max_intg_time)
-#integration_gate = int(min_intg_time) * 4 * 5 
+#integration_gate = int(min_intg_time) * 4 units of clock * 5 ns tdc clock 
 integration_gate = int(min_intg_time)
 print integration_gate 
 
