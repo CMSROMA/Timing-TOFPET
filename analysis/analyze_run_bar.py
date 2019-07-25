@@ -83,7 +83,6 @@ def totalFunction(x,par):
 
     return par[0]*(1./(1+TMath.Exp(par[1]*(x[0]-par[2])))+crystalball+( 1 + TMath.Erf((x[0]-par[12])/(par[13]*TMath.Sqrt(x[0]))) )*( par[6]/(1+TMath.Exp(par[7]*(x[0]-par[8]))) + par[14]*TMath.Gaus(x[0],par[15],par[16]) )+par[9]*TMath.Gaus(x[0],par[10],par[11]))
 
-
 def f_1274keV_compton(x,par):
     return par[0]*(1./(1+TMath.Exp(par[1]*(x[0]-par[2]))))
 
@@ -114,14 +113,19 @@ def f_511keV_peak(x,par):
 def f_background(x,par):
     return par[0]*(1./(1+TMath.Exp(par[1]*(x[0]-par[2])))) + ( 1 + TMath.Erf((x[0]-par[6])/(par[7]*TMath.Sqrt(x[0]))) ) * par[3]/(1+TMath.Exp(par[4]*(x[0]-par[5])))
     
-def fitSpectrum(histo,function,xmin,xmax,canvas,fitres,label):
+def fitSpectrum(histo,function,xmin,xmax,canvas,fitres,label,code,run,outputDIR):
 
     histo.GetXaxis().SetRange(25,1000)
     peak=histo.GetBinCenter(histo.GetMaximumBin())
     norm=float(histo.GetEntries())/float(histo.GetNbinsX())
     histo.GetXaxis().SetRangeUser(xmin,xmax)
     setParameters(function,norm,peak)
-    
+
+    #histo.SetTitle( "Run" + str(run.zfill(6)) + " " + label + str(code.zfill(6)) )
+    histo.GetXaxis().SetTitle("QDC counts")
+    histo.GetYaxis().SetTitle("Events")
+    histo.GetYaxis().SetTitleOffset(1.6)
+ 
     canvas.cd()
     histo.Draw("PE")
     goodChi2 = 0.
@@ -147,6 +151,39 @@ def fitSpectrum(histo,function,xmin,xmax,canvas,fitres,label):
     fitres[(label,"backpeak","mean","value")]=function.GetParameter(15)
     fitres[(label,"backpeak","mean","sigma")]=function.GetParError(15)
 
+    f1_bkg = TF1("f1_bkg",function,xmin,min(peak*2.4,xmax),19)
+    f1_bkg.SetLineColor(kGreen+1)
+    #f1_bkg.SetLineStyle(7)
+    f1_bkg.SetParameter(0,function.GetParameter(0))
+    f1_bkg.SetParameter(1,function.GetParameter(1))
+    f1_bkg.SetParameter(2,function.GetParameter(2))
+    f1_bkg.SetParameter(3,function.GetParameter(3))
+    f1_bkg.SetParameter(4,function.GetParameter(4))
+    f1_bkg.SetParameter(5,function.GetParameter(5))
+    f1_bkg.SetParameter(6,function.GetParameter(6))
+    f1_bkg.SetParameter(7,function.GetParameter(7))
+    f1_bkg.SetParameter(8,function.GetParameter(8))
+    f1_bkg.SetParameter(9,0.)
+    f1_bkg.SetParameter(10,function.GetParameter(10))
+    f1_bkg.SetParameter(11,function.GetParameter(11))
+    f1_bkg.SetParameter(12,function.GetParameter(12))
+    f1_bkg.SetParameter(13,function.GetParameter(13))
+    f1_bkg.SetParameter(14,function.GetParameter(14))
+    f1_bkg.SetParameter(15,function.GetParameter(15))
+    f1_bkg.SetParameter(16,function.GetParameter(16))
+    f1_bkg.SetParameter(17,function.GetParameter(17))
+    f1_bkg.SetParameter(18,function.GetParameter(18))
+
+    f1_bkg.Draw("same")
+
+    pt = TPaveText(3.9029,44966.2,73.49,48052,"br");    
+    text = pt.AddText( "Run" + str(run.zfill(6)) + " " + label + str(code.zfill(6)) )
+    pt.SetFillColor(0)
+    pt.Draw()
+
+    canvas.Update()
+    canvas.SaveAs(outputDIR+"/"+"Run"+str(run.zfill(6))+"_BAR"+str(code.zfill(6))+"_SourceSpectrum_"+label+".pdf")
+    canvas.SaveAs(outputDIR+"/"+"Run"+str(run.zfill(6))+"_BAR"+str(code.zfill(6))+"_SourceSpectrum_"+label+".png")
     canvas.Write()
 
 def fitSaturation(function,xmin,xmax,canvas,fitres,label):    
@@ -224,7 +261,7 @@ if not opt.outputDir:
 gROOT.SetBatch(True)
 
 gStyle.SetOptTitle(0)
-gStyle.SetOptStat(0)
+gStyle.SetOptStat("e")
 gStyle.SetOptFit(1111111)
 gStyle.SetStatH(0.09)
 
@@ -406,18 +443,18 @@ fitResults = {}
 
 ## Setup
 minEnergy = 4
-maxEnergy = 150
+maxEnergy = 120
 n_paramameters = 19
 
 ## Pixel (ref)
 fTot_pixel = TF1("fTot_pixel",totalFunction,minEnergy,maxEnergy,n_paramameters)
 fTot_pixel.SetNpx(1000)
-fitSpectrum(h1_energy_pixel,fTot_pixel,minEnergy,maxEnergy,c1_energy_pixel,fitResults,"pixel")
+fitSpectrum(h1_energy_pixel,fTot_pixel,minEnergy,maxEnergy,c1_energy_pixel,fitResults,"pixel","",opt.run,opt.outputDir)
 
 ## Bar (ref)
 fTot_bar = TF1("fTot_bar",totalFunction,minEnergy,maxEnergy,n_paramameters)
 fTot_bar.SetNpx(1000)
-fitSpectrum(h1_energyTot_bar,fTot_bar,minEnergy,maxEnergy,c1_energyTot_bar,fitResults,"bar")
+fitSpectrum(h1_energyTot_bar,fTot_bar,minEnergy,maxEnergy,c1_energyTot_bar,fitResults,"bar",opt.barCode,opt.run,opt.outputDir)
 
 ################################################
 ## 7) Fit response vs photon energy
