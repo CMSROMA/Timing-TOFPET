@@ -67,6 +67,38 @@ def setParameters(function,Norm,Peak):
     function.SetParLimits(16,0.04*Peak,0.13*Peak)
     ##
 
+def setParameters_coinc(function,Norm,Peak):
+
+    ## Normalisation
+    function.SetParameter(0,Norm)
+    function.SetParLimits(0,0.,Norm*1000.)
+    
+    ## 511 KeV compton
+    function.SetParameter(3,20.)
+    function.SetParLimits(3,0.,1000.)
+    function.SetParameter(4,0.4)
+    function.SetParLimits(4,0.1,1)
+    function.SetParameter(5,0.6*Peak)
+    function.SetParLimits(5,0.05*Peak,1.3*Peak)
+    
+    ## Trigger turn on (Compton+BS)
+    function.SetParameter(1,5.)
+    function.SetParLimits(1,0,10.)
+    function.SetParameter(2,5.)
+    function.SetParLimits(2,0.1,10.)
+    
+    ## 511 KeV photoelectric
+    function.SetParameter(6,15.)
+    function.SetParLimits(6,0.,1000.)
+    function.SetParameter(7,Peak)
+    function.SetParLimits(7,0.9*Peak,1.1*Peak)
+    function.SetParameter(8,0.05*Peak)
+    function.SetParLimits(8,0.02*Peak,0.2*Peak)
+
+    #flat background
+    function.SetParameter(9,15.)
+    function.SetParLimits(9,0.,1000.)
+    
 def totalFunction(x,par):
     
     t = (x[0]-par[4])/par[5]
@@ -82,6 +114,9 @@ def totalFunction(x,par):
         crystalball = par[3]*(a/TMath.Power(b-t,par[18]))
 
     return par[0]*(1./(1+TMath.Exp(par[1]*(x[0]-par[2])))+crystalball+( 1 + TMath.Erf((x[0]-par[12])/(par[13]*TMath.Sqrt(x[0]))) )*( par[6]/(1+TMath.Exp(par[7]*(x[0]-par[8]))) + par[14]*TMath.Gaus(x[0],par[15],par[16]) )+par[9]*TMath.Gaus(x[0],par[10],par[11]))
+
+def totalFunction_coinc(x,par):    
+    return par[0]*(( 1 + TMath.Erf((x[0]-par[1])/(par[2]*TMath.Sqrt(x[0]))) )*( par[3]/(1+TMath.Exp(par[4]*(x[0]-par[5]))) )+par[6]*TMath.Gaus(x[0],par[7],par[8])+par[9])
 
 def f_1274keV_compton(x,par):
     return par[0]*(1./(1+TMath.Exp(par[1]*(x[0]-par[2]))))
@@ -173,6 +208,65 @@ def fitSpectrum(histo,function,xmin,xmax,canvas,fitres,label,code,run,outputDIR)
     f1_bkg.SetParameter(16,function.GetParameter(16))
     f1_bkg.SetParameter(17,function.GetParameter(17))
     f1_bkg.SetParameter(18,function.GetParameter(18))
+
+    f1_bkg.Draw("same")
+
+    pt = TPaveText(3.9029,44966.2,73.49,48052,"br");    
+    text = pt.AddText( "Run" + str(run.zfill(6)) + " " + label + str(code.zfill(6)) )
+    pt.SetFillColor(0)
+    pt.Draw()
+
+    canvas.Update()
+    canvas.SaveAs(outputDIR+"/"+"Run"+str(run.zfill(6))+"_BAR"+str(code.zfill(6))+"_SourceSpectrum_"+label+".pdf")
+    canvas.SaveAs(outputDIR+"/"+"Run"+str(run.zfill(6))+"_BAR"+str(code.zfill(6))+"_SourceSpectrum_"+label+".png")
+    canvas.Write()
+
+def fitSpectrum_coinc(histo,function,xmin,xmax,canvas,fitres,label,code,run,outputDIR):
+
+    histo.GetXaxis().SetRange(25,1000)
+    peak=histo.GetBinCenter(histo.GetMaximumBin())
+    norm=float(histo.GetEntries())/float(histo.GetNbinsX())
+    histo.GetXaxis().SetRangeUser(xmin,xmax)
+    setParameters_coinc(function,norm,peak)
+    print peak
+
+    #histo.SetTitle( "Run" + str(run.zfill(6)) + " " + label + str(code.zfill(6)) )
+    histo.GetXaxis().SetTitle("QDC counts")
+    histo.GetYaxis().SetTitle("Events")
+    histo.GetYaxis().SetTitleOffset(1.6)
+ 
+    canvas.cd()
+    histo.Draw("PE")
+    goodChi2 = 0.
+    previousChi2overNdf = -99.
+    while goodChi2==0.:
+        histo.Fit(function.GetName(),"LR+0N","",xmin,min(peak*1.6,xmax))
+        print function.GetChisquare(), function.GetNDF(), function.GetChisquare()/function.GetNDF()
+        if abs(function.GetChisquare()/function.GetNDF()-previousChi2overNdf)<0.01*previousChi2overNdf:
+            histo.Fit(function.GetName(),"LR+","",xmin,min(peak*1.6,xmax))
+            canvas.Update()
+            goodChi2 = 1.
+        previousChi2overNdf = function.GetChisquare()/function.GetNDF()
+    print function.GetChisquare(), function.GetNDF(), function.GetChisquare()/function.GetNDF()
+
+    fitres[(label,"peak1","mean","value")]=function.GetParameter(7)
+    fitres[(label,"peak1","mean","sigma")]=function.GetParError(7)
+    fitres[(label,"peak1","sigma","value")]=function.GetParameter(8)
+    fitres[(label,"peak1","sigma","sigma")]=function.GetParError(8)
+
+    f1_bkg = TF1("f1_bkg",function,xmin,min(peak*1.6,xmax),10)
+    f1_bkg.SetLineColor(kGreen+1)
+    #f1_bkg.SetLineStyle(7)
+    f1_bkg.SetParameter(0,function.GetParameter(0))
+    f1_bkg.SetParameter(1,function.GetParameter(1))
+    f1_bkg.SetParameter(2,function.GetParameter(2))
+    f1_bkg.SetParameter(3,function.GetParameter(3))
+    f1_bkg.SetParameter(4,function.GetParameter(4))
+    f1_bkg.SetParameter(5,function.GetParameter(5))
+    f1_bkg.SetParameter(6,0.)
+    f1_bkg.SetParameter(7,function.GetParameter(7))
+    f1_bkg.SetParameter(8,function.GetParameter(8))
+    f1_bkg.SetParameter(9,function.GetParameter(9))
 
     f1_bkg.Draw("same")
 
@@ -407,22 +501,45 @@ h1_energy1_bar = TH1F("h1_energy1_bar", "", 200, 0, 200)
 h1_energy2_bar = TH1F("h1_energy2_bar", "", 200, 0, 200)
 h1_energyDiff_bar = TH1F("h1_energyDiff_bar", "", 100, -50, 50)
 h2_energy1VSenergy2_bar = TH2F("h2_energy1VSenergy2_bar", "", 200, 0, 200, 200, 0, 200)
-c1_energy1_bar = TCanvas("c1_energy1_bar", "", 900, 700)
 c1_energyTot_bar = TCanvas("c1_energyTot_bar", "", 900, 700)
 c1_sat_bar = TCanvas("c1_sat_bar", "", 900, 700)
 
+h1_energyTot_bar_coinc = TH1F("h1_energyTot_bar_coinc", "", 200, 0, 200)
+h1_energy1_bar_coinc = TH1F("h1_energy1_bar_coinc", "", 200, 0, 200)
+h1_energy2_bar_coinc = TH1F("h1_energy2_bar_coinc", "", 200, 0, 200)
+h1_energyDiff_bar_coinc = TH1F("h1_energyDiff_bar_coinc", "", 100, -50, 50)
+h1_energy_pixel_coinc = TH1F("h1_energy_pixel_coinc", "", 200, 0, 200)
+h2_energy1VSenergy2_bar_coinc = TH2F("h2_energy1VSenergy2_bar_coinc", "", 200, 0, 200, 200, 0, 200)
+h2_energyPixelVSenergyBar_coinc = TH2F("h2_energyPixelVSenergyBar_coinc", "", 200, 0, 200, 200, 0, 200)
+c1_energy_pixel_coinc = TCanvas("c1_energy_pixel_coinc", "", 900, 700)
+c1_energyTot_bar_coinc = TCanvas("c1_energyTot_bar_coinc", "", 900, 700)
+
 tfileCoinc.cd()
+
 for event in range (0,treeCoinc.GetEntries()):
     treeCoinc.GetEntry(event)
     energy1 = treeCoinc.energy[1]-mean_PedTot[channels[1]]
     energy2 = treeCoinc.energy[2]-mean_PedTot[channels[2]]
     energyBar =  energy1 + energy2
+    energyPixel = treeCoinc.energy[0]-mean_PedTot[channels[0]]
+
+    #bar only
     if( treeCoinc.energy[1]>-9. and treeCoinc.energy[2]>-9. ):
         h1_energyTot_bar.Fill(energyBar)
         h1_energy1_bar.Fill(energy1)
         h1_energy2_bar.Fill(energy2)
         h1_energyDiff_bar.Fill(energy1-energy2)
         h2_energy1VSenergy2_bar.Fill(energy1,energy2)
+
+    #bar + pixel
+    if( treeCoinc.energy[0]> -9. and treeCoinc.energy[1]>-9. and treeCoinc.energy[2]>-9.):
+        h1_energyTot_bar_coinc.Fill(energyBar)
+        h1_energy1_bar_coinc.Fill(energy1)
+        h1_energy2_bar_coinc.Fill(energy2)
+        h1_energyDiff_bar_coinc.Fill(energy1-energy2)
+        h1_energy_pixel_coinc.Fill(energyPixel)
+        h2_energy1VSenergy2_bar_coinc.Fill(energy1,energy2)
+        h2_energyPixelVSenergyBar_coinc.Fill(energyBar,energyPixel)
 
 ################################################
 ## 5) Output file
@@ -441,20 +558,35 @@ tfileoutput.cd()
 
 fitResults = {}
 
-## Setup
+## Setup singles
 minEnergy = 4
 maxEnergy = 120
 n_paramameters = 19
 
-## Pixel (ref)
+## Pixel
 fTot_pixel = TF1("fTot_pixel",totalFunction,minEnergy,maxEnergy,n_paramameters)
 fTot_pixel.SetNpx(1000)
 fitSpectrum(h1_energy_pixel,fTot_pixel,minEnergy,maxEnergy,c1_energy_pixel,fitResults,"pixel","",opt.run,opt.outputDir)
 
-## Bar (ref)
+## Bar
 fTot_bar = TF1("fTot_bar",totalFunction,minEnergy,maxEnergy,n_paramameters)
 fTot_bar.SetNpx(1000)
 fitSpectrum(h1_energyTot_bar,fTot_bar,minEnergy,maxEnergy,c1_energyTot_bar,fitResults,"bar",opt.barCode,opt.run,opt.outputDir)
+
+## Setup coincidences
+minEnergy_coinc = 4
+maxEnergy_coinc = 65
+n_paramameters_coinc = 10
+
+## Pixel
+fTot_pixel_coinc = TF1("fTot_pixel_coinc",totalFunction_coinc,minEnergy_coinc,maxEnergy_coinc,n_paramameters_coinc)
+fTot_pixel_coinc.SetNpx(1000)
+fitSpectrum_coinc(h1_energy_pixel_coinc,fTot_pixel_coinc,minEnergy_coinc,maxEnergy_coinc,c1_energy_pixel_coinc,fitResults,"pixelCoinc","",opt.run,opt.outputDir)
+
+## Bar
+fTot_bar_coinc = TF1("fTot_bar_coinc",totalFunction_coinc,minEnergy_coinc,maxEnergy_coinc,n_paramameters_coinc)
+fTot_bar_coinc.SetNpx(1000)
+fitSpectrum_coinc(h1_energyTot_bar_coinc,fTot_bar_coinc,minEnergy_coinc,maxEnergy_coinc,c1_energyTot_bar_coinc,fitResults,"barCoinc","",opt.run,opt.outputDir)
 
 ################################################
 ## 7) Fit response vs photon energy
@@ -473,8 +605,33 @@ fExpo_bar = TF1("fExpo_bar","[0]*(1-TMath::Exp(-[1]*x))",minE,maxE)
 fitSaturation(fExpo_bar,minE,maxE,c1_sat_bar,fitResults,"bar")
 
 ################################################
+## 7XXX) Coincidence time resolution (CTR)
+################################################
+
+'''
+tfileCoinc.cd()
+for event in range (0,treeCoinc.GetEntries()):
+    treeCoinc.GetEntry(event)
+    energy1 = treeCoinc.energy[1]-mean_PedTot[channels[1]]
+    energy2 = treeCoinc.energy[2]-mean_PedTot[channels[2]]
+    energyBar =  energy1 + energy2
+    energyPixel = treeCoinc.energy[0]-mean_PedTot[channels[0]]
+    if( treeCoinc.energy[0]> -9. and treeCoinc.energy[1]>-9. and treeCoinc.energy[2]>-9.):
+        h1_energyTot_bar_coinc.Fill(energyBar)
+        h1_energy1_bar_coinc.Fill(energy1)
+        h1_energy2_bar_coinc.Fill(energy2)
+        h1_energyDiff_bar_coinc.Fill(energy1-energy2)
+        h2_energy1VSenergy2_bar.Fill(energy1,energy2)
+
+        h2_energy1VSenergy2_bar_coinc.Fill(energy1,energy2)
+        h2_energyPixelVSenergyBar.Fill(energyBar,energyPixel)
+'''
+
+################################################
 ## 8) Write histograms
 ################################################
+
+tfileoutput.cd()
 
 #Pedestals
 for ch in channels:
@@ -482,10 +639,10 @@ for ch in channels:
     histos_Ped1[ch].Write()
     histos_Ped2[ch].Write()
     histos_PedTot[ch].Write()
-    #print "--- Channel = "+str(ch).zfill(3)+" ---"
-    #print "Pedestal1 "+str(mean_Ped1[ch])+" "+str(rms_Ped1[ch]) 
-    #print "Pedestal2 "+str(mean_Ped2[ch])+" "+str(rms_Ped2[ch]) 
-    #print "PedestalTot "+str(mean_PedTot[ch])+" "+str(rms_PedTot[ch]) 
+    print "--- Channel = "+str(ch).zfill(3)+" ---"
+    print "Pedestal1 "+str(mean_Ped1[ch])+" "+str(rms_Ped1[ch]) 
+    print "Pedestal2 "+str(mean_Ped2[ch])+" "+str(rms_Ped2[ch]) 
+    print "PedestalTot "+str(mean_PedTot[ch])+" "+str(rms_PedTot[ch]) 
 
 #Pixel
 h1_energy_pixel.Write()
@@ -493,8 +650,9 @@ print "--- Pixel ---"
 print "Pixel Peak 1: "+str(fitResults[('pixel',"peak1","mean","value")])+" +/- "+str(fitResults[('pixel',"peak1","mean","sigma")]) 
 print "Pixel Peak 2: "+str(fitResults[('pixel',"peak2","mean","value")])+" +/- "+str(fitResults[('pixel',"peak2","mean","sigma")]) 
 print "Pixel Backpeak : "+str(fitResults[('pixel',"backpeak","mean","value")])+" +/- "+str(fitResults[('pixel',"backpeak","mean","sigma")]) 
-print "Pixel Alpha: "+str(fitResults[('pixel',"peak12","alpha","value")])+" +/- "+str(fitResults[('pixel',"peak12","alpha","sigma")]) 
-print "Pixel Beta: "+str(fitResults[('pixel',"peak12","beta","value")])+" +/- "+str(fitResults[('pixel',"peak12","beta","sigma")]) 
+print "Pixel Peak 1 Coinc: "+str(fitResults[('pixelCoinc',"peak1","mean","value")])+" +/- "+str(fitResults[('pixelCoinc',"peak1","mean","sigma")]) 
+#print "Pixel Alpha: "+str(fitResults[('pixel',"peak12","alpha","value")])+" +/- "+str(fitResults[('pixel',"peak12","alpha","sigma")]) 
+#print "Pixel Beta: "+str(fitResults[('pixel',"peak12","beta","value")])+" +/- "+str(fitResults[('pixel',"peak12","beta","sigma")]) 
 
 #Bar
 h1_energyTot_bar.Write()
@@ -506,8 +664,18 @@ print "--- Bar ---"
 print "Bar Peak 1: "+str(fitResults[('bar',"peak1","mean","value")])+" +/- "+str(fitResults[('bar',"peak1","mean","sigma")]) 
 print "Bar Peak 2: "+str(fitResults[('bar',"peak2","mean","value")])+" +/- "+str(fitResults[('bar',"peak2","mean","sigma")]) 
 print "Bar Backpeak : "+str(fitResults[('bar',"backpeak","mean","value")])+" +/- "+str(fitResults[('bar',"backpeak","mean","sigma")]) 
-print "Pixel Alpha: "+str(fitResults[('bar',"peak12","alpha","value")])+" +/- "+str(fitResults[('bar',"peak12","alpha","sigma")]) 
-print "Pixel Beta: "+str(fitResults[('bar',"peak12","beta","value")])+" +/- "+str(fitResults[('bar',"peak12","beta","sigma")]) 
+print "Bar Peak 1 Coinc: "+str(fitResults[('barCoinc',"peak1","mean","value")])+" +/- "+str(fitResults[('barCoinc',"peak1","mean","sigma")]) 
+#print "Pixel Alpha: "+str(fitResults[('bar',"peak12","alpha","value")])+" +/- "+str(fitResults[('bar',"peak12","alpha","sigma")]) 
+#print "Pixel Beta: "+str(fitResults[('bar',"peak12","beta","value")])+" +/- "+str(fitResults[('bar',"peak12","beta","sigma")]) 
+
+#Bar+pixel
+h1_energyTot_bar_coinc.Write()
+h1_energy1_bar_coinc.Write()
+h1_energy2_bar_coinc.Write()
+h1_energyDiff_bar_coinc.Write()
+h1_energy_pixel_coinc.Write()
+h2_energy1VSenergy2_bar_coinc.Write()
+h2_energyPixelVSenergyBar_coinc.Write()
 
 tfileoutput.Close()
 tfilePed1.cd()
@@ -540,6 +708,10 @@ alpha_pixel = array( 'd', [ -999. ] )
 err_alpha_pixel = array( 'd', [ -999. ] )
 beta_pixel = array( 'd', [ -999. ] )
 err_beta_pixel = array( 'd', [ -999. ] )
+peak1_mean_pixelCoinc = array( 'd', [ -999. ] )
+err_peak1_mean_pixelCoinc = array( 'd', [ -999. ] )
+peak1_sigma_pixelCoinc = array( 'd', [ -999. ] )
+err_peak1_sigma_pixelCoinc = array( 'd', [ -999. ] )
 #
 peak1_mean_bar = array( 'd', [ -999. ] )
 err_peak1_mean_bar = array( 'd', [ -999. ] )
@@ -553,6 +725,10 @@ alpha_bar = array( 'd', [ -999. ] )
 err_alpha_bar = array( 'd', [ -999. ] )
 beta_bar = array( 'd', [ -999. ] )
 err_beta_bar = array( 'd', [ -999. ] )
+peak1_mean_barCoinc = array( 'd', [ -999. ] )
+err_peak1_mean_barCoinc = array( 'd', [ -999. ] )
+peak1_sigma_barCoinc = array( 'd', [ -999. ] )
+err_peak1_sigma_barCoinc = array( 'd', [ -999. ] )
 #
 temp_pixel = array( 'd', [ -999. ] )
 temp_bar = array( 'd', [ -999. ] )
@@ -573,6 +749,10 @@ treeOutput.Branch( 'alpha_pixel', alpha_pixel, 'alpha_pixel/D' )
 treeOutput.Branch( 'err_alpha_pixel', err_alpha_pixel, 'err_alpha_pixel/D' )
 treeOutput.Branch( 'beta_pixel', beta_pixel, 'beta_pixel/D' )
 treeOutput.Branch( 'err_beta_pixel', err_beta_pixel, 'err_beta_pixel/D' )
+treeOutput.Branch( 'peak1_mean_pixelCoinc', peak1_mean_pixelCoinc, 'peak1_mean_pixelCoinc/D' )
+treeOutput.Branch( 'err_peak1_mean_pixelCoinc', err_peak1_mean_pixelCoinc, 'err_peak1_mean_pixelCoinc/D' )
+treeOutput.Branch( 'peak1_sigma_pixelCoinc', peak1_sigma_pixelCoinc, 'peak1_sigma_pixelCoinc/D' )
+treeOutput.Branch( 'err_peak1_sigma_pixelCoinc', err_peak1_sigma_pixelCoinc, 'err_peak1_sigma_pixelCoinc/D' )
 #
 treeOutput.Branch( 'peak1_mean_bar', peak1_mean_bar, 'peak1_mean_bar/D' )
 treeOutput.Branch( 'err_peak1_mean_bar', err_peak1_mean_bar, 'err_peak1_mean_bar/D' )
@@ -586,6 +766,10 @@ treeOutput.Branch( 'alpha_bar', alpha_bar, 'alpha_bar/D' )
 treeOutput.Branch( 'err_alpha_bar', err_alpha_bar, 'err_alpha_bar/D' )
 treeOutput.Branch( 'beta_bar', beta_bar, 'beta_bar/D' )
 treeOutput.Branch( 'err_beta_bar', err_beta_bar, 'err_beta_bar/D' )
+treeOutput.Branch( 'peak1_mean_barCoinc', peak1_mean_barCoinc, 'peak1_mean_barCoinc/D' )
+treeOutput.Branch( 'err_peak1_mean_barCoinc', err_peak1_mean_barCoinc, 'err_peak1_mean_barCoinc/D' )
+treeOutput.Branch( 'peak1_sigma_barCoinc', peak1_sigma_barCoinc, 'peak1_sigma_barCoinc/D' )
+treeOutput.Branch( 'err_peak1_sigma_barCoinc', err_peak1_sigma_barCoinc, 'err_peak1_sigma_barCoinc/D' )
 #
 treeOutput.Branch( 'temp_pixel', temp_pixel, 'temp_pixel/D' )
 treeOutput.Branch( 'temp_bar', temp_bar, 'temp_bar/D' )
@@ -606,6 +790,10 @@ alpha_pixel[0] = fitResults[('pixel',"peak12","alpha","value")]
 err_alpha_pixel[0] = fitResults[('pixel',"peak12","alpha","sigma")]
 beta_pixel[0] = fitResults[('pixel',"peak12","beta","value")]
 err_beta_pixel[0] = fitResults[('pixel',"peak12","beta","sigma")]
+peak1_mean_pixelCoinc[0] = fitResults[('pixelCoinc',"peak1","mean","value")]
+err_peak1_mean_pixelCoinc[0] = fitResults[('pixelCoinc',"peak1","mean","sigma")]
+peak1_sigma_pixelCoinc[0] = fitResults[('pixelCoinc',"peak1","sigma","value")]
+err_peak1_sigma_pixelCoinc[0] = fitResults[('pixelCoinc',"peak1","sigma","sigma")]
 #
 peak1_mean_bar[0] = fitResults[('bar',"peak1","mean","value")]
 err_peak1_mean_bar[0] = fitResults[('bar',"peak1","mean","sigma")]
@@ -619,6 +807,10 @@ alpha_bar[0] = fitResults[('bar',"peak12","alpha","value")]
 err_alpha_bar[0] = fitResults[('bar',"peak12","alpha","sigma")]
 beta_bar[0] = fitResults[('bar',"peak12","beta","value")]
 err_beta_bar[0] = fitResults[('bar',"peak12","beta","sigma")]
+peak1_mean_barCoinc[0] = fitResults[('barCoinc',"peak1","mean","value")]
+err_peak1_mean_barCoinc[0] = fitResults[('barCoinc',"peak1","mean","sigma")]
+peak1_sigma_barCoinc[0] = fitResults[('barCoinc',"peak1","sigma","value")]
+err_peak1_sigma_barCoinc[0] = fitResults[('barCoinc',"peak1","sigma","sigma")]
 #
 temp_pixel[0] = Temp_pixel
 temp_bar[0] = Temp_bar
