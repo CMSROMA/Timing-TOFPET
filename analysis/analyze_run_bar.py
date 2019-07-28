@@ -211,7 +211,7 @@ def fitSpectrum(histo,function,xmin,xmax,canvas,fitres,label,code,run,outputDIR)
 
     f1_bkg.Draw("same")
 
-    pt1 = TPaveText(3.9029,44966.2,73.49,48052,"br");    
+    pt1 = TPaveText(0.100223,0.915556,0.613586,0.967407,"brNDC")
     text1 = pt1.AddText( "Run" + str(run.zfill(6)) + " " + label + str(code.zfill(6)) )
     pt1.SetFillColor(0)
     pt1.Draw()
@@ -270,7 +270,7 @@ def fitSpectrum_coinc(histo,function,xmin,xmax,canvas,fitres,label,code,run,outp
 
     f1_bkg.Draw("same")
 
-    pt2 = TPaveText(3.9029,44966.2,73.49,48052,"br");    
+    pt2 = TPaveText(0.100223,0.915556,0.613586,0.967407,"brNDC")    
     text2 = pt2.AddText( "Run" + str(run.zfill(6)) + " " + label + str(code.zfill(6)) )
     pt2.SetFillColor(0)
     pt2.Draw()
@@ -648,7 +648,12 @@ h1_CTR.GetXaxis().SetTitle("t_{bar} - t_{pixel} [ps]")
 h1_CTR.GetYaxis().SetTitle("Events")
 h1_CTR.GetYaxis().SetTitleOffset(1.6)
 
-pt3 = TPaveText(3.9029,44966.2,73.49,48052,"br");    
+fitResults[("barCoinc","CTR","mean","value")]=f_gaus.GetParameter(1)
+fitResults[("barCoinc","CTR","mean","sigma")]=f_gaus.GetParError(1)
+fitResults[("barCoinc","CTR","sigma","value")]=f_gaus.GetParameter(2)
+fitResults[("barCoinc","CTR","sigma","sigma")]=f_gaus.GetParError(2)
+
+pt3 = TPaveText(0.100223,0.915556,0.613586,0.967407,"brNDC")
 text3 = pt3.AddText( "Run" + str(opt.run.zfill(6)) + " BAR" + str(opt.barCode.zfill(6)) )
 pt3.SetFillColor(0)
 pt3.Draw()
@@ -764,6 +769,11 @@ err_peak1_mean_barCoinc = array( 'd', [ -999. ] )
 peak1_sigma_barCoinc = array( 'd', [ -999. ] )
 err_peak1_sigma_barCoinc = array( 'd', [ -999. ] )
 #
+CTR_mean_barCoinc = array( 'd', [ -999. ] )
+err_CTR_mean_barCoinc = array( 'd', [ -999. ] )
+CTR_sigma_barCoinc = array( 'd', [ -999. ] )
+err_CTR_sigma_barCoinc = array( 'd', [ -999. ] )
+#
 temp_pixel = array( 'd', [ -999. ] )
 temp_bar = array( 'd', [ -999. ] )
 temp_int = array( 'd', [ -999. ] )
@@ -805,6 +815,11 @@ treeOutput.Branch( 'err_peak1_mean_barCoinc', err_peak1_mean_barCoinc, 'err_peak
 treeOutput.Branch( 'peak1_sigma_barCoinc', peak1_sigma_barCoinc, 'peak1_sigma_barCoinc/D' )
 treeOutput.Branch( 'err_peak1_sigma_barCoinc', err_peak1_sigma_barCoinc, 'err_peak1_sigma_barCoinc/D' )
 #
+treeOutput.Branch( 'CTR_mean_barCoinc', CTR_mean_barCoinc, 'CTR_mean_barCoinc/D' )
+treeOutput.Branch( 'err_CTR_mean_barCoinc', err_CTR_mean_barCoinc, 'err_CTR_mean_barCoinc/D' )
+treeOutput.Branch( 'CTR_sigma_barCoinc', CTR_sigma_barCoinc, 'CTR_sigma_barCoinc/D' )
+treeOutput.Branch( 'err_CTR_sigma_barCoinc', err_CTR_sigma_barCoinc, 'err_CTR_sigma_barCoinc/D' )
+#
 treeOutput.Branch( 'temp_pixel', temp_pixel, 'temp_pixel/D' )
 treeOutput.Branch( 'temp_bar', temp_bar, 'temp_bar/D' )
 treeOutput.Branch( 'temp_int', temp_int, 'temp_int/D' )
@@ -845,6 +860,11 @@ peak1_mean_barCoinc[0] = fitResults[('barCoinc',"peak1","mean","value")]
 err_peak1_mean_barCoinc[0] = fitResults[('barCoinc',"peak1","mean","sigma")]
 peak1_sigma_barCoinc[0] = fitResults[('barCoinc',"peak1","sigma","value")]
 err_peak1_sigma_barCoinc[0] = fitResults[('barCoinc',"peak1","sigma","sigma")]
+#
+CTR_mean_barCoinc[0] = fitResults[('barCoinc',"CTR","mean","value")]
+err_CTR_mean_barCoinc[0] = fitResults[('barCoinc',"CTR","mean","sigma")]
+CTR_sigma_barCoinc[0] = fitResults[('barCoinc',"CTR","sigma","value")]
+err_CTR_sigma_barCoinc[0] = fitResults[('barCoinc',"CTR","sigma","sigma")]
 #
 temp_pixel[0] = Temp_pixel
 temp_bar[0] = Temp_bar
