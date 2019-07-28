@@ -211,10 +211,10 @@ def fitSpectrum(histo,function,xmin,xmax,canvas,fitres,label,code,run,outputDIR)
 
     f1_bkg.Draw("same")
 
-    pt = TPaveText(3.9029,44966.2,73.49,48052,"br");    
-    text = pt.AddText( "Run" + str(run.zfill(6)) + " " + label + str(code.zfill(6)) )
-    pt.SetFillColor(0)
-    pt.Draw()
+    pt1 = TPaveText(3.9029,44966.2,73.49,48052,"br");    
+    text1 = pt1.AddText( "Run" + str(run.zfill(6)) + " " + label + str(code.zfill(6)) )
+    pt1.SetFillColor(0)
+    pt1.Draw()
 
     canvas.Update()
     canvas.SaveAs(outputDIR+"/"+"Run"+str(run.zfill(6))+"_BAR"+str(code.zfill(6))+"_SourceSpectrum_"+label+".pdf")
@@ -270,10 +270,10 @@ def fitSpectrum_coinc(histo,function,xmin,xmax,canvas,fitres,label,code,run,outp
 
     f1_bkg.Draw("same")
 
-    pt = TPaveText(3.9029,44966.2,73.49,48052,"br");    
-    text = pt.AddText( "Run" + str(run.zfill(6)) + " " + label + str(code.zfill(6)) )
-    pt.SetFillColor(0)
-    pt.Draw()
+    pt2 = TPaveText(3.9029,44966.2,73.49,48052,"br");    
+    text2 = pt2.AddText( "Run" + str(run.zfill(6)) + " " + label + str(code.zfill(6)) )
+    pt2.SetFillColor(0)
+    pt2.Draw()
 
     canvas.Update()
     canvas.SaveAs(outputDIR+"/"+"Run"+str(run.zfill(6))+"_BAR"+str(code.zfill(6))+"_SourceSpectrum_"+label+".pdf")
@@ -364,7 +364,7 @@ gStyle.SetStatH(0.09)
 ################################################
 
 run = opt.run.zfill(6)
-print run
+print "Run ", run
 
 input_filename_ped1 = ""
 input_filename_ped2 = ""
@@ -586,7 +586,7 @@ fitSpectrum_coinc(h1_energy_pixel_coinc,fTot_pixel_coinc,minEnergy_coinc,maxEner
 ## Bar
 fTot_bar_coinc = TF1("fTot_bar_coinc",totalFunction_coinc,minEnergy_coinc,maxEnergy_coinc,n_paramameters_coinc)
 fTot_bar_coinc.SetNpx(1000)
-fitSpectrum_coinc(h1_energyTot_bar_coinc,fTot_bar_coinc,minEnergy_coinc,maxEnergy_coinc,c1_energyTot_bar_coinc,fitResults,"barCoinc","",opt.run,opt.outputDir)
+fitSpectrum_coinc(h1_energyTot_bar_coinc,fTot_bar_coinc,minEnergy_coinc,maxEnergy_coinc,c1_energyTot_bar_coinc,fitResults,"barCoinc",opt.barCode,opt.run,opt.outputDir)
 
 ################################################
 ## 7) Fit response vs photon energy
@@ -605,30 +605,64 @@ fExpo_bar = TF1("fExpo_bar","[0]*(1-TMath::Exp(-[1]*x))",minE,maxE)
 fitSaturation(fExpo_bar,minE,maxE,c1_sat_bar,fitResults,"bar")
 
 ################################################
-## 7XXX) Coincidence time resolution (CTR)
+## 8) Coincidence time resolution (CTR)
 ################################################
 
-'''
 tfileCoinc.cd()
+
+h1_CTR = TH1F("h1_CTR", "", 800, -10000, 10000)
+c1_CTR = TCanvas("c1_CTR", "", 900, 700)
+
 for event in range (0,treeCoinc.GetEntries()):
     treeCoinc.GetEntry(event)
     energy1 = treeCoinc.energy[1]-mean_PedTot[channels[1]]
     energy2 = treeCoinc.energy[2]-mean_PedTot[channels[2]]
     energyBar =  energy1 + energy2
     energyPixel = treeCoinc.energy[0]-mean_PedTot[channels[0]]
-    if( treeCoinc.energy[0]> -9. and treeCoinc.energy[1]>-9. and treeCoinc.energy[2]>-9.):
-        h1_energyTot_bar_coinc.Fill(energyBar)
-        h1_energy1_bar_coinc.Fill(energy1)
-        h1_energy2_bar_coinc.Fill(energy2)
-        h1_energyDiff_bar_coinc.Fill(energy1-energy2)
-        h2_energy1VSenergy2_bar.Fill(energy1,energy2)
+    timeBar = (treeCoinc.time[1]+treeCoinc.time[2])/2
+    timePixel = treeCoinc.time[0]
+    deltaT = timeBar - timePixel 
 
-        h2_energy1VSenergy2_bar_coinc.Fill(energy1,energy2)
-        h2_energyPixelVSenergyBar.Fill(energyBar,energyPixel)
-'''
+    NsigmaCut = 1
+
+    if( treeCoinc.energy[0]> -9. 
+        and treeCoinc.energy[1]>-9. 
+        and treeCoinc.energy[2]>-9. 
+        and energyPixel > fitResults[('pixelCoinc',"peak1","mean","value")] - NsigmaCut*fitResults[('pixelCoinc',"peak1","sigma","value")] 
+        and energyPixel < fitResults[('pixelCoinc',"peak1","mean","value")] + NsigmaCut*fitResults[('pixelCoinc',"peak1","sigma","value")] 
+        and energyBar > fitResults[('barCoinc',"peak1","mean","value")] - NsigmaCut*fitResults[('barCoinc',"peak1","sigma","value")]
+        and energyBar < fitResults[('barCoinc',"peak1","mean","value")] + NsigmaCut*fitResults[('barCoinc',"peak1","sigma","value")] ):
+      
+        h1_CTR.Fill(deltaT)  
+
+c1_CTR.cd()
+h1_CTR.Draw("PE")  
+#f_gaus = TF1("f_gaus","gaus",h1_CTR.GetMean()-2*h1_CTR.GetRMS(),h1_CTR.GetMean()+2*h1_CTR.GetRMS())
+#h1_CTR.Fit(f_gaus,"LR+0N","",h1_CTR.GetMean()-1*h1_CTR.GetRMS(),h1_CTR.GetMean()+1*h1_CTR.GetRMS())
+#h1_CTR.Fit(f_gaus,"LR+","",f_gaus.GetParameter(1)-3.5*f_gaus.GetParameter(2),f_gaus.GetParameter(1)+3.5*f_gaus.GetParameter(2))
+f_gaus = TF1("f_gaus","gaus",h1_CTR.GetMean()-550.,h1_CTR.GetMean()+550.)
+h1_CTR.Fit(f_gaus,"R+0N","",h1_CTR.GetMean()-550.,h1_CTR.GetMean()+550.)
+h1_CTR.Fit(f_gaus,"R+","",f_gaus.GetParameter(1)-550.,f_gaus.GetParameter(1)+550.)
+h1_CTR.GetXaxis().SetRangeUser(f_gaus.GetParameter(1)-550.,f_gaus.GetParameter(1)+550.)
+h1_CTR.GetXaxis().SetTitle("t_{bar} - t_{pixel} [ps]")
+h1_CTR.GetYaxis().SetTitle("Events")
+h1_CTR.GetYaxis().SetTitleOffset(1.6)
+
+pt3 = TPaveText(3.9029,44966.2,73.49,48052,"br");    
+text3 = pt3.AddText( "Run" + str(opt.run.zfill(6)) + " BAR" + str(opt.barCode.zfill(6)) )
+pt3.SetFillColor(0)
+pt3.Draw()
+#FIXME: check why it does not show the label on the canvas!
+
+tfileoutput.cd()
+c1_CTR.cd()
+c1_CTR.Update()
+c1_CTR.SaveAs(opt.outputDir+"/"+"Run"+str(opt.run.zfill(6))+"_BAR"+str(opt.barCode.zfill(6))+"_CTR"+".pdf")
+c1_CTR.SaveAs(opt.outputDir+"/"+"Run"+str(opt.run.zfill(6))+"_BAR"+str(opt.barCode.zfill(6))+"_CTR"+".png")
+c1_CTR.Write()
 
 ################################################
-## 8) Write histograms
+## 9) Write histograms
 ################################################
 
 tfileoutput.cd()
@@ -688,7 +722,7 @@ tfileCoinc.cd()
 tfileCoinc.Close()
 
 ################################################
-## 8) Write root tree with measurements
+## 10) Write root tree with measurements
 ################################################
 
 tfileoutputtree = TFile( opt.outputDir+"/"+"tree_Run"+run+"_BAR"+str(str(opt.barCode).zfill(6))+".root", "recreate" )
