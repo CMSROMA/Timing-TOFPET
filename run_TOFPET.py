@@ -57,11 +57,6 @@ if not opt.configFile:
 
 gROOT.SetBatch(True)
 
-current_time = datetime.datetime.now()
-simpletimeMarker = "%04d-%02d-%02d__%02d-%02d-%02d" % (current_time.year,current_time.month,current_time.day,current_time.hour,current_time.minute,current_time.second)
-
-unixTimeStart = long(time.time())
-
 #####################################################
 ### 0) Edit config file based on command line options
 #####################################################
@@ -502,6 +497,24 @@ if run_calib=="1":
 ###############################
 ### 6) Run daq
 ###############################
+
+#copy content and clear temporary file with temperatures
+commandCopyTemp = "cat "+temperaturefile+" >> arduino/temperature/temperature_all.txt"
+print commandCopyTemp
+os.system(commandCopyTemp)
+commandRmTemp = "rm -f "+temperaturefile
+print commandRmTemp
+os.system(commandRmTemp)
+time.sleep(3) #wait until 1 line of the temporary temperature file is recreated
+
+###########################################
+
+#current_time = datetime.datetime.now()
+#simpletimeMarker = "%04d-%02d-%02d__%02d-%02d-%02d" % (current_time.year,current_time.month,current_time.day,current_time.hour,current_time.minute,current_time.second)
+unixTimeStart = long(time.time())
+
+###########################################
+
 commandOutputDir = "mkdir -p "+output_dir
 print commandOutputDir
 os.system(commandOutputDir)
@@ -662,3 +675,11 @@ print commandConvertCoincidences
 os.system(commandConvertCoincidences)
 print "File created."
 print "\n"
+
+#copy content and clear temporary file with temperatures
+print commandCopyTemp
+os.system(commandCopyTemp)
+print commandRmTemp
+os.system(commandRmTemp)
+
+
