@@ -20,11 +20,15 @@ parser.add_option("-o", "--outFolder", dest="outputFolder",
                   help="output directory")
 parser.add_option("--pedAllChannels", dest="pedAllChannels", default=0, 
                   help="Set to 1 to collect pedestals for all channels (default is 0)")
+parser.add_option("-n", "--name", dest="nameLabel",
+                  help="label for output files")
 (opt, args) = parser.parse_args()
 if not opt.configFile:   
     parser.error('config file not provided')
 if not opt.outputFolder:   
     parser.error('output folder not provided')
+if not opt.nameLabel:   
+    parser.error('label for output files not provided')
 
 #############################
 
@@ -108,15 +112,18 @@ ov_values = [7] #V
 ovref_values = [7] #V
 #ov_values = [4,5,7] #V
 gate_values = [15] # DeltaT[ns]/20: gate=15 -> DeltaT=300 ns 
+#gate_values = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25] 
 #name = "TEST_WS1_NW_NC"
-#name = "REF_WS1_NW_NC"
-name = "BAR000098_WS1_NW_NC"
+#name = "PEDESTAL_WS1_NW_NC_GATESCAN_1"
+#name = "BAR000028_WS1_NW_NC"
+name = opt.nameLabel
 
 if int(opt.pedAllChannels)==1:
     n_ch = n_chip*64
 
-nseq = int( t_tot / ( (2*t_ped*n_ch+t_phys)*len(ov_values)*len(gate_values) ) )
-print "Number of sequences in "+str(t_tot)+" seconds = "+ str(nseq)
+nseq = 1
+#nseq = int( t_tot / ( (2*t_ped*n_ch+t_phys)*len(ov_values)*len(gate_values) ) )
+#print "Number of sequences in "+str(t_tot)+" seconds = "+ str(nseq)
 if nseq==0:
     print "==> Please increase total time of the run (t_tot)"
 

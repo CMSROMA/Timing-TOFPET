@@ -126,5 +126,5 @@ python run_TOFPET.py -c config_main.txt --runType PED -d acquire_pedestal_data -
 Edit last part of "run_DAQ.py" ("Run daq sequence") to define the sequence.
 Then launch the script
 ```
-python run_DAQ.py  -c config_main.txt -o output/TestSequence
+python run_DAQ.py -c config_main_bar.txt -o output/ScanTestBar -n BAR000028_WS1_NW_NC
 ```
