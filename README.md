@@ -32,10 +32,11 @@ The sensors are positioned in the following way in order:
 
 Open a new terminal
 ```
-python3 read_temp.py -o temperature.txt -p /dev/ttyACM1 -r 9600
+cd arduino/temperature
+python3 read_temp.py -o temperature_tmp.txt -p /dev/ttyACM1 -r 9600
 ```
 
-It will add (append) a line every second (configurable from arduino firmware) in the output file "temperature.txt" with this format: "unix_time temp1 temp2 temp3 temp4 temp5 temp6". Temperatures are reported in Celsius degrees; unix epoch time in seconds (https://www.epochconverter.com). 
+It will add (append) a line every 2 seconds (configurable from arduino firmware) in the output file "temperature_tmp.txt" with this format: "unix_time temp1 temp2 temp3 temp4 temp5 temp6". Temperatures are reported in Celsius degrees; unix epoch time in seconds (https://www.epochconverter.com).
 
 Example:
 ```
@@ -80,6 +81,10 @@ config_main.txt
 or for pixel + bar:
 ```
 config_main_bar.txt
+```
+Note: the temperature file should be the same specified in the previous step (i.e. arduino/temperature/temperature_tmp.txt). At the end of each run the recorded temperatures will be attached to the end of this file 
+```
+arduino/temperature/temperature_all.txt
 ```
 
 Start data taking
