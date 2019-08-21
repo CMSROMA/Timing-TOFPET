@@ -715,6 +715,10 @@ h1_energyDiff_bar_coinc.Write()
 h1_energy_pixel_coinc.Write()
 h2_energy1VSenergy2_bar_coinc.Write()
 h2_energyPixelVSenergyBar_coinc.Write()
+print "--- CTR ---"
+print "CTR mean: "+str(fitResults[('barCoinc',"CTR","mean","value")])+" +/- "+str(fitResults[('barCoinc',"CTR","mean","sigma")]) 
+print "CTR sigma: "+str(fitResults[('barCoinc',"CTR","sigma","value")])+" +/- "+str(fitResults[('barCoinc',"CTR","sigma","sigma")]) 
+
 
 tfileoutput.Close()
 tfilePed1.cd()
