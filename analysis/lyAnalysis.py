@@ -78,6 +78,12 @@ def LYAnalysis(crystal,crystalInfo):
 
     return { 'ly':lyAvg, 'lyCoinc':lyCoincAvg, 'ctr':ctrAvg, 'lyRef':lyAvgRef, 'lyCoincRef':lyCoincAvgRef, 'ctrRef':ctrAvgRef  }
 
+import argparse
+
+parser = argparse.ArgumentParser()
+parser.add_argument('--output',dest='output')
+args = parser.parse_args()
+
 from crystalsDB import crystalsDB
 
 crystalsDB_withData = {}
@@ -95,4 +101,5 @@ df=pd.DataFrame.from_dict(crystalsDB_withData,orient='index')
 #df=df.drop(columns=['runs','refRuns'])
 #df=df.drop(['runs','refRuns'],axis=1)
 df=df[['producer','geometry','ly','lyCoinc','ctr','lyRef','lyCoincRef','ctrRef']]
-df.to_csv('lyAnalysisTOFPET.csv',header=False)
+#df.to_csv('lyAnalysisTOFPET.csv',header=False)
+df.to_csv(args.output,header=False)
