@@ -553,5 +553,115 @@ crystalsDB={
         'refRuns'  : [ 'tree_Run000638_BAR000028' , 'tree_Run000686_BAR000028' ]
     },
 
+#################################
+###### Prod6 ####################
+#################################
+
+### Geo1 
+
+    "BAR000101":
+    {
+        'producer' : 'prod6',
+        'geometry' : 'geo1',
+        'runs'  :  [ 'tree_Run000710_BAR000101' ],
+        'refRuns'  : [ 'tree_Run000689_BAR000028' , 'tree_Run000725_BAR000028' ]
+    },
+    "BAR000102":
+    {
+        'producer' : 'prod6',
+        'geometry' : 'geo1',
+        'runs'  :  [ 'tree_Run000713_BAR000102' ],
+        'refRuns'  : [ 'tree_Run000689_BAR000028' , 'tree_Run000725_BAR000028' ]
+    },
+    "BAR000103":
+    {
+        'producer' : 'prod6',
+        'geometry' : 'geo1',
+        'runs'  :  [ 'tree_Run000716_BAR000103' ],
+        'refRuns'  : [ 'tree_Run000689_BAR000028' , 'tree_Run000725_BAR000028' ]
+    },
+    "BAR000104":
+    {
+        'producer' : 'prod6',
+        'geometry' : 'geo1',
+        'runs'  :  [ 'tree_Run000719_BAR000104' ],
+        'refRuns'  : [ 'tree_Run000689_BAR000028' , 'tree_Run000725_BAR000028' ]
+    },
+    "BAR000105":
+    {
+        'producer' : 'prod6',
+        'geometry' : 'geo1',
+        'runs'  :  [ 'tree_Run000722_BAR000105' ],
+        'refRuns'  : [ 'tree_Run000689_BAR000028' , 'tree_Run000725_BAR000028' ]
+    },
+
+### Geo2 
+
+    "BAR000106":
+    {
+        'producer' : 'prod6',
+        'geometry' : 'geo2',
+        'runs'  : [ 'tree_Run000692_BAR000106'],
+        'refRuns'  : [ 'tree_Run000689_BAR000028' , 'tree_Run000725_BAR000028' ]
+    },
+    "BAR000107":
+    {
+        'producer' : 'prod6',
+        'geometry' : 'geo2',
+        'runs'  :  [ 'tree_Run000695_BAR000107' ],
+        'refRuns'  : [ 'tree_Run000689_BAR000028' , 'tree_Run000725_BAR000028' ]
+    },
+    "BAR000108":
+    {
+        'producer' : 'prod6',
+        'geometry' : 'geo2',
+        'runs'  :  [ 'tree_Run000698_BAR000108' , 'tree_Run000704_BAR000108' , 'tree_Run000707_BAR000108' ],
+        'refRuns'  : [ 'tree_Run000689_BAR000028' , 'tree_Run000725_BAR000028' ]
+    },
+    "BAR000109":
+    {
+        'producer' : 'prod6',
+        'geometry' : 'geo2',
+        'runs'  :  [ 'tree_Run000701_BAR000109' ],
+        'refRuns'  : [ 'tree_Run000689_BAR000028' , 'tree_Run000725_BAR000028' ]
+    },
+
+### Geo3 
+
+    "BAR000110":
+    {
+        'producer' : 'prod6',
+        'geometry' : 'geo3',
+        'runs'  :  [ 'tree_Run000731_BAR000110' ],
+        'refRuns'  : [ 'tree_Run000728_BAR000028' ]
+    },
+    "BAR000111":
+    {
+        'producer' : 'prod6',
+        'geometry' : 'geo3',
+        'runs'  :  [ 'tree_Run000734_BAR000111' ],
+        'refRuns'  : [ 'tree_Run000728_BAR000028' ]
+    },
+    "BAR000112":
+    {
+        'producer' : 'prod6',
+        'geometry' : 'geo3',
+        'runs'  :  [ 'tree_Run000737_BAR000112' ],
+        'refRuns'  : [ 'tree_Run000728_BAR000028' ]
+    },
+    "BAR000113":
+    {
+        'producer' : 'prod6',
+        'geometry' : 'geo3',
+        'runs'  :  [ 'tree_Run000740_BAR000113' ],
+        'refRuns'  : [ 'tree_Run000728_BAR000028' ]
+    },
+    "BAR000114":
+    {
+        'producer' : 'prod6',
+        'geometry' : 'geo3',
+        'runs'  :  [ 'tree_Run000743_BAR000114' ],
+        'refRuns'  : [ 'tree_Run000728_BAR000028' ]
+    },
 
 }
