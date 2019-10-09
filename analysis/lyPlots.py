@@ -4,7 +4,7 @@ R.gROOT.SetBatch(1)
 crystalsData=R.TTree("crystalsData","crystalsData");
 crystalsData.ReadFile("crystalsDataTOFPET.csv","id/C:prod/C:geo/C:ly/F:lyCoinc/F:ctr/F:lyRef/F:lyCoincRef/F:ctrRef/F");
 
-producers = [ 'prod'+str(i) for i in range(1,7) ]
+producers = [ 'prod'+str(i) for i in range(1,9) ]
 geoms = [ 'geo'+str(i) for i in range(1,4) ]
 
 histos = {}
@@ -98,8 +98,9 @@ c2=R.TCanvas("c2","c2",800,600)
 histos['lyCoincRatioGeo21_vs_prod'] = R.TGraph(len(producers))
 histos['lyCoincRatioGeo21_vs_prod'].SetName('lyCoincRatioGeo21_vs_prod')
 for iprod,prod in enumerate(producers): 
-    histos['lyCoincRatioGeo21_vs_prod'].SetPoint(iprod,float(prod.split('prod')[1]),histos['ctrVslyCoincNorm_'+prod+'_geo2'].GetMean(1)/histos['ctrVslyCoincNorm_'+prod+'_geo1'].GetMean(1))
-    print histos['ctrVslyCoincNorm_'+prod+'_geo2'].GetMean(1), histos['ctrVslyCoincNorm_'+prod+'_geo1'].GetMean(1)
+    if histos['ctrVslyCoincNorm_'+prod+'_geo1'].GetMean(1):
+        histos['lyCoincRatioGeo21_vs_prod'].SetPoint(iprod,float(prod.split('prod')[1]),histos['ctrVslyCoincNorm_'+prod+'_geo2'].GetMean(1)/histos['ctrVslyCoincNorm_'+prod+'_geo1'].GetMean(1))
+        print histos['ctrVslyCoincNorm_'+prod+'_geo2'].GetMean(1), histos['ctrVslyCoincNorm_'+prod+'_geo1'].GetMean(1)
 histos['lyCoincRatioGeo21_vs_prod'].GetXaxis().SetTitle("Producer ID")
 histos['lyCoincRatioGeo21_vs_prod'].GetYaxis().SetTitle("LO_geo2 / LO_geo1")
 histos['lyCoincRatioGeo21_vs_prod'].SetMarkerStyle(20)
@@ -111,8 +112,9 @@ c2.SaveAs("lyCoincRatioGeo21_vs_prod.png")
 
 histos['lyCoincRatioGeo32_vs_prod'] = R.TGraph(len(producers))
 histos['lyCoincRatioGeo32_vs_prod'].SetName('lyCoincRatioGeo32_vs_prod')
-for iprod,prod in enumerate(producers): 
-    histos['lyCoincRatioGeo32_vs_prod'].SetPoint(iprod,float(prod.split('prod')[1]),histos['ctrVslyCoincNorm_'+prod+'_geo3'].GetMean(1)/histos['ctrVslyCoincNorm_'+prod+'_geo2'].GetMean(1))
+for iprod,prod in enumerate(producers):
+    if histos['ctrVslyCoincNorm_'+prod+'_geo2'].GetMean(1):
+        histos['lyCoincRatioGeo32_vs_prod'].SetPoint(iprod,float(prod.split('prod')[1]),histos['ctrVslyCoincNorm_'+prod+'_geo3'].GetMean(1)/histos['ctrVslyCoincNorm_'+prod+'_geo2'].GetMean(1))
 histos['lyCoincRatioGeo32_vs_prod'].GetXaxis().SetTitle("Producer ID")
 histos['lyCoincRatioGeo32_vs_prod'].GetYaxis().SetTitle("LO_geo3 / LO_geo2")
 histos['lyCoincRatioGeo32_vs_prod'].SetMarkerStyle(20)
