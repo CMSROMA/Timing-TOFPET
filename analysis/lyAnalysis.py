@@ -102,4 +102,5 @@ df=pd.DataFrame.from_dict(crystalsDB_withData,orient='index')
 #df=df.drop(['runs','refRuns'],axis=1)
 df=df[['producer','geometry','ly','lyCoinc','ctr','lyRef','lyCoincRef','ctrRef']]
 #df.to_csv('lyAnalysisTOFPET.csv',header=False)
+#print df
 df.to_csv(args.output,header=False)
