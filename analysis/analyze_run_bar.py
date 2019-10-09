@@ -613,6 +613,11 @@ tfileCoinc.cd()
 h1_CTR = TH1F("h1_CTR", "", 800, -10000, 10000)
 c1_CTR = TCanvas("c1_CTR", "", 900, 700)
 
+print fitResults[('pixelCoinc',"peak1","mean","value")] - fitResults[('pixelCoinc',"peak1","sigma","value")]
+print fitResults[('pixelCoinc',"peak1","mean","value")] + fitResults[('pixelCoinc',"peak1","sigma","value")]
+print fitResults[('barCoinc',"peak1","mean","value")] - fitResults[('barCoinc',"peak1","sigma","value")]
+print fitResults[('barCoinc',"peak1","mean","value")] + fitResults[('barCoinc',"peak1","sigma","value")]
+
 for event in range (0,treeCoinc.GetEntries()):
     treeCoinc.GetEntry(event)
     energy1 = treeCoinc.energy[1]-mean_PedTot[channels[1]]
