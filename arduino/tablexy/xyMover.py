@@ -4,12 +4,20 @@ class XYMover:
 
     def __init__(self,port):
         self.my_socket = socket.socket()
+        self.my_socket.settimeout(10) #to be checked if this is sufficient
         self.my_socket.connect(('127.0.0.1', port))
         self.home()
 
+    def getSocketResponse(self):
+        try:
+            response = self.my_socket.recv(1024).decode().strip()
+        except socket.timeout:
+            response = 'error'
+        return response
+
     def home(self):
         self.my_socket.send(bytes('home'))
-        response = self.my_socket.recv(1024).decode().strip()
+        response = self.getSocketResponse()
         if not response.startswith('ok'):
             return 'error'
         else:
@@ -20,7 +28,7 @@ class XYMover:
         
     def moveXY(self,x,y):
         self.my_socket.send(bytes('%d %d'%(x,y)))
-        response = self.my_socket.recv(1024).decode().strip()
+        response = self.getSocketResponse()
         if not response.startswith('ok'):
             return 'error'
         else:
@@ -30,7 +38,7 @@ class XYMover:
 
     def relativeX(self,x):
         self.my_socket.send(bytes('%d %d'%(self.x+x,self.y)))
-        response = self.my_socket.recv(1024).decode().strip()
+        response = self.getSocketResponse()
         if not response.startswith('ok'):
             return 'error'
         else:
@@ -39,7 +47,7 @@ class XYMover:
 
     def relativeY(self,y):
         self.my_socket.send(bytes('%d %d'%(self.x,self.y+y)))
-        response = self.my_socket.recv(1024).decode().strip()
+        response = self.getSocketResponse()
         if not response.startswith('ok'):
             return 'error'
         else:
@@ -48,7 +56,7 @@ class XYMover:
 
     def position(self):
         self.my_socket.send(bytes('position'))
-        response = self.my_socket.recv(1024).decode().strip()
+        response = self.getSocketResponse()
         xy = response.split(" ")
         if (int(xy[0]) != self.x or int(xy[1]) != self.y):
             return 'error'

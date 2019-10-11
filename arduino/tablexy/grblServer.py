@@ -23,6 +23,8 @@ import argparse
 import logging
 import re
 import sys
+from time import sleep
+
 from curses import ascii
 
 # Version
@@ -51,12 +53,13 @@ def Gcommand(Gstring, arduino):
     if (not arduino):
         ret = 'Arduino not connected'
     data = ''
-    if (len(Gstring) > 0) and (arduino):
+    if (len(Gstring) > 0) and (arduino != ""):
         Gstring += '\n'
-        arduino.write(Gstring.encode())
-        while not (data.startswith('ok') or data.startswith('error')):
-            data = arduino.readline()[:-2].decode("utf-8") #the last bit gets rid of the new-line chars
-            ret += data + '\n'
+#        arduino.write(Gstring.encode())
+#        while not (data.startswith('ok') or data.startswith('error')):
+#            data = arduino.readline()[:-2].decode("utf-8") #the last bit gets rid of the new-line chars
+        data = "ok"
+        ret += data + '\n'
         logging.debug(data)
     return ret
 
@@ -87,15 +90,17 @@ arduino = None
 # connect to Arduino
 try:
     logging.info("Connecting to Arduino via " + args.usb)
-    arduino = serial.Serial(args.usb, 9600)
+#    arduino = serial.Serial(args.usb, 9600)
+    arduino = "OKPM"
 except:
     print("[ERROR] Cannot connect to Arduino")
     logging.warning("Cannot connect to Arduino")
     logging.warning(sys.exc_info())
     exit(-1)
 
-arduino.write(b'\x18')
-data = arduino.readline().decode("utf-8") 
+#arduino.write(b'\x18')
+#data = arduino.readline().decode("utf-8") 
+data = "ok"
 logging.info(data)
 
 logging.info("Ready. Waiting for clients")
@@ -141,14 +146,17 @@ y = 0
 
 while (True):
     ret = "invalid command"
-    client_data = client_socket.recv(1024)
+
+    client_data = client_socket.recv(1024)        
+
     if not client_data:
         client_socket.close()
         logging.info("Client disconnected")
         logging.info("==========================================================================")
         (client_socket, client_address) = server_socket.accept()
         logging.info("Client connected from " + client_address[0])
-        
+        client_data = client_socket.recv(1024)        
+
     client_data = client_data.decode('utf-8').strip() # trim the input string
     client_data = re.sub(" +", " ", client_data)
     xy = client_data.split(" ")
@@ -193,26 +201,34 @@ while (True):
         Gcommand("$H", arduino)
         x = 0
         y = 0
+        ret = "ok"
 
     if re.match("reset", client_data):
-        arduino.write(b'\x18')
-        data = arduino.readline().decode("utf-8") 
+#        arduino.write(b'\x18')
+#        data = arduino.readline().decode("utf-8") 
+        data = "ok"
         logging.info("Reset: " + data)
+        ret = "ok"
 
     if re.match("position", client_data):
         ret = str(-x) + " " + str(-y)
 
-    if re.match("help", client_data):
-        help()
+#    if re.match("help", client_data):
+#        help()
 
-    client_socket.send(bytes(ret, 'utf-8'))
+#    if (client_data=='quit'):
+#        ret = 'Quit. Bye' 
+
+    client_socket.send(bytes(ret))
 
     logging.info("Estimated position: (" + str(-x) + ", " + str(-y) + ")")
 
-    if (client_data == "quit"):
-        client_socket.close()
-        server_socket.close()
-        logging.info("Quit")
-        logging.info("==========================================================================")
-        exit(0)
+    sleep(0.001)
+#    if (client_data == "quit"):
+#        client_socket.close()
+#        server_socket.close()
+#        logging.info("Quit")
+#        logging.info("==========================================================================")
+#        exit(0)
+
 
