@@ -26,7 +26,7 @@ class XYMover:
             return 'ok'
 
         
-    def moveXY(self,x,y):
+    def moveAbsoluteXY(self,x,y):
         self.my_socket.send(bytes('%d %d'%(x,y)))
         response = self.getSocketResponse()
         if not response.startswith('ok'):
@@ -36,8 +36,8 @@ class XYMover:
             self.y=y
             return 'ok'
 
-    def relativeX(self,x):
-        self.my_socket.send(bytes('%d %d'%(self.x+x,self.y)))
+    def moveRelativeX(self,x):
+        self.my_socket.send(bytes('%+d %+d'%(x,0)))
         response = self.getSocketResponse()
         if not response.startswith('ok'):
             return 'error'
@@ -45,8 +45,8 @@ class XYMover:
             self.x=x+self.x
             return 'ok'
 
-    def relativeY(self,y):
-        self.my_socket.send(bytes('%d %d'%(self.x,self.y+y)))
+    def moveRelativeY(self,y):
+        self.my_socket.send(bytes('%+d %+d'%(0,y)))
         response = self.getSocketResponse()
         if not response.startswith('ok'):
             return 'error'
