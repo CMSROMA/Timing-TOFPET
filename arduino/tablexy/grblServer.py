@@ -55,10 +55,9 @@ def Gcommand(Gstring, arduino):
     data = ''
     if (len(Gstring) > 0) and (arduino != ""):
         Gstring += '\n'
-#        arduino.write(Gstring.encode())
-#        while not (data.startswith('ok') or data.startswith('error')):
-#            data = arduino.readline()[:-2].decode("utf-8") #the last bit gets rid of the new-line chars
-        data = "ok"
+        arduino.write(Gstring.encode())
+        while not (data.startswith('ok') or data.startswith('error')):
+            data = arduino.readline()[:-2].decode("utf-8") #the last bit gets rid of the new-line chars
         ret += data + '\n'
         logging.debug(data)
     return ret
@@ -90,17 +89,15 @@ arduino = None
 # connect to Arduino
 try:
     logging.info("Connecting to Arduino via " + args.usb)
-#    arduino = serial.Serial(args.usb, 9600)
-    arduino = "OKPM"
+    arduino = serial.Serial(args.usb, 9600)
 except:
     print("[ERROR] Cannot connect to Arduino")
     logging.warning("Cannot connect to Arduino")
     logging.warning(sys.exc_info())
     exit(-1)
 
-#arduino.write(b'\x18')
-#data = arduino.readline().decode("utf-8") 
-data = "ok"
+arduino.write(b'\x18')
+data = arduino.readline().decode("utf-8") 
 logging.info(data)
 
 logging.info("Ready. Waiting for clients")
@@ -204,9 +201,8 @@ while (True):
         ret = "ok"
 
     if re.match("reset", client_data):
-#        arduino.write(b'\x18')
-#        data = arduino.readline().decode("utf-8") 
-        data = "ok"
+        arduino.write(b'\x18')
+        data = arduino.readline().decode("utf-8") 
         logging.info("Reset: " + data)
         ret = "ok"
 
