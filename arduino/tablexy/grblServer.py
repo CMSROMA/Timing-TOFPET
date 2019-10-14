@@ -50,7 +50,7 @@ def help():
 def Gcommand(Gstring, arduino):
     logging.debug(Gstring)
     ret = ''
-    if (arduino == 'OK'):
+    if (arduino == 'DEMO'):
         demo = True
 
     if (not arduino):
@@ -100,7 +100,7 @@ try:
     if (not args.demo):
         arduino = serial.Serial(args.usb, 9600)
     else:
-        arduino = 'OK'
+        arduino = 'DEMO'
 except:
     print("[ERROR] Cannot connect to Arduino")
     logging.warning("Cannot connect to Arduino")
