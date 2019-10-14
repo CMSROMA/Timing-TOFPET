@@ -17,8 +17,11 @@ class XYControlPanel(npyscreen.ActionForm):
         # Add the TitleText widget to the form
         self.port = self.add(npyscreen.TitleFilename, name="PORT     :", value="8820", editable=False)
         self.xyMover = XYMover(int(self.port.value))
-        self.xpos = self.add(npyscreen.TitleText, name="X_POS       :", value="0")
-        self.ypos = self.add(npyscreen.TitleText, name="Y_POS       :", value="0")
+        self.xpos = self.add(npyscreen.TitleText, name="X_POS       :", value="0", rely=4)
+        self.xposSlider  = self.add(npyscreen.TitleSlider, out_of=47, name = "X_POS       :", value=0, editable=False)
+        self.ypos = self.add(npyscreen.TitleText, name="Y_POS       :", value="0", rely=7)
+        self.yposSlider  = self.add(npyscreen.TitleSlider, out_of=47, name = "Y_POS       :", value=0, editable=False)
+
 
     def on_ok(self):
         (xpos,ypos)=self.xyMover.position().split(" ")
@@ -36,12 +39,14 @@ class XYControlPanel(npyscreen.ActionForm):
                 (xpos,ypos)=self.xyMover.position().split(" ")
                 self.xpos.value=xpos
                 self.ypos.value=ypos
+                self.xposSlider.value=int(xpos)
                 self.xpos.display()
                 self.ypos.display()
+                self.yposSlider.value=int(ypos)
 
         except ValueError as ve:
-            self.xpos.value = "Please use an integer number"
-            self.ypos.value = "Please use an integer number"
+            self.xpos.value = "Invalid coordinates. Please use an integer number"
+            self.ypos.value = "Invalid coordinates. Please use an integer number"
             self.xpos.display()
             self.ypos.display()
         except:
