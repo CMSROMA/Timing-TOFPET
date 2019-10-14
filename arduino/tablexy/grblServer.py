@@ -53,7 +53,7 @@ def Gcommand(Gstring, arduino):
     if (arduino == 'DEMO'):
         demo = True
 
-    if (not arduino):
+    if (not demo and not arduino):
         ret = 'Arduino not connected'
     data = ''
     if (len(Gstring) > 0) and (arduino != ""):
