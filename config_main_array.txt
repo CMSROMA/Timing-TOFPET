@@ -39,9 +39,9 @@ TEMPERATUREFILE arduino/temperature/temperature_tmp.txt
 MODE qdc
 TIME 1
 #TIME 1
-OUTPUT_DIR output/TestArray
+OUTPUT_DIR /home/cmsdaq/Workspace/TOFPET/Timing-TOFPET/output/TestArray
 #OUTPUT_DIR output/Pedestal
-OUTPUT_LABEL Run000003_2019-08-23-12-41-56_ARRAYTEST_WS1_NW_NC
+OUTPUT_LABEL Run000006_2019-10-14-09-13-07_ARRAYTESTALLCH_WS1_NW_NC
 #OUTPUT_LABEL PedestalTest13_2ch_100000delay
 
 #Channels
@@ -52,17 +52,46 @@ OVERWRITE_OV 7
 #REF is always CH0
 
 #  ID	NHV    VBR    OV    NCHIP    NCH    VTH_1    VTH_2    VTH_E    SIPM_CODE    SIPM_TYPE     X    Y    Z    CRYSTAL	
-CH 0	11     52.25  7.00  0	     59	    20	     20	      15       10579	    S13360-3025CS --   --   430  LYSO_3_3_5
+CH 0	11     52.25  7.00  0	     59	    20	     20	      15       10579	    S13360-3025CS --   --   165  LYSO_3_3_5
 #array 3025
-# First 8 channels in connector 1
-CH 1	19     52.48  7.00  4	     26	    10	     20	      15       15	    S13363-8975_3025 --   --   xx  LYSO_bar	
-CH 2	19     52.48  7.00  4	     16	    10	     20	      15       15	    S13363-8975_3025 --   --   xx  LYSO_bar	
-CH 3	19     52.48  7.00  4	     14	    10	     20	      15       15	    S13363-8975_3025 --   --   xx  LYSO_bar	
-CH 4	19     52.48  7.00  4	     6	    10	     20	      15       15	    S13363-8975_3025 --   --   xx  LYSO_bar	
-CH 5	19     52.48  7.00  4	     11	    10	     20	      15       15	    S13363-8975_3025 --   --   xx  LYSO_bar	
-CH 6	19     52.48  7.00  4	     1	    10	     20	      15       15	    S13363-8975_3025 --   --   xx  LYSO_bar	
-CH 7	19     52.48  7.00  4	     9	    10	     20	      15       15	    S13363-8975_3025 --   --   xx  LYSO_bar	
-CH 8	19     52.48  7.00  4	     4	    10	     20	      15       15	    S13363-8975_3025 --   --   xx  LYSO_bar	
+# SiPM channels connected to the same bar in the array: CH1-CH17 , CH2-CH18, CH3-CH19, ... , CH16-CH32
+# Connector 1
+CH 1	19     52.50  7.00  4	     26	    10	     20	      15       15	    S13363-8975_3025 --   --   540  LYSO_bar1	
+CH 2	19     52.50  7.00  4	     16	    10	     20	      15       15	    S13363-8975_3025 --   --   540  LYSO_bar2	
+CH 3	19     52.50  7.00  4	     14	    10	     20	      15       15	    S13363-8975_3025 --   --   540  LYSO_bar3	
+CH 4	19     52.50  7.00  4	     6	    10	     20	      15       15	    S13363-8975_3025 --   --   540  LYSO_bar4	
+CH 5	19     52.50  7.00  4	     11	    10	     20	      15       15	    S13363-8975_3025 --   --   540  LYSO_bar5	
+CH 6	19     52.50  7.00  4	     1	    10	     20	      15       15	    S13363-8975_3025 --   --   540  LYSO_bar6	
+CH 7	19     52.50  7.00  4	     9	    10	     20	      15       15	    S13363-8975_3025 --   --   540  LYSO_bar7	
+CH 8	19     52.50  7.00  4	     4	    10	     20	      15       15	    S13363-8975_3025 --   --   540  LYSO_bar8	
+CH 9	31     52.50  7.00  4	     30	    10	     20	      15       15	    S13363-8975_3025 --   --   540  LYSO_bar9	
+#problem in CH9 NCHIP4 NCH30 (disconnected)
+CH 10	31     52.50  7.00  4	     29	    10	     20	      15       15	    S13363-8975_3025 --   --   540  LYSO_bar10	
+CH 11	31     52.50  7.00  4	     15	    10	     20	      15       15	    S13363-8975_3025 --   --   540  LYSO_bar11	
+CH 12	31     52.50  7.00  4	     23	    10	     20	      15       15	    S13363-8975_3025 --   --   540  LYSO_bar12	
+CH 13	31     52.50  7.00  4	     17	    10	     20	      15       15	    S13363-8975_3025 --   --   540  LYSO_bar13	
+CH 14	31     52.50  7.00  4	     28	    10	     20	      15       15	    S13363-8975_3025 --   --   540  LYSO_bar14	
+CH 15	31     52.50  7.00  4	     18	    10	     20	      15       15	    S13363-8975_3025 --   --   540  LYSO_bar15	
+CH 16	31     52.50  7.00  4	     25	    10	     20	      15       15	    S13363-8975_3025 --   --   540  LYSO_bar16	
+# Connector 2
+CH 17	8      52.50  7.00  4	     51	    10	     20	      15       12	    S13363-8975_3025 --   --   540  LYSO_bar1	
+CH 18	8      52.50  7.00  4	     33	    10	     20	      15       12	    S13363-8975_3025 --   --   540  LYSO_bar2	
+CH 19	8      52.50  7.00  4	     44	    10	     20	      15       12	    S13363-8975_3025 --   --   540  LYSO_bar3	
+CH 20	8      52.50  7.00  4	     34	    10	     20	      15       12	    S13363-8975_3025 --   --   540  LYSO_bar4	
+#problem in CH20 NCHIP4 NCH34 (low signal and low rate) ??
+CH 21	29     52.50  7.00  4	     36	    10	     20	      15       12	    S13363-8975_3025 --   --   540  LYSO_bar5	
+CH 22	29     52.50  7.00  4	     48	    10	     20	      15       12	    S13363-8975_3025 --   --   540  LYSO_bar6	
+CH 23	29     52.50  7.00  4	     46	    10	     20	      15       12	    S13363-8975_3025 --   --   540  LYSO_bar7	
+CH 24	29     52.50  7.00  4	     54	    10	     20	      15       12	    S13363-8975_3025 --   --   540  LYSO_bar8	
+CH 25	29     52.50  7.00  4	     61	    10	     20	      15       12	    S13363-8975_3025 --   --   540  LYSO_bar9	
+CH 26	29     52.50  7.00  4	     63	    10	     20	      15       12	    S13363-8975_3025 --   --   540  LYSO_bar10	
+CH 27	29     52.50  7.00  4	     62	    10	     20	      15       12	    S13363-8975_3025 --   --   540  LYSO_bar11	
+#problem in CH27 NCHIP4 NCH62 (disconnected)
+CH 28	29     52.50  7.00  4	     60	    10	     20	      15       12	    S13363-8975_3025 --   --   540  LYSO_bar12	
+CH 29	8      52.50  7.00  4	     39	    10	     20	      15       12	    S13363-8975_3025 --   --   540  LYSO_bar13	
+CH 30	8      52.50  7.00  4	     41	    10	     20	      15       12	    S13363-8975_3025 --   --   540  LYSO_bar14	
+CH 31	8      52.50  7.00  4	     45	    10	     20	      15       12	    S13363-8975_3025 --   --   540  LYSO_bar15	
+CH 32	8      52.50  7.00  4	     55	    10	     20	      15       12	    S13363-8975_3025 --   --   540  LYSO_bar16	
 #3025
 #CH 1	29     51.57  7.00  4	     59	    10	     20	      15       11040	    S13360-3025CS --   --   140  LYSO_bar	
 #CH 2	8      51.50  7.00  4	     35	    10	     20	      15       11041	    S13360-3025CS --   --   140  LYSO_bar	
