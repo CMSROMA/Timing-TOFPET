@@ -12,7 +12,7 @@ from array import array
 import time
 import re
 
-usage = "usage: run from Timing-TOFPET: \n python run_DAQ.py -c config_main.txt -o output/ScanTest"
+usage = "usage: run from Timing-TOFPET: \n python run_DAQ.py -c config_main_bar.txt -o /data/TOFPET/LYSOBARS -n BAR000028_WS1_NW_NC" 
 parser = optparse.OptionParser(usage)
 parser.add_option("-c", "--config", dest="configFile",
                   help="config file")
@@ -101,7 +101,7 @@ gate_values = [15] # DeltaT[ns]/20: gate=15 -> DeltaT=300 ns
 name = "Na22PedAllChannels"
 '''
 
-
+'''
 #Main sequence (pixel+bar)
 n_ch = 3 #number of channels in config file (2 for 2 pixels, 3 for 1 pixel and 1 bar, ..)
 n_chip = 2 #number of active TOFPET2 chips
@@ -118,11 +118,11 @@ gate_values = [15] # DeltaT[ns]/20: gate=15 -> DeltaT=300 ns
 #name = "PEDESTAL_WS1_NW_NC_GATESCAN_1"
 #name = "BAR000028_WS1_NW_NC"
 name = opt.nameLabel
-
-
 '''
+
+
 #Main sequence (pixel+array)
-n_ch = 9 #number of channels in config file (2 for 2 pixels, 3 for 1 pixel and 1 bar, ..)
+n_ch = 33 #number of channels in config file (2 for 2 pixels, 3 for 1 pixel and 1 bar, ..)
 n_chip = 2 #number of active TOFPET2 chips
 t_ped = 1 #s
 t_phys = 300 #s
@@ -137,7 +137,7 @@ gate_values = [15] # DeltaT[ns]/20: gate=15 -> DeltaT=300 ns
 #name = "PEDESTAL_WS1_NW_NC_GATESCAN_1"
 #name = "BAR000028_WS1_NW_NC"
 name = opt.nameLabel
-'''
+
 
 if int(opt.pedAllChannels)==1:
     n_ch = n_chip*64
