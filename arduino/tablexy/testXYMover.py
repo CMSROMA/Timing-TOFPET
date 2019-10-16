@@ -1,38 +1,19 @@
 from xyMover import XYMover
+import time
 
-
-print "++++ Testing XYMover +++++"
+print ("++++ Testing XYMover +++++")
 
 aMover=XYMover(8820)
-aMover.moveAbsoluteXY(10,15)
-myPos=aMover.position()
-print ("XYMover now @"+myPos)
+#print (aMover.estimatedPosition())
 
-aMover.moveAbsoluteXY(15,15)
-myPos=aMover.position()
-print ("XYMover now @"+myPos)
+print ("++++ Moving to 20,25 +++++")
+print (aMover.moveAbsoluteXY(20,25))
+print (aMover.estimatedPosition())
+print ("++++ Done +++++")
 
-aMover.moveRelativeX(5)
-myPos=aMover.position()
-print ("XYMover now @"+myPos)
+print ("++++ Moving 100,30 out of bounds +++++")
+print (aMover.moveAbsoluteXY(100,30))
+print (aMover.estimatedPosition())
+print ("++++ Done +++++")
 
-aMover.moveRelativeX(-5)
-myPos=aMover.position()
-print ("XYMover now @"+myPos)
 
-aMover.moveRelativeY(5)
-myPos=aMover.position()
-print ("XYMover now @"+myPos)
-
-aMover.moveRelativeY(-5)
-myPos=aMover.position()
-print ("XYMover now @"+myPos)
-
-aMover.moveAbsoluteXY(20,20)
-myPos=aMover.position()
-print ("XYMover now @"+myPos)
-
-print "----> Going home"
-aMover.home()
-myPos=aMover.position()
-print ("XYMover now @"+myPos)

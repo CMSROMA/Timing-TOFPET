@@ -39,6 +39,7 @@ def version():
     print("home                   perform a home search")
     print("reset                  perform a reset - be careful: reset may be needed after limits are reached")
     print("position               returns the current absolute position of the table")
+    print("status                 returns the curent status")
     print("quit                   exit")
     exit(0)
 
@@ -50,6 +51,8 @@ def help():
 def Gcommand(Gstring, arduino):
     logging.debug(Gstring)
     ret = ''
+    demo = None
+
     if (arduino == 'DEMO'):
         demo = True
 
@@ -59,9 +62,12 @@ def Gcommand(Gstring, arduino):
     if (len(Gstring) > 0) and (arduino != ""):
         Gstring += '\n'
         if (not demo):
-            arduino.write(Gstring.encode())
-            while not (data.startswith('ok') or data.startswith('error')):
-                data = arduino.readline()[:-2].decode("utf-8") #the last bit gets rid of the new-line chars
+            arduino.reset_input_buffer()
+            arduino.reset_output_buffer()
+            arduino.write(Gstring.encode('utf-8'))
+#            while not (data.startswith('ok') or data.startswith('error')):
+            sleep(0.1)
+            data = arduino.readline().decode("utf-8").strip() #the last bit gets rid of the new-line chars
         else:
             data = 'ok'
         ret += data + '\n'
@@ -189,7 +195,7 @@ while (True):
     if (absolute):
         x = -int(xy[0])
         y = -int(xy[1])
-        if ((x <= 0) and (x >= -47) and (y <= 0) and (y >= -47)):
+        if ((x <= -1) and (x >= -48) and (y <= -1) and (y >= -48)):
             ret = Gcommand("G90 G01 X" + str(x) + " Y" + str(y), arduino)
         else:
             ret = "Invalid coordinates"
@@ -201,7 +207,7 @@ while (True):
         dy = -int(xy[1])
         x += dx
         y += dy
-        if ((x <= 0) and (x >= -47) and (y <= 0) and (y >= -47)):
+        if ((x <= -1) and (x >= -48) and (y <= -1) and (y >= -48)):
             ret = Gcommand("G91 G01 X" + str(dx) + " Y" + str(dy), arduino)
         else:
             ret = "Invalid coordinates"
@@ -210,10 +216,13 @@ while (True):
 
     if re.match("home", client_data):
         Gcommand("$H", arduino)
-        x = 0
-        y = 0
+        x = -1
+        y = -1
         ret = "ok"
 
+    if re.match("status", client_data):
+        ret = Gcommand("?", arduino)
+       
     if re.match("reset", client_data):
         if (not args.demo):
             arduino.write(b'\x18')
@@ -232,7 +241,7 @@ while (True):
 #    if (client_data=='quit'):
 #        ret = 'Quit. Bye' 
 
-    client_socket.send(bytes(ret))
+    client_socket.send(bytes(ret,'utf-8'))
 
     logging.info("Estimated position: (" + str(-x) + ", " + str(-y) + ")")
 
