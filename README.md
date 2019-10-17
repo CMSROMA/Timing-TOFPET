@@ -1,6 +1,7 @@
 # Table of Contents
 - [Setup](#user-content-setup)
 - [Read temperature sensors](#user-content-read-temperature-sensors)
+- [Move xy table](#user-content-move-xy-table)
 - [Connect TOFPET](#user-content-connect-tofpet)
 - [Run TOFPET](#user-content-run-tofpet)
 
