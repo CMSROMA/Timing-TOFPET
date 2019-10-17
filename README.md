@@ -32,8 +32,8 @@ The sensors are positioned in the following way in order:
 
 Open a new terminal
 ```
-cd arduino/temperature
-python3 read_temp.py -o temperature_tmp.txt -p /dev/ttyACM1 -r 9600
+cd Workspace/TOFPET/Timing-TOFPET/arduino/temperature
+python3 read_temp.py -o temperature_tmp.txt -p /dev/tempmon_0 -r 9600
 ```
 
 It will add (append) a line every 2 seconds (configurable from arduino firmware) in the output file "temperature_tmp.txt" with this format: "unix_time temp1 temp2 temp3 temp4 temp5 temp6". Temperatures are reported in Celsius degrees; unix epoch time in seconds (https://www.epochconverter.com).
@@ -47,6 +47,35 @@ Example:
 1561125972 28.00 27.12 27.31 28.12 27.06 27.19
 [...]
 ```
+
+# Move xy table
+
+Open a new terminal and start the grbl server
+```
+cd Workspace/TOFPET/Timing-TOFPET/arduino/tablexy
+python3 grblServer.py --usb /dev/motor_0 -l /tmp/test.log
+```
+
+Open a new terminal. 
+```
+cd Workspace/TOFPET/Timing-TOFPET/arduino/tablexy
+```
+
+Then you have different options:
+
+## 1) Start the GUI (to move the xy table interactively)
+NOTE: make the window size big enough (about 3/4 of the laptop screen) 
+to see the "exit" and "apply" button at the bottom right of the GUI panel.
+```
+python3 xyShell.py
+```
+
+## 2) Move the table using a python script (test example)
+```
+python3 testXYMover.py
+```
+
+NOTE: when you finish to work, remember to kill the server python script from the first terminal.
 
 # Connect TOFPET
 
