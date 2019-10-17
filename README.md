@@ -51,6 +51,8 @@ Example:
 
 # Move xy table
 
+NOTE: for the moment the xy table is connected only for the test crystal.
+
 Open a new terminal and start the grbl server
 ```
 cd Workspace/TOFPET/Timing-TOFPET/arduino/tablexy
