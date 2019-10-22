@@ -51,13 +51,41 @@ Example:
 
 # Move xy table
 
-NOTE: for the moment the xy table is connected only for the test crystal.
+## Load firmware to arduino (only the first time)
+
+* Download grbl code v0_8 from https://github.com/grbl/grbl/tree/v0_8 
+* Edit config.h file (see https://github.com/grbl/grbl/issues/224) 
+```
+#define HOMING_SEARCH_CYCLE_0 ((1<<X_AXIS)|(1<<Y_AXIS))
+#define HOMING_LOCATE_CYCLE   ((1<<X_AXIS)|(1<<Y_AXIS))
+```
+* Compile the code
+```
+make
+```
+* Upload the executable firmware grbl.hex on arduino using HexUploader (http://paulkaplan.me/HexUploader/)
+NOTE: the current version of the firmware is available at 
+```
+Workspace/TOFPET/Timing-TOFPET/arduino/tablexy/grbl.hex
+```
+
+## Use the xy table
 
 Open a new terminal and start the grbl server
 ```
 cd Workspace/TOFPET/Timing-TOFPET/arduino/tablexy
+```
+
+To move the xytable of the test crystal
+```
 python3 grblServer.py --usb /dev/motor_0 -l /tmp/test.log
 ```
+To move the xytable of the reference crystal
+```
+python3 grblServer.py --usb /dev/ttyACM2 -l /tmp/test.log
+```
+(At the moment the two xy tables cannot be used at the same time. To be fixed.)
+
 
 Open a new terminal. 
 ```
@@ -66,19 +94,20 @@ cd Workspace/TOFPET/Timing-TOFPET/arduino/tablexy
 
 Then you have different options:
 
-## 1) Start the GUI (to move the xy table interactively)
+### 1) Start the GUI (to move the xy table interactively)
 NOTE: make the window size big enough (about 3/4 of the laptop screen) 
 to see the "exit" and "apply" button at the bottom right of the GUI panel.
 ```
 python3 xyShell.py
 ```
 
-## 2) Move the table using a python script (test example)
+### 2) Move the table using a python script (test example)
 ```
 python3 testXYMover.py
 ```
 
 NOTE: when you finish to work, remember to kill the server python script from the first terminal.
+
 
 # Connect TOFPET
 
