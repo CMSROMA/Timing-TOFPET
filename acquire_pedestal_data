@@ -51,8 +51,8 @@ systemConfig = config.ConfigFromFile(args.config)
 daqd = daqd.Connection()
 daqd.initializeSystem()
 
-systemConfig.loadToHardware(daqd, bias_enable=config.APPLY_BIAS_OFF)
-#systemConfig.loadToHardware(daqd, bias_enable=config.APPLY_BIAS_ON, hw_trigger_enable=args.hwTrigger)
+#systemConfig.loadToHardware(daqd, bias_enable=config.APPLY_BIAS_OFF)
+systemConfig.loadToHardware(daqd, bias_enable=config.APPLY_BIAS_ON, hw_trigger_enable=args.hwTrigger)
 
 qdcMode = args.mode == "qdc"
 
