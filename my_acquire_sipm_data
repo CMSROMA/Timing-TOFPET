@@ -1,0 +1,118 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+from petsys import daqd, config
+from copy import deepcopy
+import argparse
+
+parser = argparse.ArgumentParser(description='Acquire data for TDC calibration')
+parser.add_argument("--config", type=str, required=True, help="Configuration file")
+parser.add_argument("-o", type=str, dest="fileNamePrefix", required=True, help="Data filename (prefix)")
+parser.add_argument("--time", type=float, required=True, help="Acquisition time (in seconds)")
+parser.add_argument("--mode", type=str, required=True, choices=["tot", "qdc"], help="Acquisition mode (ToT or QDC)")
+parser.add_argument("--enable-hw-trigger", dest="hwTrigger", action="store_true", help="Enable the hardware coincidence filter")
+parser.add_argument("--cfgChannels", type=str, dest="cfgChannels", required=True, help="Configuration file with list of channels")
+parser.add_argument("--triggerAllChannels", type=int, dest="triggerAllChannels", required=True, default=1, help="Set to 0 to enable trigger only for some channels (specified in the enabledChannels options)")
+parser.add_argument("--enabledChannels", type=str, dest="enabledChannels", required=False, help="List of channels with trigger enabled. The string format is 0_1_2_3 to eanble channels CH0, CH1, CH2, CH3 accordingly to configuration file. This flag is considered (and required) only if triggerAllChannels is set to 0, otherwise it is ignored.")
+args = parser.parse_args()
+
+################################
+
+#The configChannels .txt file  should have lines with this format
+##  ID   NHV    VBR    OV    NCHIP    NCH    VTH_1    VTH_2    VTH_E    SIPM_CODE    SIPM_TYPE     X    Y    Z    CRYSTAL
+#CH 0    11     52.25  7.00  0        59     20       20       15       10579        S13360-3025CS --   --   360  LYSO_3_3_5
+#CH 1    29     51.74  7.00  4        59     20       20       15       10580        S13360-3025CS --   --   170  LYSO_3_3_5
+cfg = open(args.cfgChannels, "r")
+
+channelList = {}
+for line in cfg:
+
+    #skip commented out lines or empty lines
+    if (line.startswith("#")):
+        continue
+    if line in ['\n','\r\n']:
+        continue
+        
+    line = line.rstrip('\n')
+    splitline = line.split()
+    linetype = splitline[0]
+    linesize = len(splitline)
+
+    if (linetype == "CH" and linesize==16):
+        CH = splitline[1]
+        NCHIP = splitline[5]
+        NCH = splitline[6]
+        #channelList.append( (int(CH),int(NCHIP),int(NCH)) )
+        channelList[int(CH)]=(int(NCHIP),int(NCH))
+
+cfg.close()
+
+print "Channels in config file: ", channelList
+
+################################
+
+channelsEnabled = []
+
+if args.triggerAllChannels==0:
+        if not args.enabledChannels:   
+                parser.error('list of files to be enabled in trigger not provided')                
+        else:
+                channelsEnabled = args.enabledChannels.split("_")
+
+        print "Channels with trigger enabled: ", channelsEnabled
+
+################################
+
+systemConfig = config.ConfigFromFile(args.config)
+
+daqd = daqd.Connection()
+daqd.initializeSystem()
+systemConfig.loadToHardware(daqd, bias_enable=config.APPLY_BIAS_ON, hw_trigger_enable=args.hwTrigger)
+
+qdcMode = args.mode == "qdc"
+
+asicsConfig = daqd.getAsicsConfig()
+print "asicsConfig : ", asicsConfig
+#for ac in asicsConfig.values():
+for key, ac in asicsConfig.items():
+        print "current asic: ", key
+        chip = key[2]
+
+        #unused?
+	gc = ac.globalConfig
+        #
+
+	for channel, cc in enumerate(ac.channelConfig):
+                #print channel
+                #print cc                
+
+                if args.triggerAllChannels==1:
+                        cc.setValue("trigger_mode_1", 0b00)
+                else:
+                        # Disable channel from triggering.
+                        cc.setValue("trigger_mode_1", 0b11)
+
+                        # Will selectively enable channels below
+                        for chEnabled in channelsEnabled:
+                                thischip = channelList[int(chEnabled)][0]
+                                thischannel = channelList[int(chEnabled)][1]
+                                if(thischip == chip and thischannel == channel):
+                                        print "Enable trigger for CH", int(chEnabled), " , chip ", chip, " , channel", channel
+                                        cc.setValue("trigger_mode_1", 0b00)                                        
+
+		if not qdcMode:
+			cc.setValue("qdc_mode", 0)
+			cc.setValue("intg_en", 0)
+			cc.setValue("intg_signal_en", 0)
+		else:
+			cc.setValue("qdc_mode", 1)
+			cc.setValue("intg_en", 1)
+			cc.setValue("intg_signal_en", 1)
+			
+
+daqd.setAsicsConfig(asicsConfig)
+
+daqd.openRawAcquisition(args.fileNamePrefix, qdcMode=qdcMode)
+daqd.acquire(args.time, 0, 0);
+
+systemConfig.loadToHardware(daqd, bias_enable=config.APPLY_BIAS_OFF)

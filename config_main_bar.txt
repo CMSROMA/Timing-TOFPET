@@ -29,9 +29,9 @@ QDC_CALIB qdc_calibration.tsv
 # - QCD_CALIB is currently not used to reconstruct energy values in qdc mode (simply, energy = raw counts)
 
 #Run settings
-#DAQSCRIPT acquire_sipm_data PHYS
+#DAQSCRIPT my_acquire_sipm_data PHYS
 DAQSCRIPT acquire_pedestal_data PED
-#DAQSCRIPT acquire_sipm_data PHYS
+#DAQSCRIPT my_acquire_sipm_data PHYS
 CONVERTSINGLESCRIPT convert_raw_to_singles
 CONVERTCOINCIDENCESCRIPT analysis/find_coincidences.py
 #CONVERTCOINCIDENCESCRIPT convert_raw_to_coincidence

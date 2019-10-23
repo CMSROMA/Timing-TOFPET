@@ -157,7 +157,7 @@ python run_TOFPET.py -c config_main.txt
 
 Physics run (overwrite options from command line):
 ```
-python run_TOFPET.py -c config_main.txt --runType PHYS -d acquire_sipm_data -t 10 -v 3 --ovref 3 -l NoSource_1 -g 15 -o output/ScanTest
+python run_TOFPET.py -c config_main.txt --runType PHYS -d my_acquire_sipm_data -t 10 -v 3 --ovref 3 -l NoSource_1 -g 15 -o output/ScanTest
 ```
 Pedestal run (overwrite options from command line):
 ```

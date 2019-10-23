@@ -14,7 +14,7 @@ import re
 
 from ROOT import *
 
-usage = "usage: run from Timing-TOFPET: \n Test (options from config_main.txt): python run_TOFPET.py -c config_main.txt \n Physics run (with options): python run_TOFPET.py -c config_main.txt --runType PHYS -d acquire_sipm_data -t 10 -v 3 --ovref 3 -l NoSource_1 -g 15 -o output/ScanTest \n Pedestal run (with options): python run_TOFPET.py -c config_main.txt --runType PED -d acquire_pedestal_data -t 1 -v 3 --ovref 3 -l Ped_1 -g 15 -o output/ScanTest"
+usage = "usage: run from Timing-TOFPET: \n Test (options from config_main.txt): python run_TOFPET.py -c config_main.txt \n Physics run (with options): python run_TOFPET.py -c config_main.txt --runType PHYS -d my_acquire_sipm_data -t 10 -v 3 --ovref 3 -l NoSource_1 -g 15 -o output/ScanTest \n Pedestal run (with options): python run_TOFPET.py -c config_main.txt --runType PED -d acquire_pedestal_data -t 1 -v 3 --ovref 3 -l Ped_1 -g 15 -o output/ScanTest"
 
 parser = optparse.OptionParser(usage)
 
@@ -48,10 +48,20 @@ parser.add_option("--runType", dest="runType",
 parser.add_option("--pedAllChannels", dest="pedAllChannels", default=0, 
                   help="Set to 1 to collect pedestals for all channels (default is 0)")
 
+parser.add_option("--triggerAllChannels", dest="triggerAllChannels", default=1, 
+                  help="Set to 0 to enable trigger only for some channels (specified in the enabledChannels options). Default is 1.")
+
+parser.add_option("--enabledChannels", dest="enabledChannels", 
+                  help="List of channels with trigger enabled. The string format is 0_1_2_3 to eanble channels CH0, CH1, CH2, CH3 accordingly to configuration file. This flag is considered (and required) only if triggerAllChannels is set to 0, otherwise it is ignored.")
+
 (opt, args) = parser.parse_args()
 
 if not opt.configFile:   
     parser.error('config file not provided')
+
+if int(opt.triggerAllChannels)==0:
+        if not opt.enabledChannels:   
+                parser.error('list of files to be enabled in trigger not provided')                
 
 ################################################
 
@@ -550,7 +560,11 @@ print daqscript
 if (daqscript == "acquire_pedestal_data"):
     commandRun = "./"+daqscript+" --config "+ config_current +" --mode "+ mode +" --time "+ runtime +" -o "+newname+" --cfgChannels "+opt.configFile+" --pedAllChannels " + str(opt.pedAllChannels)
 else:
-    commandRun = "./"+daqscript+" --config "+ config_current +" --mode "+ mode +" --time "+ runtime +" -o "+newname
+    if int(opt.triggerAllChannels)==1:
+        commandRun = "./"+daqscript+" --config "+ config_current +" --mode "+ mode +" --time "+ runtime +" -o "+newname+" --cfgChannels "+opt.configFile+" --triggerAllChannels " + str(opt.triggerAllChannels)
+    else:
+        commandRun = "./"+daqscript+" --config "+ config_current +" --mode "+ mode +" --time "+ runtime +" -o "+newname+" --cfgChannels "+opt.configFile+" --triggerAllChannels " + str(opt.triggerAllChannels)+" --enabledChannels " + str(opt.enabledChannels)
+          
 print commandRun
 os.system(commandRun)
 print "End run"
