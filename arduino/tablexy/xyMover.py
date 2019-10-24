@@ -27,7 +27,8 @@ class XYMover:
         return
 
     def home(self):
-        self.my_socket.send(bytes('home','utf-8'))
+        self.my_socket.send(bytes('home'))
+        #self.my_socket.send(bytes('home','utf-8')) #python3
         response = self.getSocketResponse()
         if not response.startswith('ok'):
             return 'error'
@@ -46,9 +47,11 @@ class XYMover:
 
     def moveAbsolute(self,pos,direction):
         if (direction == 'x'):
-            self.my_socket.send(bytes('%d %d'%(pos,self.y),'utf-8'))
+            self.my_socket.send(bytes('%d %d'%(pos,self.y)))
+            #self.my_socket.send(bytes('%d %d'%(pos,self.y),'utf-8'))#python3
         elif (direction == 'y'):
-            self.my_socket.send(bytes('%d %d'%(self.x,pos),'utf-8'))
+            self.my_socket.send(bytes('%d %d'%(self.x,pos)))
+            #self.my_socket.send(bytes('%d %d'%(self.x,pos),'utf-8'))#python3
         response = self.getSocketResponse()
         if not response.startswith('ok'):
             return 'error'
@@ -113,13 +116,15 @@ class XYMover:
         return '%d %d'%(self.x,self.y)
 
     def status(self):
-        self.my_socket.send(bytes('status','utf-8'))
+        self.my_socket.send(bytes('status'))
+        #self.my_socket.send(bytes('status','utf-8'))#python3
         response = self.getSocketResponse()
         currentStatus = response.replace('<','').replace('>','').split(",")[0]
         return currentStatus
 
     def checkCurrentPosition(self):
-        self.my_socket.send(bytes('status','utf-8'))
+        self.my_socket.send(bytes('status'))
+        #self.my_socket.send(bytes('status','utf-8'))#python3
         response = self.getSocketResponse()
         currentPos = response.split("MPos:")[1].split(",")[0:2]
         self.currentX = abs(int(round(float(currentPos[0]))))
