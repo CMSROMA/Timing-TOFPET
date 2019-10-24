@@ -98,12 +98,12 @@ Then you have different options:
 NOTE: make the window size big enough (about 3/4 of the laptop screen) 
 to see the "exit" and "apply" button at the bottom right of the GUI panel.
 ```
-python3 xyShell.py
+python xyShell.py
 ```
 
 ### 2) Move the table using a python script (test example)
 ```
-python3 testXYMover.py
+python testXYMover.py
 ```
 
 NOTE: when you finish to work, remember to kill the server python script from the first terminal.
