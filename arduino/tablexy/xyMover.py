@@ -7,10 +7,10 @@ class XYMover:
         self.my_socket = socket.socket()
         self.my_socket.settimeout(60) #to be checked if this is sufficient
         self.my_socket.connect(('127.0.0.1', port))
-        self.x = -1 
-        self.y = -1
-        self.currentX = -1
-        self.currentY = -1
+        self.x = -1. 
+        self.y = -1.
+        self.currentX = -1.
+        self.currentY = -1.
         self.home()
 
     def getSocketResponse(self):
@@ -40,17 +40,17 @@ class XYMover:
                 self.currentY != 1):
                 return 'error'
             else:
-                self.x=1
-                self.y=1
+                self.x=1.
+                self.y=1.
                 return 'ok'
 
 
     def moveAbsolute(self,pos,direction):
         if (direction == 'x'):
-            self.my_socket.send(bytes('%d %d'%(pos,self.y)))
+            self.my_socket.send(bytes('%3.1f %3.1f'%(pos,self.y)))
             #self.my_socket.send(bytes('%d %d'%(pos,self.y),'utf-8'))#python3
         elif (direction == 'y'):
-            self.my_socket.send(bytes('%d %d'%(self.x,pos)))
+            self.my_socket.send(bytes('%3.1f %3.1f'%(self.x,pos)))
             #self.my_socket.send(bytes('%d %d'%(self.x,pos),'utf-8'))#python3
         response = self.getSocketResponse()
         if not response.startswith('ok'):
@@ -113,7 +113,7 @@ class XYMover:
 #                return 'ok'
 
     def estimatedPosition(self):
-        return '%d %d'%(self.x,self.y)
+        return '%3.1f %3.1f'%(self.x,self.y)
 
     def status(self):
         self.my_socket.send(bytes('status'))
@@ -127,6 +127,6 @@ class XYMover:
         #self.my_socket.send(bytes('status','utf-8'))#python3
         response = self.getSocketResponse()
         currentPos = response.split("MPos:")[1].split(",")[0:2]
-        self.currentX = abs(int(round(float(currentPos[0]))))
-        self.currentY = abs(int(round(float(currentPos[1]))))
+        self.currentX = abs(round(float(currentPos[0]),1))
+        self.currentY = abs(round(float(currentPos[1]),1))
 
