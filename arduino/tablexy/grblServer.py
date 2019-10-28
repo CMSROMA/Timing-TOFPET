@@ -179,8 +179,8 @@ while (True):
     xy = client_data.split(" ")
     logging.debug("Received: %s" % client_data)
 
-    absolute = re.match("[0-9]+ [0-9]+", client_data)
-    relative = re.match("[\+-][0-9]+ [\+-][0-9]+", client_data)
+    absolute = re.match("[0-9]*\.?[0-9]+ [0-9]*\.?[0-9]+", client_data)
+    relative = re.match("[\+-][0-9]*\.?[0-9]+ [\+-][0-9]*\.?[0-9]+", client_data)
 
 #   About the sign of the coordinates
 #
@@ -193,22 +193,22 @@ while (True):
     yold = y
 
     if (absolute):
-        x = -int(xy[0])
-        y = -int(xy[1])
+        x = -1.*float(xy[0])
+        y = -1.*float(xy[1])
         if ((x <= -1) and (x >= -48) and (y <= -1) and (y >= -48)):
-            ret = Gcommand("G90 G01 X" + str(x) + " Y" + str(y), arduino)
+            ret = Gcommand("G90 G01 X%3.1f Y%3.1f"%(x,y), arduino)
         else:
             ret = "Invalid coordinates"
             x = xold
             y = yold
 
     if (relative):
-        dx = -int(xy[0])
-        dy = -int(xy[1])
+        dx = -1.*float(xy[0])
+        dy = -1.*float(xy[1])
         x += dx
         y += dy
         if ((x <= -1) and (x >= -48) and (y <= -1) and (y >= -48)):
-            ret = Gcommand("G91 G01 X" + str(dx) + " Y" + str(dy), arduino)
+            ret = Gcommand("G91 G01 X%3.1f Y%3.1f"%(dx,dy), arduino)
         else:
             ret = "Invalid coordinates"
             x = xold
@@ -233,7 +233,7 @@ while (True):
         ret = "ok"
 
     if re.match("position", client_data):
-        ret = str(-x) + " " + str(-y)
+        ret = "%3.1f %3.1f%"%(-x,-y)
 
 #    if re.match("help", client_data):
 #        help()
@@ -243,7 +243,7 @@ while (True):
 
     client_socket.send(bytes(ret,'utf-8'))
 
-    logging.info("Estimated position: (" + str(-x) + ", " + str(-y) + ")")
+    logging.info("Estimated position: (%3.1f,%3.1f)"%(-x,-y))
 
     sleep(0.001)
 #    if (client_data == "quit"):
