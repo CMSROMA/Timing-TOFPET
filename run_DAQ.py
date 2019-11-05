@@ -126,8 +126,8 @@ name = opt.nameLabel
 #Main sequence (pixel+array)
 n_ch = 33 #number of channels in config file (2 for 2 pixels, 3 for 1 pixel and 1 bar, ..)
 n_chip = 2 #number of active TOFPET2 chips
-t_ped = 1 #s
-t_phys = 60 #s
+t_ped = 0.5 #s
+t_phys =300#s
 t_tot = 300  #s this is approximate (it is 20-30% less of true value due to cpu processing time to make root files)
 #t_tot = 7200  #s this is approximate (it is 20-30% less of true value due to cpu processing time to make root files)
 ov_values = [7] #V
@@ -176,27 +176,27 @@ nseq = 1
 refBar = 5 #REF BAR N. = 5 (start counting from 0) so it's the sixth bar
 posRefX = 30 
 posRefY = 23
-step = 3 #3mm step from one crystal center to another in X direction
+step = 3.2 #3.2mm step from one crystal center to another in X direction
 posFirstBarX = posRefX + step*refBar 
 posFirstBarY = posRefY
 
 dict_PosScan = {
-    0: (posFirstBarX,posFirstBarY,"0_1_2_17_18"),
-    1: (posFirstBarX-1*3,posFirstBarY,"0_1_2_3_17_18_19"),
-    2: (posFirstBarX-2*3,posFirstBarY,"0_2_3_4_18_19_20"),
-    3: (posFirstBarX-3*3,posFirstBarY,"0_3_4_5_19_20_21"),
-    4: (posFirstBarX-4*3,posFirstBarY,"0_4_5_6_20_21_22"),
-    5: (posFirstBarX-5*3,posFirstBarY,"0_5_6_7_21_22_23"),
-    6: (posFirstBarX-6*3,posFirstBarY,"0_6_7_8_22_23_24"),
-    7: (posFirstBarX-7*3,posFirstBarY,"0_7_8_9_23_24_25"),
-    8: (posFirstBarX-8*3,posFirstBarY,"0_8_9_10_24_25_26"),
-    9: (posFirstBarX-9*3,posFirstBarY,"0_9_10_11_25_26_27"),
-    10: (posFirstBarX-10*3,posFirstBarY,"0_10_11_12_26_27_28"),
-    11: (posFirstBarX-11*3,posFirstBarY,"0_11_12_13_27_28_29"),
-    12: (posFirstBarX-12*3,posFirstBarY,"0_12_13_14_28_29_30"),
-    13: (posFirstBarX-13*3,posFirstBarY,"0_13_14_15_29_30_31"),
-    14: (posFirstBarX-14*3,posFirstBarY,"0_14_15_16_30_31_32"),
-    15: (posFirstBarX-15*3,posFirstBarY,"0_15_16_31_32")
+    0: (round(posFirstBarX,1),posFirstBarY,"0_1_2_17_18"),
+    1: (round(posFirstBarX-1*step,1),posFirstBarY,"0_1_2_3_17_18_19"),
+    2: (round(posFirstBarX-2*step,1),posFirstBarY,"0_2_3_4_18_19_20"),
+    3: (round(posFirstBarX-3*step,1),posFirstBarY,"0_3_4_5_19_20_21"),
+    4: (round(posFirstBarX-4*step,1),posFirstBarY,"0_4_5_6_20_21_22"),
+    5: (round(posFirstBarX-5*step,1),posFirstBarY,"0_5_6_7_21_22_23"),
+    6: (round(posFirstBarX-6*step,1),posFirstBarY,"0_6_7_8_22_23_24"),
+    7: (round(posFirstBarX-7*step,1),posFirstBarY,"0_7_8_9_23_24_25"),
+#    8: (round(posFirstBarX-8*step,1),posFirstBarY,"0_8_9_10_24_25_26"),
+    9: (round(posFirstBarX-9*step,1),posFirstBarY,"0_9_10_11_25_26_27"),
+#    10: (round(posFirstBarX-10*step,1),posFirstBarY,"0_10_11_12_26_27_28"),
+    11: (round(posFirstBarX-11*step,1),posFirstBarY,"0_11_12_13_27_28_29"),
+    12: (round(posFirstBarX-12*step,1),posFirstBarY,"0_12_13_14_28_29_30"),
+#    13: (round(posFirstBarX-13*step,1),posFirstBarY,"0_13_14_15_29_30_31"),
+    14: (round(posFirstBarX-14*step,1),posFirstBarY,"0_14_15_16_30_31_32"),
+    15: (round(posFirstBarX-15*step,1),posFirstBarY,"0_15_16_31_32")
 }
 print "Position scan" , dict_PosScan
 
@@ -219,9 +219,9 @@ for seq in range(0,nseq):
                     thisname = name+"_POS"+str(posStep)
 
                     RUN("PED",t_ped,ov,ovref,gate,thisname,1,"-9")
-                    #RUN("PHYS",t_phys,ov,ovref,gate,name,1,"-9") #trigger on all channels
-                    ##RUN("PHYS",t_phys,ov,ovref,gate,name,0,"0_6_7_8_22_23_24") #trigger on a subset of channels
+                    ##RUN("PHYS",t_phys,ov,ovref,gate,thisname,0,"0_6_7_8_22_23_24") #trigger on a subset of channels
                     RUN("PHYS",t_phys,ov,ovref,gate,thisname,0,posInfo[2]) #trigger on a subset of channels
+                    #RUN("PHYS",t_phys,ov,ovref,gate,thisname,1,"-9") #trigger on all channels
                     RUN("PED",t_ped,ov,ovref,gate,thisname,1,"-9")
 
 
