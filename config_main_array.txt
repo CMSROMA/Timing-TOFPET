@@ -46,9 +46,9 @@ TEMPERATUREFILE arduino/temperature/temperature_tmp.txt
 MODE qdc
 TIME 1
 #TIME 1
-OUTPUT_DIR output/TestArrayPosScan
+OUTPUT_DIR output/TestArray_05_11_2019
 #OUTPUT_DIR output/Pedestal
-OUTPUT_LABEL Run000045_2019-10-25-11-40-12_ARRAYTEST_WS1_NW_NC_POS14
+OUTPUT_LABEL Run000004_2019-11-05-09-49-39_ARRAY000175_ch4_ch5_pedOnly_phaseScan_POS5
 #OUTPUT_LABEL PedestalTest13_2ch_100000delay
 
 #Channels
@@ -58,6 +58,7 @@ OVERWRITE_OV 7
 #If OVERWRITE_OV -1 (same for OVERWRITE_OV_REF), use the OV values in the table below. If OVERWRITE_OV > 0 set all channels to this OV value.
 #REF is always CH0
 
+# Source Position 305
 #  ID	NHV    VBR    OV    NCHIP    NCH    VTH_1    VTH_2    VTH_E    SIPM_CODE    SIPM_TYPE     X    Y    Z    CRYSTAL	
 CH 0	11     52.25  7.00  0	     59	    20	     20	      15       10579	    S13360-3025CS 22   25   165  LYSO_3_3_5
 #array 3025
