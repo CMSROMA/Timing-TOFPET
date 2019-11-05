@@ -430,47 +430,54 @@ rms_PedTot = {}
 
 for ch in channels:
 
-    histo1 = TH1F("h1_ped1_energy_ch"+str(ch), "", 500, 0, 500)
+    histo1 = TProfile("tprof_ped1_energy_ch"+str(ch), "", 4, -0.5, 3.5, 0, 500,"s")
+    #histo1 = TH1F("h1_ped1_energy_ch"+str(ch), "", 500, 0, 500)
     histos_Ped1[ch]=histo1
-    mean_Ped1[ch]=-9 
-    rms_Ped1[ch]=-9 
 
-    histo2 = TH1F("h1_ped2_energy_ch"+str(ch), "", 500, 0, 500)
+    histo2 = TProfile("tprof_ped2_energy_ch"+str(ch), "", 4, -0.5, 3.5, 0, 500,"s")
+    #histo2 = TH1F("h1_ped2_energy_ch"+str(ch), "", 500, 0, 500)
     histos_Ped2[ch]=histo2
-    mean_Ped2[ch]=-9 
-    rms_Ped2[ch]=-9 
 
-    histoTot = TH1F("h1_pedTot_energy_ch"+str(ch), "", 500, 0, 500)
+    histoTot = TProfile("tprof_pedTot_energy_ch"+str(ch), "", 4, -0.5, 3.5, 0, 500,"s")
+    #histoTot = TH1F("h1_pedTot_energy_ch"+str(ch), "", 500, 0, 500)
     histos_PedTot[ch]=histoTot
-    mean_PedTot[ch]=-9 
-    rms_PedTot[ch]=-9 
+
+    for tac in range (0,4):
+        mean_Ped1[(ch,tac)]=-9 
+        rms_Ped1[(ch,tac)]=-9 
+        mean_Ped2[(ch,tac)]=-9 
+        rms_Ped2[(ch,tac)]=-9 
+        mean_PedTot[(ch,tac)]=-9 
+        rms_PedTot[(ch,tac)]=-9 
 
 tfilePed1.cd()
 for event in range (0,treePed1.GetEntries()):
     treePed1.GetEntry(event)
     for ch in channels:
         if( treePed1.channelID==ch):
-            histos_Ped1[ch].Fill(treePed1.energy)
-            histos_PedTot[ch].Fill(treePed1.energy)
+            histos_Ped1[ch].Fill(treePed1.tacID,treePed1.energy)
+            histos_PedTot[ch].Fill(treePed1.tacID,treePed1.energy)
 
 tfilePed2.cd()
 for event in range (0,treePed2.GetEntries()):
     treePed2.GetEntry(event)
     for ch in channels:
         if( treePed2.channelID==ch):
-            histos_Ped2[ch].Fill(treePed2.energy)
-            histos_PedTot[ch].Fill(treePed2.energy)
+            histos_Ped2[ch].Fill(treePed2.tacID,treePed2.energy)
+            histos_PedTot[ch].Fill(treePed2.tacID,treePed2.energy)
 
 for ch in channels:
 
-    mean_Ped1[ch]=histos_Ped1[ch].GetMean()
-    rms_Ped1[ch]=histos_Ped1[ch].GetRMS() 
+    for tac in range (0,4):
 
-    mean_Ped2[ch]=histos_Ped2[ch].GetMean()
-    rms_Ped2[ch]=histos_Ped2[ch].GetRMS() 
+        mean_Ped1[(ch,tac)]=histos_Ped1[ch].GetBinContent(tac+1)
+        rms_Ped1[(ch,tac)]=histos_Ped1[ch].GetBinError(tac+1)
 
-    mean_PedTot[ch]=histos_PedTot[ch].GetMean()
-    rms_PedTot[ch]=histos_PedTot[ch].GetRMS() 
+        mean_Ped2[(ch,tac)]=histos_Ped2[ch].GetBinContent(tac+1)
+        rms_Ped2[(ch,tac)]=histos_Ped2[ch].GetBinError(tac+1)
+
+        mean_PedTot[(ch,tac)]=histos_PedTot[ch].GetBinContent(tac+1)
+        rms_PedTot[(ch,tac)]=histos_PedTot[ch].GetBinError(tac+1)
 
 print "Pedestals analyzed"
 
@@ -492,8 +499,8 @@ h1_temp_int = TH1F("h1_temp_int", "", 1000, 15, 50)
 tfileSingles.cd()
 for event in range (0,treeSingles.GetEntries()):
     treeSingles.GetEntry(event)
-    if( treeSingles.channelID==channels[0]):
-        h1_energy_pixel.Fill(treeSingles.energy-mean_PedTot[channels[0]])
+    if( treeSingles.channelID==channels[0] and treeSingles.tacID > -9):
+        h1_energy_pixel.Fill(treeSingles.energy-mean_PedTot[(channels[0],treeSingles.tacID)])
     h1_temp_pixel.Fill(treeSingles.tempSiPMRef)
     h1_temp_bar.Fill(treeSingles.tempSiPMTest)
     h1_temp_int.Fill(treeSingles.tempInt)
@@ -574,17 +581,14 @@ tfileCoinc.cd()
 for event in range (0,treeCoinc.GetEntries()):
     treeCoinc.GetEntry(event)
 
-    energyPixel = treeCoinc.energy[0]-mean_PedTot[channels[0]]
-
     for ibar in range(0,16):
-
-        energy1 = treeCoinc.energy[ibar+1]-mean_PedTot[channels[ibar+1]]
-        energy2 = treeCoinc.energy[ibar+17]-mean_PedTot[channels[ibar+17]]
-        energyBar =  energy1 + energy2
 
         #FIXME
         ##array only
         #if( treeCoinc.energy[ibar+1]>-9. and treeCoinc.energy[ibar+17]>-9. ):
+        #    energy1 = treeCoinc.energy[ibar+1]-mean_PedTot[(channels[ibar+1],treeCoinc.tacID[ibar+1])]
+        #    energy2 = treeCoinc.energy[ibar+17]-mean_PedTot[(channels[ibar+17],treeCoinc.tacID[ibar+17])]
+        #    energyBar =  energy1 + energy2
         #    h1_energyTot_bar[ibar].Fill(energyBar)
         #    h1_energy1_bar[ibar].Fill(energy1)
         #    h1_energy2_bar[ibar].Fill(energy2)
@@ -593,6 +597,12 @@ for event in range (0,treeCoinc.GetEntries()):
 
         #array + pixel
         if( treeCoinc.energy[0]> -9. and treeCoinc.energy[ibar+1]>-9. and treeCoinc.energy[ibar+17]>-9. ):
+
+            energyPixel = treeCoinc.energy[0]-mean_PedTot[(channels[0],treeCoinc.tacID[0])]
+            energy1 = treeCoinc.energy[ibar+1]-mean_PedTot[(channels[ibar+1],treeCoinc.tacID[ibar+1])]
+            energy2 = treeCoinc.energy[ibar+17]-mean_PedTot[(channels[ibar+17],treeCoinc.tacID[ibar+17])]
+            energyBar =  energy1 + energy2
+
             h1_energyTot_bar_coinc[ibar].Fill(energyBar)
             h1_energy1_bar_coinc[ibar].Fill(energy1)
             h1_energy2_bar_coinc[ibar].Fill(energy2)
@@ -729,68 +739,64 @@ print fitResults[('barCoinc',"peak1","mean","value")] + fitResults[('barCoinc',"
 for event in range (0,treeCoinc.GetEntries()):
     treeCoinc.GetEntry(event)
 
-    energy1 = treeCoinc.energy[alignedBar+1]-mean_PedTot[channels[alignedBar+1]]
-    energy2 = treeCoinc.energy[alignedBar+17]-mean_PedTot[channels[alignedBar+17]]
-    energyBar =  energy1 + energy2
-
-    energyPixel = treeCoinc.energy[0]-mean_PedTot[channels[0]]
-    timeBar = (treeCoinc.time[alignedBar+1]+treeCoinc.time[alignedBar+17])/2
-    timePixel = treeCoinc.time[0]
-    deltaT = timeBar - timePixel 
-
-    #CTR
-    NsigmaCut = 1
     if( treeCoinc.energy[0]> -9. 
         and treeCoinc.energy[alignedBar+1]>-9. 
-        and treeCoinc.energy[alignedBar+17]>-9. 
-        and energyPixel > fitResults[('pixelCoinc',"peak1","mean","value")] - NsigmaCut*fitResults[('pixelCoinc',"peak1","sigma","value")] 
-        and energyPixel < fitResults[('pixelCoinc',"peak1","mean","value")] + NsigmaCut*fitResults[('pixelCoinc',"peak1","sigma","value")] 
-        and energyBar > fitResults[('barCoinc',"peak1","mean","value")] - NsigmaCut*fitResults[('barCoinc',"peak1","sigma","value")]
-        and energyBar < fitResults[('barCoinc',"peak1","mean","value")] + NsigmaCut*fitResults[('barCoinc',"peak1","sigma","value")] ):
+        and treeCoinc.energy[alignedBar+17]>-9.):
+
+        energy1 = treeCoinc.energy[alignedBar+1]-mean_PedTot[(channels[alignedBar+1],treeCoinc.tacID[alignedBar+1])]
+        energy2 = treeCoinc.energy[alignedBar+17]-mean_PedTot[(channels[alignedBar+17],treeCoinc.tacID[alignedBar+17])]
+        energyBar =  energy1 + energy2
+        
+        energyPixel = treeCoinc.energy[0]-mean_PedTot[(channels[0],treeCoinc.tacID[0])]
+        timeBar = (treeCoinc.time[alignedBar+1]+treeCoinc.time[alignedBar+17])/2
+        timePixel = treeCoinc.time[0]
+        deltaT = timeBar - timePixel 
+
+        #CTR
+        NsigmaCut = 1
+        if( energyPixel > fitResults[('pixelCoinc',"peak1","mean","value")] - NsigmaCut*fitResults[('pixelCoinc',"peak1","sigma","value")] 
+            and energyPixel < fitResults[('pixelCoinc',"peak1","mean","value")] + NsigmaCut*fitResults[('pixelCoinc',"peak1","sigma","value")] 
+            and energyBar > fitResults[('barCoinc',"peak1","mean","value")] - NsigmaCut*fitResults[('barCoinc',"peak1","sigma","value")]
+            and energyBar < fitResults[('barCoinc',"peak1","mean","value")] + NsigmaCut*fitResults[('barCoinc',"peak1","sigma","value")] ):
       
-        h1_CTR.Fill(deltaT)  
+            h1_CTR.Fill(deltaT)  
 
-    #Cross-talk
-    NsigmaCut = 1.5
-    nhits_xtalk = 0
-    energySum_xtalk = 0
-    if( treeCoinc.energy[0]> -9. 
-        and treeCoinc.energy[alignedBar+1]>-9. 
-        and treeCoinc.energy[alignedBar+17]>-9. 
-        #and energyPixel > fitResults[('pixelCoinc',"peak1","mean","value")] - NsigmaCut*fitResults[('pixelCoinc',"peak1","sigma","value")] 
-        #and energyPixel < fitResults[('pixelCoinc',"peak1","mean","value")] + NsigmaCut*fitResults[('pixelCoinc',"peak1","sigma","value")] 
-        and energyBar > fitResults[('barCoinc',"peak1","mean","value")] - NsigmaCut*fitResults[('barCoinc',"peak1","sigma","value")]
-        and energyBar < fitResults[('barCoinc',"peak1","mean","value")] + NsigmaCut*fitResults[('barCoinc',"peak1","sigma","value")] ):
+        #Cross-talk
+        NsigmaCut = 1.5
+        nhits_xtalk = 0
+        energySum_xtalk = 0
+        if( energyBar > fitResults[('barCoinc',"peak1","mean","value")] - NsigmaCut*fitResults[('barCoinc',"peak1","sigma","value")]
+            and energyBar < fitResults[('barCoinc',"peak1","mean","value")] + NsigmaCut*fitResults[('barCoinc',"peak1","sigma","value")] ):
 
-        for ibar in range(0,16):            
+            for ibar in range(0,16):            
 
-            energy1current = 0.
-            energy2current = 0.
-            time1current = 0.
-            time2current = 0.
-
-            if treeCoinc.energy[ibar+1]==-9.:    
                 energy1current = 0.
-                time1current = 0.
-            else:
-                energy1current = treeCoinc.energy[ibar+1]-mean_PedTot[channels[ibar+1]]
-                time1current = treeCoinc.time[ibar+1]
-
-            if treeCoinc.energy[ibar+17]==-9.:
                 energy2current = 0.
+                time1current = 0.
                 time2current = 0.
-            else:
-                energy2current = treeCoinc.energy[ibar+17]-mean_PedTot[channels[ibar+17]]
-                time2current = treeCoinc.time[ibar+17]
 
-            energyBarcurrent =  energy1current + energy2current
-            timeBarcurrent = (time1current + time2current)/2
-            timeDiff = timeBarcurrent - timePixel
+                if treeCoinc.energy[ibar+1]==-9.:    
+                    energy1current = 0.
+                    time1current = 0.
+                else:
+                    energy1current = treeCoinc.energy[ibar+1]-mean_PedTot[(channels[ibar+1],treeCoinc.tacID[ibar+1])]
+                    time1current = treeCoinc.time[ibar+1]
 
-            h1_energyTot_bar_Xtalk[ibar].Fill(energyBarcurrent) 
-            h1_energy1_bar_Xtalk[ibar].Fill(energy1current) 
-            h1_energy2_bar_Xtalk[ibar].Fill(energy2current) 
-            h2_deltaT_vs_energyTot_bar_Xtalk[ibar].Fill(energyBarcurrent,timeDiff)
+                if treeCoinc.energy[ibar+17]==-9.:
+                    energy2current = 0.
+                    time2current = 0.
+                else:
+                    energy2current = treeCoinc.energy[ibar+17]-mean_PedTot[(channels[ibar+17],treeCoinc.tacID[ibar+17])]
+                    time2current = treeCoinc.time[ibar+17]
+
+                energyBarcurrent =  energy1current + energy2current
+                timeBarcurrent = (time1current + time2current)/2
+                timeDiff = timeBarcurrent - timePixel
+
+                h1_energyTot_bar_Xtalk[ibar].Fill(energyBarcurrent) 
+                h1_energy1_bar_Xtalk[ibar].Fill(energy1current) 
+                h1_energy2_bar_Xtalk[ibar].Fill(energy2current) 
+                h2_deltaT_vs_energyTot_bar_Xtalk[ibar].Fill(energyBarcurrent,timeDiff)
 
 ##CTR
 c1_CTR.cd()
@@ -837,14 +843,19 @@ tfileoutput.cd()
 
 #Pedestals
 for ch in channels:
+
     #pedestals
     histos_Ped1[ch].Write()
     histos_Ped2[ch].Write()
     histos_PedTot[ch].Write()
     print "--- Channel = "+str(ch).zfill(3)+" ---"
-    print "Pedestal1 "+str(mean_Ped1[ch])+" "+str(rms_Ped1[ch]) 
-    print "Pedestal2 "+str(mean_Ped2[ch])+" "+str(rms_Ped2[ch]) 
-    print "PedestalTot "+str(mean_PedTot[ch])+" "+str(rms_PedTot[ch]) 
+
+    for tac in range(0,4):
+        print "====" 
+        print "TacID ", tac 
+        print "Pedestal1 "+str(mean_Ped1[(ch,tac)])+" "+str(rms_Ped1[(ch,tac)]) 
+        print "Pedestal2 "+str(mean_Ped2[(ch,tac)])+" "+str(rms_Ped2[(ch,tac)]) 
+        print "PedestalTot "+str(mean_PedTot[(ch,tac)])+" "+str(rms_PedTot[(ch,tac)]) 
 
 #Pixel
 h1_energy_pixel.Write()
