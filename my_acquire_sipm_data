@@ -109,6 +109,7 @@ for key, ac in asicsConfig.items():
 			cc.setValue("intg_en", 1)
 			cc.setValue("intg_signal_en", 1)
 			
+                #print "chip, channel, min_intg_time, max_intg_time", chip, channel, cc.getValue("min_intg_time"), cc.getValue("max_intg_time")
 
 daqd.setAsicsConfig(asicsConfig)
 
