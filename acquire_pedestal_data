@@ -89,12 +89,13 @@ for ac in asicsConfig.values():
 			cc.setValue("intg_en", 1)
 			cc.setValue("intg_signal_en", 1)
 
+                #print "min_intg_time, max_intg_time", cc.getValue("min_intg_time"), cc.getValue("max_intg_time")
 
 #Open raw output file
 daqd.openRawAcquisition(args.fileNamePrefix, qdcMode=qdcMode)
 
-#Set Test Pulse 2000000 ~ 100 Hz, 200000 ~ 1 kHz 
-daqd.setTestPulsePLL(200, 200000, 0, False)
+##Set Test Pulse 2000000 ~ 100 Hz, 200000 ~ 1 kHz 
+#daqd.setTestPulsePLL(200, 200000, 0, False)
 
 if args.pedAllChannels==0:
 #Collect pedestals only for channels in config file
@@ -111,18 +112,26 @@ if args.pedAllChannels==0:
             print key, ac
             chip = key[2]
             if (chip == thischip):
-                print "Enable test pulse for chip ", chip, " , channel", thischannel
-                ac.channelConfig[thischannel].setValue("trigger_mode_1", 0b01)
 
-                #update config
-                daqd.setAsicsConfig(cfgCopy)
+                #Scan test pulse phase
+                for phase in [0.0/3, 1.0/3, 2.0/3]:
 
-                #start daq
-                daqd.acquire(args.time, 0, 0);
+                    print "Enable test pulse for chip ", chip, " , channel", thischannel
+                    ac.channelConfig[thischannel].setValue("trigger_mode_1", 0b01)
 
-                #update config (disable again the current channel)
-                ac.channelConfig[thischannel].setValue("trigger_mode_1", 0b11)
-                daqd.setAsicsConfig(cfgCopy)
+                    #Set Test Pulse 2000000 ~ 100 Hz, 200000 ~ 1 kHz 
+                    print "TestPulse PLL phase: ", phase
+                    daqd.setTestPulsePLL(200, 200000, phase, False)
+
+                    #update config
+                    daqd.setAsicsConfig(cfgCopy)
+
+                    #start daq
+                    daqd.acquire(args.time, 0, 0);
+
+                    #update config (disable again the current channel)
+                    ac.channelConfig[thischannel].setValue("trigger_mode_1", 0b11)
+                    daqd.setAsicsConfig(cfgCopy)
 
 else:
 #Collect pedestals for all channels in active chips 
@@ -136,17 +145,25 @@ else:
         
             print key, ac
             chip = key[2]
-            print "Enable test pulse for chip ", chip, " , channel", thischannel
-            ac.channelConfig[thischannel].setValue("trigger_mode_1", 0b01)
+
+            #Scan test pulse phase
+            for phase in [0.0/3, 1.0/3, 2.0/3]:
+
+                print "Enable test pulse for chip ", chip, " , channel", thischannel
+                ac.channelConfig[thischannel].setValue("trigger_mode_1", 0b01)
+
+                #Set Test Pulse 2000000 ~ 100 Hz, 200000 ~ 1 kHz 
+                print "TestPulse PLL phase: ", phase
+                daqd.setTestPulsePLL(200, 200000, phase, False)
             
-            #update config
-            daqd.setAsicsConfig(cfgCopy)
+                #update config
+                daqd.setAsicsConfig(cfgCopy)
             
-            #start daq
-            daqd.acquire(args.time, 0, 0);
+                #start daq
+                daqd.acquire(args.time, 0, 0);
             
-            #update config (disable again the current channel)
-            ac.channelConfig[thischannel].setValue("trigger_mode_1", 0b11)
-            daqd.setAsicsConfig(cfgCopy)
+                #update config (disable again the current channel)
+                ac.channelConfig[thischannel].setValue("trigger_mode_1", 0b11)
+                daqd.setAsicsConfig(cfgCopy)
 
 systemConfig.loadToHardware(daqd, bias_enable=config.APPLY_BIAS_OFF)
