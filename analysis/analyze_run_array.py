@@ -582,13 +582,14 @@ for event in range (0,treeCoinc.GetEntries()):
         energy2 = treeCoinc.energy[ibar+17]-mean_PedTot[channels[ibar+17]]
         energyBar =  energy1 + energy2
 
-        #array only
-        if( treeCoinc.energy[ibar+1]>-9. and treeCoinc.energy[ibar+17]>-9. ):
-            h1_energyTot_bar[ibar].Fill(energyBar)
-            h1_energy1_bar[ibar].Fill(energy1)
-            h1_energy2_bar[ibar].Fill(energy2)
-            h1_energyDiff_bar[ibar].Fill(energy1-energy2)
-            h2_energy1VSenergy2_bar[ibar].Fill(energy1,energy2)
+        #FIXME
+        ##array only
+        #if( treeCoinc.energy[ibar+1]>-9. and treeCoinc.energy[ibar+17]>-9. ):
+        #    h1_energyTot_bar[ibar].Fill(energyBar)
+        #    h1_energy1_bar[ibar].Fill(energy1)
+        #    h1_energy2_bar[ibar].Fill(energy2)
+        #    h1_energyDiff_bar[ibar].Fill(energy1-energy2)
+        #    h2_energy1VSenergy2_bar[ibar].Fill(energy1,energy2)
 
         #array + pixel
         if( treeCoinc.energy[0]> -9. and treeCoinc.energy[ibar+1]>-9. and treeCoinc.energy[ibar+17]>-9. ):
@@ -704,7 +705,6 @@ c1_CTR = TCanvas("c1_CTR", "", 900, 700)
 #h1_Xtalk_energy = TH1F("h1_Xtalk_energy", "", 800, , 10000)
 #h1_Xtalk_relEnergy = TH1F("h1_Xtalk_relEnergy", "", 800, , 10000)
 #c1_Xtalk_nhits = TCanvas("c1_Xtalk_nhits", "", 900, 700)
-
 h1_energyTot_bar_Xtalk = {} 
 h1_energy1_bar_Xtalk = {}
 h1_energy2_bar_Xtalk = {}
@@ -749,7 +749,6 @@ for event in range (0,treeCoinc.GetEntries()):
         and energyBar < fitResults[('barCoinc',"peak1","mean","value")] + NsigmaCut*fitResults[('barCoinc',"peak1","sigma","value")] ):
       
         h1_CTR.Fill(deltaT)  
-
 
     #Cross-talk
     NsigmaCut = 1.5
@@ -824,6 +823,11 @@ c1_CTR.Update()
 c1_CTR.SaveAs(opt.outputDir+"/"+"Run"+str(opt.run.zfill(6))+"_ARRAY"+str(opt.arrayCode.zfill(6))+"_BAR"+str(alignedBar)+"_CTR"+".pdf")
 c1_CTR.SaveAs(opt.outputDir+"/"+"Run"+str(opt.run.zfill(6))+"_ARRAY"+str(opt.arrayCode.zfill(6))+"_BAR"+str(alignedBar)+"_CTR"+".png")
 c1_CTR.Write()
+
+###XTALK 
+#if(alignedBar>0 and alignedBar<7):
+#    e_1 = h1_energyTot_bar_Xtalk[ibar]
+#    e_2 = 
 
 ################################################
 ## 8) Write histograms
