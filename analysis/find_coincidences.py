@@ -108,6 +108,7 @@ n_coincidences = array( 'i', [ -9 ] )
 a_chId = array( 'd', maxn*[ -9. ] )
 a_energy = array( 'd', maxn*[ -9. ] )
 a_time = array( 'd', maxn*[ -9. ] )
+a_tacID = array( 'd', maxn*[ -9. ] )
 
 for absChId in channel_map:
     a_chId[ int(channel_map[int(absChId)]) ] = absChId
@@ -117,6 +118,7 @@ treeOutput.Branch( 'ncoinc', n_coincidences, 'ncoinc/I' )
 treeOutput.Branch( 'chId', a_chId, 'chId[nch]/D' )
 treeOutput.Branch( 'energy', a_energy, 'energy[nch]/D' )
 treeOutput.Branch( 'time', a_time, 'time[nch]/D' )
+treeOutput.Branch( 'tacID', a_tacID, 'tacID[nch]/D' )
 treeOutput.Branch( 'unixTime', unixTime, 'unixTime/L' )
 treeOutput.Branch( 'tempInt', tempInt, 'tempInt/D' )
 treeOutput.Branch( 'tempExt', tempExt, 'tempExt/D' )
@@ -169,6 +171,7 @@ while i_singles<nEntries:
     a_chId[ int(channel_map[int(treeInput.channelID)]) ] = treeInput.channelID
     a_energy[ int(channel_map[int(treeInput.channelID)]) ] = treeInput.energy
     a_time[ int(channel_map[int(treeInput.channelID)]) ] = treeInput.time
+    a_tacID[ int(channel_map[int(treeInput.channelID)]) ] = treeInput.tacID
 
     n_coinc=0
     nch_check_coinc = (int(opt.nch)-1)
@@ -198,6 +201,7 @@ while i_singles<nEntries:
             a_chId[ int(channel_map[int(treeInput.channelID)]) ] = treeInput.channelID
             a_energy[ int(channel_map[int(treeInput.channelID)]) ] = treeInput.energy
             a_time[ int(channel_map[int(treeInput.channelID)]) ] = treeInput.time
+            a_tacID[ int(channel_map[int(treeInput.channelID)]) ] = treeInput.tacID
             n_coinc=n_coinc+1 
             #print "===> i_singles= ", i_singles
             #print "k= ", k
