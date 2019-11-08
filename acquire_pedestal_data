@@ -58,7 +58,10 @@ qdcMode = args.mode == "qdc"
 
 asicsConfig = daqd.getAsicsConfig()
 for ac in asicsConfig.values():
-	gc = ac.globalConfig
+        gc = ac.globalConfig
+        #gc.setValue("v_att_diff_bias_ig", 0b111000)                            
+        #gc.setValue("v_att_diff_bias_ig", 0b100011)                            
+
 	for cc in ac.channelConfig:
                 # Disable channel from triggering.
                 # Will selectively enable channels below
@@ -122,6 +125,14 @@ if args.pedAllChannels==0:
                     #Set Test Pulse 2000000 ~ 100 Hz, 200000 ~ 1 kHz 
                     print "TestPulse PLL phase: ", phase
                     daqd.setTestPulsePLL(200, 200000, phase, False)
+
+                    # Integrator gain G1
+                    #ac.channelConfig[thischannel].setValue("att", 0b111)
+                    #ac.channelConfig[thischannel].setValue("att", 0b000)
+                    #if( chip==4 and (thischannel==11 or thischannel==36) ):
+                    #    ac.channelConfig[thischannel].setValue("att", 0b110)
+
+                    #print "=======> integ_source_sw: ", ac.channelConfig[thischannel].getValue("integ_source_sw")
 
                     #update config
                     daqd.setAsicsConfig(cfgCopy)
