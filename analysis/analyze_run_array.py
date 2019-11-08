@@ -21,14 +21,14 @@ def setParameters(function,Norm,Peak):
     ## 1274 KeV compton 
     function.SetParameter(1,0.4)
     function.SetParLimits(1,0.1,1)
-    function.SetParameter(2,1.8*Peak)
-    function.SetParLimits(2,1.7*Peak,1.9*Peak)
+    function.SetParameter(2,1.7*Peak)
+    function.SetParLimits(2,1.6*Peak,1.8*Peak)
 
     ## 1274 KeV "photo-electric" 
     function.SetParameter(3,1.)
     function.SetParLimits(3,0.2,5.)
-    function.SetParameter(4,2.1*Peak)
-    function.SetParLimits(4,2.0*Peak,2.2*Peak)
+    function.SetParameter(4,1.8*Peak)
+    function.SetParLimits(4,1.7*Peak,1.9*Peak)
     function.SetParameter(5,0.1*Peak)
     function.SetParLimits(5,0.03*Peak,0.2*Peak)
     function.SetParameter(17,0.4)
@@ -41,8 +41,8 @@ def setParameters(function,Norm,Peak):
     function.SetParLimits(6,0.,1000.)
     function.SetParameter(7,0.4)
     function.SetParLimits(7,0.1,1)
-    function.SetParameter(8,0.6*Peak)
-    function.SetParLimits(8,0.05*Peak,1.3*Peak)
+    function.SetParameter(8,0.7*Peak)
+    function.SetParLimits(8,0.6*Peak,0.85*Peak)
     
     ## Trigger turn on (Compton+BS)
     function.SetParameter(12,5.)
@@ -78,8 +78,8 @@ def setParameters_coinc(function,Norm,Peak):
     function.SetParLimits(3,0.,1000.)
     function.SetParameter(4,0.4)
     function.SetParLimits(4,0.1,1)
-    function.SetParameter(5,0.6*Peak)
-    function.SetParLimits(5,0.05*Peak,1.3*Peak)
+    function.SetParameter(5,0.7*Peak)
+    function.SetParLimits(5,0.6*Peak,0.85*Peak)
     
     ## Trigger turn on (Compton+BS)
     function.SetParameter(1,5.)
@@ -93,7 +93,7 @@ def setParameters_coinc(function,Norm,Peak):
     function.SetParameter(7,Peak)
     function.SetParLimits(7,0.9*Peak,1.1*Peak)
     function.SetParameter(8,0.05*Peak)
-    function.SetParLimits(8,0.02*Peak,0.2*Peak)
+    function.SetParLimits(8,0.02*Peak,0.1*Peak)
 
     #flat background
     function.SetParameter(9,15.)
@@ -240,10 +240,10 @@ def fitSpectrum_coinc(histo,function,xmin,xmax,canvas,fitres,label,code,barAlign
     goodChi2 = 0.
     previousChi2overNdf = -99.
     while goodChi2==0.:
-        histo.Fit(function.GetName(),"LR+0N","",xmin,min(peak*1.6,xmax))
+        histo.Fit(function.GetName(),"LR+0N","",xmin,min(peak*1.3,xmax))
         print function.GetChisquare(), function.GetNDF(), function.GetChisquare()/function.GetNDF()
         if abs(function.GetChisquare()/function.GetNDF()-previousChi2overNdf)<0.01*previousChi2overNdf:
-            histo.Fit(function.GetName(),"LR+","",xmin,min(peak*1.6,xmax))
+            histo.Fit(function.GetName(),"LR+","",xmin,min(peak*1.3,xmax))
             canvas.Update()
             goodChi2 = 1.
         previousChi2overNdf = function.GetChisquare()/function.GetNDF()
@@ -254,7 +254,7 @@ def fitSpectrum_coinc(histo,function,xmin,xmax,canvas,fitres,label,code,barAlign
     fitres[(label,"peak1","sigma","value")]=function.GetParameter(8)
     fitres[(label,"peak1","sigma","sigma")]=function.GetParError(8)
 
-    f1_bkg = TF1("f1_bkg",function,xmin,min(peak*1.6,xmax),10)
+    f1_bkg = TF1("f1_bkg",function,xmin,min(peak*1.3,xmax),10)
     f1_bkg.SetLineColor(kGreen+1)
     #f1_bkg.SetLineStyle(7)
     f1_bkg.SetParameter(0,function.GetParameter(0))
@@ -501,9 +501,9 @@ for event in range (0,treeSingles.GetEntries()):
     treeSingles.GetEntry(event)
     if( treeSingles.channelID==channels[0] and treeSingles.tacID > -9):
         h1_energy_pixel.Fill(treeSingles.energy-mean_PedTot[(channels[0],treeSingles.tacID)])
-    h1_temp_pixel.Fill(treeSingles.tempSiPMRef)
-    h1_temp_bar.Fill(treeSingles.tempSiPMTest)
-    h1_temp_int.Fill(treeSingles.tempInt)
+        h1_temp_pixel.Fill(treeSingles.tempSiPMRef)
+        h1_temp_bar.Fill(treeSingles.tempSiPMTest)
+        h1_temp_int.Fill(treeSingles.tempInt)
 
 Temp_pixel = h1_temp_pixel.GetMean()
 Temp_bar = h1_temp_bar.GetMean()
@@ -648,7 +648,7 @@ fitResults = {}
 ## Setup singles
 #minEnergy = 4
 #maxEnergy = 120
-minEnergy = 15
+minEnergy = 7
 maxEnergy = 250
 n_paramameters = 19
 
@@ -670,8 +670,8 @@ n_paramameters_coinc = 10
 ## Pixel
 #minEnergy_coinc = 4
 #maxEnergy_coinc = 65
-minEnergy_coinc = 10
-maxEnergy_coinc = 150
+minEnergy_coinc = 7
+maxEnergy_coinc = 160
 
 fTot_pixel_coinc = TF1("fTot_pixel_coinc",totalFunction_coinc,minEnergy_coinc,maxEnergy_coinc,n_paramameters_coinc)
 fTot_pixel_coinc.SetNpx(1000)
@@ -680,8 +680,8 @@ fitSpectrum_coinc(h1_energy_pixel_coinc[alignedBar],fTot_pixel_coinc,minEnergy_c
 ## Bar
 #minEnergy_coinc = 4
 #maxEnergy_coinc = 45
-minEnergy_coinc = 10
-maxEnergy_coinc = 150
+minEnergy_coinc = 7
+maxEnergy_coinc = 100
 
 fTot_bar_coinc = TF1("fTot_bar_coinc",totalFunction_coinc,minEnergy_coinc,maxEnergy_coinc,n_paramameters_coinc)
 fTot_bar_coinc.SetNpx(1000)
