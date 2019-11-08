@@ -54,6 +54,9 @@ parser.add_option("--triggerAllChannels", dest="triggerAllChannels", default=1,
 parser.add_option("--enabledChannels", dest="enabledChannels", 
                   help="List of channels with trigger enabled. The string format is 0_1_2_3 to eanble channels CH0, CH1, CH2, CH3 accordingly to configuration file. This flag is considered (and required) only if triggerAllChannels is set to 0, otherwise it is ignored.")
 
+parser.add_option("--energyThr", dest="energyThr", default="", 
+                  help="List of energy thresholds for triggering. The string format is 15_5_15_5 to set energy threshold to 15, 5, 15, 5 for channels CH0, CH1, CH2, CH3. This flag is considered (and required) only if triggerAllChannels is set to 0, otherwise it is ignored.")
+
 (opt, args) = parser.parse_args()
 
 if not opt.configFile:   
@@ -563,7 +566,9 @@ else:
     if int(opt.triggerAllChannels)==1:
         commandRun = "./"+daqscript+" --config "+ config_current +" --mode "+ mode +" --time "+ runtime +" -o "+newname+" --cfgChannels "+opt.configFile+" --triggerAllChannels " + str(opt.triggerAllChannels)
     else:
-        commandRun = "./"+daqscript+" --config "+ config_current +" --mode "+ mode +" --time "+ runtime +" -o "+newname+" --cfgChannels "+opt.configFile+" --triggerAllChannels " + str(opt.triggerAllChannels)+" --enabledChannels " + str(opt.enabledChannels)
+        commandRun = "./"+daqscript+" --config "+ config_current +" --mode "+ mode +" --time "+ runtime +" -o "+newname+" --cfgChannels "+opt.configFile+" --triggerAllChannels " + str(opt.triggerAllChannels)+" --enabledChannels " + str(opt.enabledChannels) 
+        if (opt.energyThr != ""):
+            commandRun = commandRun + " --energyThr " + str(opt.energyThr)
           
 print commandRun
 os.system(commandRun)
