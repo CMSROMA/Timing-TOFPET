@@ -14,7 +14,7 @@ parser.add_argument("--enable-hw-trigger", dest="hwTrigger", action="store_true"
 parser.add_argument("--cfgChannels", type=str, dest="cfgChannels", required=True, help="Configuration file with list of channels")
 parser.add_argument("--triggerAllChannels", type=int, dest="triggerAllChannels", required=True, default=1, help="Set to 0 to enable trigger only for some channels (specified in the enabledChannels options)")
 parser.add_argument("--enabledChannels", type=str, dest="enabledChannels", required=False, help="List of channels with trigger enabled. The string format is 0_1_2_3 to eanble channels CH0, CH1, CH2, CH3 accordingly to configuration file. This flag is considered (and required) only if triggerAllChannels is set to 0, otherwise it is ignored.")
-parser.add_argument("--energyThr", type=str, dest="energyThr", default="", required=False, help="List of energy thresholds for enabled channels. The string format is 15_5_15_15 to eanble channels CH0, CH1, CH2, CH3. This flag is considered (and required) only if triggerAllChannels is set to 0, otherwise it is ignored.")
+parser.add_argument("--energyThr", type=str, dest="energyThr", default="", required=False, help="List of energy thresholds for enabled channels. The string format is 0_10_5_3 to reduce the energy thresholds with respect to the config file by to 0, 10, 5, 3 for channels CH0, CH1, CH2, CH3.")
 
 args = parser.parse_args()
 
