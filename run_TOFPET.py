@@ -55,7 +55,7 @@ parser.add_option("--enabledChannels", dest="enabledChannels",
                   help="List of channels with trigger enabled. The string format is 0_1_2_3 to eanble channels CH0, CH1, CH2, CH3 accordingly to configuration file. This flag is considered (and required) only if triggerAllChannels is set to 0, otherwise it is ignored.")
 
 parser.add_option("--energyThr", dest="energyThr", default="", 
-                  help="List of energy thresholds for triggering. The string format is 15_5_15_5 to set energy threshold to 15, 5, 15, 5 for channels CH0, CH1, CH2, CH3. This flag is considered (and required) only if triggerAllChannels is set to 0, otherwise it is ignored.")
+                  help="List of energy thresholds for triggering. The string format is 0_10_5_3 to reduce the energy thresholds with respect to the config file by to 0, 10, 5, 3 for channels CH0, CH1, CH2, CH3.")
 
 (opt, args) = parser.parse_args()
 
