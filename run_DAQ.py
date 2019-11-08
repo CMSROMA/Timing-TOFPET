@@ -129,7 +129,7 @@ name = opt.nameLabel
 n_ch = 33 #number of channels in config file (2 for 2 pixels, 3 for 1 pixel and 1 bar, ..)
 n_chip = 2 #number of active TOFPET2 chips
 t_ped = 0.3 #s
-t_phys =20#s
+t_phys =300#s
 t_tot = 300  #s this is approximate (it is 20-30% less of true value due to cpu processing time to make root files)
 #t_tot = 7200  #s this is approximate (it is 20-30% less of true value due to cpu processing time to make root files)
 ov_values = [7] #V
@@ -183,22 +183,22 @@ posFirstBarX = posRefX + step*refBar
 posFirstBarY = posRefY
 
 dict_PosScan = {
-#        0: (round(posFirstBarX,1),posFirstBarY,"0_1_2_17_18","0_0_10_0_10"),
-#        1: (round(posFirstBarX-1*step,1),posFirstBarY,"0_1_2_3_17_18_19","0_10_0_10_10_0_10"),
-#        2: (round(posFirstBarX-2*step,1),posFirstBarY,"0_2_3_4_18_19_20","0_10_0_10_10_0_10"),
-#        3: (round(posFirstBarX-3*step,1),posFirstBarY,"0_3_4_5_19_20_21","0_10_0_10_10_0_10"),
-#    4: (round(posFirstBarX-4*step,1),posFirstBarY,"0_4_5_6_20_21_22","0_10_0_10_10_0_10"),
-    5: (round(posFirstBarX-5*step,1),posFirstBarY, "0_5_6_7_21_22_23","0_10_0_10_10_0_10"),
-#    6: (round(posFirstBarX-6*step,1),posFirstBarY,"0_6_7_8_22_23_24","0_10_0_10_10_0_10"),
-#    7: (round(posFirstBarX-7*step,1),posFirstBarY,"0_7_8_9_23_24_25","0_10_0_10_10_0_10"),
-#    8: (round(posFirstBarX-8*step,1),posFirstBarY,"0_8_9_10_24_25_26","0_10_0_10_10_0_10"),
-#    9: (round(posFirstBarX-9*step,1),posFirstBarY,"0_9_10_11_25_26_27","0_10_0_10_10_0_10"),
-#    10: (round(posFirstBarX-10*step,1),posFirstBarY,"0_10_11_12_26_27_28","0_10_0_10_10_0_10"),
-#    11: (round(posFirstBarX-11*step,1),posFirstBarY,"0_11_12_13_27_28_29","0_10_0_10_10_0_10"),
-#    12: (round(posFirstBarX-12*step,1),posFirstBarY,"0_12_13_14_28_29_30","0_10_0_10_10_0_10"),
-#    13: (round(posFirstBarX-13*step,1),posFirstBarY,"0_13_14_15_29_30_31","0_10_0_10_10_0_10"),
-#    14: (round(posFirstBarX-14*step,1),posFirstBarY,"0_14_15_16_30_31_32","0_10_0_10_10_0_10"),
-    #    15: (round(posFirstBarX-15*step,1),posFirstBarY,"0_15_16_31_32","0_10_0_10_0")
+#        0: (round(posFirstBarX,1),round(posFirstBarY,1),"0_1_2_17_18","0_0_10_0_10"),
+#        1: (round(posFirstBarX-1*step,1),round(posFirstBarY,1),"0_1_2_3_17_18_19","0_10_0_10_10_0_10"),
+#        2: (round(posFirstBarX-2*step,1),round(posFirstBarY,1),"0_2_3_4_18_19_20","0_10_0_10_10_0_10"),
+#        3: (round(posFirstBarX-3*step,1),round(posFirstBarY,1),"0_3_4_5_19_20_21","0_10_0_10_10_0_10"),
+#    4: (round(posFirstBarX-4*step,1),round(posFirstBarY,1),"0_4_5_6_20_21_22","0_10_0_10_10_0_10"),
+    5: (round(posFirstBarX-5*step,1),round(posFirstBarY,1), "0_5_6_7_21_22_23","0_10_0_10_10_0_10"),
+#    6: (round(posFirstBarX-6*step,1),round(posFirstBarY,1),"0_6_7_8_22_23_24","0_10_0_10_10_0_10"),
+#    7: (round(posFirstBarX-7*step,1),round(posFirstBarY,1),"0_7_8_9_23_24_25","0_10_0_10_10_0_10"),
+#    8: (round(posFirstBarX-8*step,1),round(posFirstBarY,1),"0_8_9_10_24_25_26","0_10_0_10_10_0_10"),
+#    9: (round(posFirstBarX-9*step,1),round(posFirstBarY,1),"0_9_10_11_25_26_27","0_10_0_10_10_0_10"),
+#    10: (round(posFirstBarX-10*step,1),round(posFirstBarY,1),"0_10_11_12_26_27_28","0_10_0_10_10_0_10"),
+#    11: (round(posFirstBarX-11*step,1),round(posFirstBarY,1),"0_11_12_13_27_28_29","0_10_0_10_10_0_10"),
+#    12: (round(posFirstBarX-12*step,1),round(posFirstBarY,1),"0_12_13_14_28_29_30","0_10_0_10_10_0_10"),
+#    13: (round(posFirstBarX-13*step,1),round(posFirstBarY,1),"0_13_14_15_29_30_31","0_10_0_10_10_0_10"),
+#    14: (round(posFirstBarX-14*step,1),round(posFirstBarY,1),"0_14_15_16_30_31_32","0_10_0_10_10_0_10"),
+#    15: (round(posFirstBarX-15*step,1),round(posFirstBarY,1),"0_15_16_31_32","0_10_0_10_0")
 }
 print "Position scan" , dict_PosScan
 
@@ -210,6 +210,7 @@ for seq in range(0,nseq):
         for ovref in ovref_values:
             for gate in gate_values:
                 for posStep, posInfo in dict_PosScan.items():
+
                     print "++++ Centering Bar: "+str(posStep)+": X="+str(posInfo[0])+" Y="+str(posInfo[1])+" Channels="+str(posInfo[2])+" +++++"
                     print aMover.moveAbsoluteXY(posInfo[0],posInfo[1])
                     if (aMover.moveAbsoluteXY(posInfo[0],posInfo[1]) is "error"):
@@ -218,13 +219,13 @@ for seq in range(0,nseq):
                     print aMover.estimatedPosition()
                     print "++++ Done +++++"                    
 
-                    thisname = name+"_POS"+str(posStep)
+                    thisname = name+"_POS"+str(posStep)+"_X"+str(posInfo[0]).replace(".","p")+"_Y"+str(posInfo[1]).replace(".","p")
 
-                    #RUN("PED",t_ped,ov,ovref,gate,thisname,1,"-9")
-                    ##RUN("PHYS",t_phys,ov,ovref,gate,thisname,0,"0_6_7_8_22_23_24") #trigger on a subset of channels
+                    RUN("PED",t_ped,ov,ovref,gate,thisname,1,"-9")
+                    ##RUN("PHYS",t_phys,ov,ovref,gate,thisname,0,"0_6_7_8_22_23_24","0_10_0_10_10_0_10") #trigger on a subset of channels
                     RUN("PHYS",t_phys,ov,ovref,gate,thisname,0,posInfo[2],posInfo[3]) #trigger on a subset of channels
                     #RUN("PHYS",t_phys,ov,ovref,gate,thisname,1,"-9") #trigger on all channels
-                    #RUN("PED",t_ped,ov,ovref,gate,thisname,1,"-9")
+                    RUN("PED",t_ped,ov,ovref,gate,thisname,1,"-9")
 
 
 
