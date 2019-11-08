@@ -646,8 +646,10 @@ tfileoutput.cd()
 fitResults = {}
 
 ## Setup singles
-minEnergy = 4
-maxEnergy = 120
+#minEnergy = 4
+#maxEnergy = 120
+minEnergy = 15
+maxEnergy = 250
 n_paramameters = 19
 
 ## Pixel
@@ -666,16 +668,20 @@ fitSpectrum(h1_energyTot_bar,fTot_bar,minEnergy,maxEnergy,c1_energyTot_bar,fitRe
 n_paramameters_coinc = 10
 
 ## Pixel
-minEnergy_coinc = 4
-maxEnergy_coinc = 65
+#minEnergy_coinc = 4
+#maxEnergy_coinc = 65
+minEnergy_coinc = 10
+maxEnergy_coinc = 150
 
 fTot_pixel_coinc = TF1("fTot_pixel_coinc",totalFunction_coinc,minEnergy_coinc,maxEnergy_coinc,n_paramameters_coinc)
 fTot_pixel_coinc.SetNpx(1000)
 fitSpectrum_coinc(h1_energy_pixel_coinc[alignedBar],fTot_pixel_coinc,minEnergy_coinc,maxEnergy_coinc,c1_energy_pixel_coinc[alignedBar],fitResults,"pixelCoinc",opt.arrayCode,alignedBar,opt.run,opt.outputDir)
 
 ## Bar
-minEnergy_coinc = 4
-maxEnergy_coinc = 45
+#minEnergy_coinc = 4
+#maxEnergy_coinc = 45
+minEnergy_coinc = 10
+maxEnergy_coinc = 150
 
 fTot_bar_coinc = TF1("fTot_bar_coinc",totalFunction_coinc,minEnergy_coinc,maxEnergy_coinc,n_paramameters_coinc)
 fTot_bar_coinc.SetNpx(1000)
@@ -711,14 +717,15 @@ h1_CTR = TH1F("h1_CTR", "", 800, -10000, 10000)
 c1_CTR = TCanvas("c1_CTR", "", 900, 700)
 
 #Cross-talk
-#h1_Xtalk_nhits = TH1F("h1_Xtalk_nhits", "", 4, 0, 4)
-#h1_Xtalk_energy = TH1F("h1_Xtalk_energy", "", 800, , 10000)
-#h1_Xtalk_relEnergy = TH1F("h1_Xtalk_relEnergy", "", 800, , 10000)
-#c1_Xtalk_nhits = TCanvas("c1_Xtalk_nhits", "", 900, 700)
+h1_nhits_Xtalk = TH1F("h1_nhits_Xtalk", "", 8, 0, 8)
+h1_nbars_Xtalk = TH1F("h1_nbars_Xtalk", "", 17, 0, 17)
+h2_nbars_vs_nhits_Xtalk = TH2F("h2_nbars_vs_nhits_Xtalk", "", 8, 0, 8, 17, 0, 17)
+h1_energySum_Xtalk = TH1F("h1_energySum_Xtalk", "", 220, -20, 200)
+h2_energySum_vs_energyBar_Xtalk = TH2F("h2_energySum_vs_energyBar_Xtalk", "", 220, -20, 200, 220, -20, 200)
 h1_energyTot_bar_Xtalk = {} 
 h1_energy1_bar_Xtalk = {}
 h1_energy2_bar_Xtalk = {}
-h2_deltaT_vs_energyTot_bar_Xtalk = {} 
+#h2_deltaT_vs_energyTot_bar_Xtalk = {} 
 
 for ibar in range(0,16):            
     histo_energyTot_Xtalk = TH1F("h1_energyTot_bar_Xtalk"+str(ibar), "", 220, -20, 200)
@@ -727,8 +734,8 @@ for ibar in range(0,16):
     h1_energy1_bar_Xtalk[ibar]=histo_energy1_Xtalk
     histo_energy2_Xtalk = TH1F("h1_energy2_bar_Xtalk"+str(ibar), "", 220, -20, 200)
     h1_energy2_bar_Xtalk[ibar]=histo_energy2_Xtalk
-    histo_deltaTVSenergyBarXtalk = TH2F("h2_deltaT_vs_energyTot_bar_Xtalk"+str(ibar), "", 220, -20, 200, 800, -10000, 10000)
-    h2_deltaT_vs_energyTot_bar_Xtalk[ibar]=histo_deltaTVSenergyBarXtalk
+    #histo_deltaTVSenergyBarXtalk = TH2F("h2_deltaT_vs_energyTot_bar_Xtalk"+str(ibar), "", 220, -20, 200, 800, -10000, 10000)
+    #h2_deltaT_vs_energyTot_bar_Xtalk[ibar]=histo_deltaTVSenergyBarXtalk
 
 print "Cuts for CTR calculation:"
 print fitResults[('pixelCoinc',"peak1","mean","value")] - fitResults[('pixelCoinc',"peak1","sigma","value")]
@@ -762,13 +769,18 @@ for event in range (0,treeCoinc.GetEntries()):
             h1_CTR.Fill(deltaT)  
 
         #Cross-talk
-        NsigmaCut = 1.5
+        NsigmaCut = 2
         nhits_xtalk = 0
-        energySum_xtalk = 0
+        nbars_xtalk = 0
+        energySum_xtalk = 0.
         if( energyBar > fitResults[('barCoinc',"peak1","mean","value")] - NsigmaCut*fitResults[('barCoinc',"peak1","sigma","value")]
             and energyBar < fitResults[('barCoinc',"peak1","mean","value")] + NsigmaCut*fitResults[('barCoinc',"peak1","sigma","value")] ):
 
+            ## loop over bars except aligned bar
             for ibar in range(0,16):            
+
+                if (ibar==alignedBar):
+                    continue
 
                 energy1current = 0.
                 energy2current = 0.
@@ -779,6 +791,7 @@ for event in range (0,treeCoinc.GetEntries()):
                     energy1current = 0.
                     time1current = 0.
                 else:
+                    nhits_xtalk += 1
                     energy1current = treeCoinc.energy[ibar+1]-mean_PedTot[(channels[ibar+1],treeCoinc.tacID[ibar+1])]
                     time1current = treeCoinc.time[ibar+1]
 
@@ -786,17 +799,30 @@ for event in range (0,treeCoinc.GetEntries()):
                     energy2current = 0.
                     time2current = 0.
                 else:
+                    nhits_xtalk += 1
                     energy2current = treeCoinc.energy[ibar+17]-mean_PedTot[(channels[ibar+17],treeCoinc.tacID[ibar+17])]
                     time2current = treeCoinc.time[ibar+17]
 
-                energyBarcurrent =  energy1current + energy2current
-                timeBarcurrent = (time1current + time2current)/2
-                timeDiff = timeBarcurrent - timePixel
+                if treeCoinc.energy[ibar+1]>-9. and treeCoinc.energy[ibar+17]>-9. :
+                    nbars_xtalk += 1
+
+                energyBarcurrent =  energy1current + energy2current                
+                energySum_xtalk += energyBarcurrent
+                #timeBarcurrent = (time1current + time2current)/2
+                #timeDiff = timeBarcurrent - timePixel
 
                 h1_energyTot_bar_Xtalk[ibar].Fill(energyBarcurrent) 
                 h1_energy1_bar_Xtalk[ibar].Fill(energy1current) 
                 h1_energy2_bar_Xtalk[ibar].Fill(energy2current) 
-                h2_deltaT_vs_energyTot_bar_Xtalk[ibar].Fill(energyBarcurrent,timeDiff)
+                #h2_deltaT_vs_energyTot_bar_Xtalk[ibar].Fill(energyBarcurrent,timeDiff)
+
+                ## --> end loop over bars
+                
+            h1_nhits_Xtalk.Fill(nhits_xtalk)           
+            h2_nbars_vs_nhits_Xtalk.Fill(nhits_xtalk,nbars_xtalk)
+            h1_energySum_Xtalk.Fill(energySum_xtalk)
+            if(nhits_xtalk>0):
+                h2_energySum_vs_energyBar_Xtalk.Fill(energySum_xtalk,energyBar)
 
 ##CTR
 c1_CTR.cd()
@@ -893,11 +919,14 @@ for ibar in range(0,16):
     h2_energyPixelVSenergyBar_coinc[ibar].Write()
 
 #Xtalk
+h1_nhits_Xtalk.Write()         
+h1_energySum_Xtalk.Write()
+h2_energySum_vs_energyBar_Xtalk.Write()
 for ibar in range(0,16):
     h1_energyTot_bar_Xtalk[ibar].Write()
     h1_energy1_bar_Xtalk[ibar].Write()
     h1_energy2_bar_Xtalk[ibar].Write()
-    h2_deltaT_vs_energyTot_bar_Xtalk[ibar].Write()
+    #h2_deltaT_vs_energyTot_bar_Xtalk[ibar].Write()
 
 print "--- CTR ---"
 print "CTR mean: "+str(fitResults[('barCoinc',"CTR","mean","value")])+" +/- "+str(fitResults[('barCoinc',"CTR","mean","sigma")]) 
