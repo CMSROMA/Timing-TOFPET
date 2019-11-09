@@ -37,18 +37,18 @@ QDC_CALIB qdc_calibration.tsv
 
 #Run settings
 #DAQSCRIPT my_acquire_sipm_data PHYS
-DAQSCRIPT my_acquire_sipm_data PHYS
+DAQSCRIPT acquire_pedestal_data PED
 #DAQSCRIPT my_acquire_sipm_data PHYS
 CONVERTSINGLESCRIPT convert_raw_to_singles
 CONVERTCOINCIDENCESCRIPT analysis/find_coincidences.py
 #CONVERTCOINCIDENCESCRIPT convert_raw_to_coincidence
 TEMPERATUREFILE arduino/temperature/temperature_tmp.txt
 MODE qdc
-TIME 20
+TIME 0.3
 #TIME 1
-OUTPUT_DIR output/TestArrayReproducibility_08_11_2019
+OUTPUT_DIR output/TestArray_09_11_2019
 #OUTPUT_DIR output/Pedestal
-OUTPUT_LABEL Run000001_2019-11-08-15-08-08_ARRAY000175_POS5
+OUTPUT_LABEL Run000019_2019-11-09-10-03-01_ARRAY000175_POS5_X30.0_Y23.0_CH_ETHR
 #OUTPUT_LABEL PedestalTest13_2ch_100000delay
 
 #Channels
@@ -79,6 +79,7 @@ CH 11	31     52.50  7.00  4	     15	    10	     20	      15       15	    S13363-
 CH 12	31     52.50  7.00  4	     23	    10	     20	      15       15	    S13363-8975_3025 --   --   540  LYSO_bar11	
 CH 13	31     52.50  7.00  4	     17	    10	     20	      15       15	    S13363-8975_3025 --   --   540  LYSO_bar12	
 CH 14	31     52.50  7.00  4	     28	    10	     20	      15       15	    S13363-8975_3025 --   --   540  LYSO_bar13	
+#problem in CH14 NCHIP4 NCH28 (no signal)
 CH 15	31     52.50  7.00  4	     18	    10	     20	      15       15	    S13363-8975_3025 --   --   540  LYSO_bar14	
 CH 16	31     52.50  7.00  4	     25	    10	     20	      15       15	    S13363-8975_3025 --   --   540  LYSO_bar15	
 # Connector 2
