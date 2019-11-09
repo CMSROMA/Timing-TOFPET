@@ -48,11 +48,8 @@ parser.add_option("--runType", dest="runType",
 parser.add_option("--pedAllChannels", dest="pedAllChannels", default=0, 
                   help="Set to 1 to collect pedestals for all channels (default is 0)")
 
-parser.add_option("--triggerAllChannels", dest="triggerAllChannels", default=1, 
-                  help="Set to 0 to enable trigger only for some channels (specified in the enabledChannels options). Default is 1.")
-
-parser.add_option("--enabledChannels", dest="enabledChannels", 
-                  help="List of channels with trigger enabled. The string format is 0_1_2_3 to eanble channels CH0, CH1, CH2, CH3 accordingly to configuration file. This flag is considered (and required) only if triggerAllChannels is set to 0, otherwise it is ignored.")
+parser.add_option("--enabledChannels", dest="enabledChannels", default="",
+                  help="List of channels with trigger enabled. The string format is 0_1_2_3 to eanble channels CH0, CH1, CH2, CH3 accordingly to configuration file. If nothing is specified all channels in configuration file can trigger.")
 
 parser.add_option("--energyThr", dest="energyThr", default="", 
                   help="List of energy thresholds for triggering. The string format is 0_10_5_3 to reduce the energy thresholds with respect to the config file by to 0, 10, 5, 3 for channels CH0, CH1, CH2, CH3.")
@@ -62,9 +59,8 @@ parser.add_option("--energyThr", dest="energyThr", default="",
 if not opt.configFile:   
     parser.error('config file not provided')
 
-if int(opt.triggerAllChannels)==0:
-        if not opt.enabledChannels:   
-                parser.error('list of files to be enabled in trigger not provided')                
+if (opt.enabledChannels != "" and opt.energyThr == ""):
+    parser.error('Please provide the energy threshold modifiers for the channels enabled in the trigger.')                
 
 ################################################
 
@@ -563,10 +559,9 @@ print daqscript
 if (daqscript == "acquire_pedestal_data"):
     commandRun = "./"+daqscript+" --config "+ config_current +" --mode "+ mode +" --time "+ runtime +" -o "+newname+" --cfgChannels "+opt.configFile+" --pedAllChannels " + str(opt.pedAllChannels)
 else:
-    if int(opt.triggerAllChannels)==1:
-        commandRun = "./"+daqscript+" --config "+ config_current +" --mode "+ mode +" --time "+ runtime +" -o "+newname+" --cfgChannels "+opt.configFile+" --triggerAllChannels " + str(opt.triggerAllChannels)
-    else:
-        commandRun = "./"+daqscript+" --config "+ config_current +" --mode "+ mode +" --time "+ runtime +" -o "+newname+" --cfgChannels "+opt.configFile+" --triggerAllChannels " + str(opt.triggerAllChannels)+" --enabledChannels " + str(opt.enabledChannels) 
+    commandRun = "./"+daqscript+" --config "+ config_current +" --mode "+ mode +" --time "+ runtime +" -o "+newname+" --cfgChannels "+opt.configFile
+    if (opt.enabledChannels != ""):
+        commandRun = commandRun +" --enabledChannels " + str(opt.enabledChannels)         
         if (opt.energyThr != ""):
             commandRun = commandRun + " --energyThr " + str(opt.energyThr)
           

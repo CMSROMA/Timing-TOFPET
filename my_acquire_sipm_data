@@ -12,8 +12,7 @@ parser.add_argument("--time", type=float, required=True, help="Acquisition time 
 parser.add_argument("--mode", type=str, required=True, choices=["tot", "qdc"], help="Acquisition mode (ToT or QDC)")
 parser.add_argument("--enable-hw-trigger", dest="hwTrigger", action="store_true", help="Enable the hardware coincidence filter")
 parser.add_argument("--cfgChannels", type=str, dest="cfgChannels", required=True, help="Configuration file with list of channels")
-parser.add_argument("--triggerAllChannels", type=int, dest="triggerAllChannels", required=True, default=1, help="Set to 0 to enable trigger only for some channels (specified in the enabledChannels options)")
-parser.add_argument("--enabledChannels", type=str, dest="enabledChannels", required=False, help="List of channels with trigger enabled. The string format is 0_1_2_3 to eanble channels CH0, CH1, CH2, CH3 accordingly to configuration file. This flag is considered (and required) only if triggerAllChannels is set to 0, otherwise it is ignored.")
+parser.add_argument("--enabledChannels", type=str, dest="enabledChannels", default="",required=False, help="List of channels with trigger enabled. The string format is 0_1_2_3 to eanble channels CH0, CH1, CH2, CH3 accordingly to configuration file. If nothing is specified all channels in configuration file can trigger.")
 parser.add_argument("--energyThr", type=str, dest="energyThr", default="", required=False, help="List of energy thresholds for enabled channels. The string format is 0_10_5_3 to reduce the energy thresholds with respect to the config file by to 0, 10, 5, 3 for channels CH0, CH1, CH2, CH3.")
 
 args = parser.parse_args()
@@ -56,20 +55,20 @@ print "Channels in config file: ", channelList
 channelsEnabled = []
 energyThresholds = []
 
-if args.triggerAllChannels==0:
+if args.enabledChannels!="":
 
-        if not args.enabledChannels:   
-            parser.error('list of files to be enabled in trigger not provided')                
-        else:
-            channelsEnabled = args.enabledChannels.split("_")
+    channelsEnabled = args.enabledChannels.split("_")
 
-        if args.energyThr != "":   
-            energyThresholds = args.energyThr.split("_")
-            if (len (energyThresholds) != len(channelsEnabled)):
-                parser.error('Number of threshodls differnet from number of enabled channels')                
+    if args.energyThr == "":
+        parser.error('Please provide the energy threshold modifiers for the channels enabled in the trigger.')                
 
-        print "Channels with trigger enabled: ", channelsEnabled
-        print "Energy thresholds: ", energyThresholds
+    if args.energyThr != "":   
+        energyThresholds = args.energyThr.split("_")
+        if (len (energyThresholds) != len(channelsEnabled)):
+            parser.error('Number of energy thresholds differnet from number of channels enabled in the trigger.')                
+
+    print "Channels with trigger enabled: ", channelsEnabled
+    print "Modifiers to energy thresholds (reduction of value wrt to config file): ", energyThresholds
 
 ################################
 
@@ -90,25 +89,16 @@ for key, ac in asicsConfig.items():
 
         #unused?
 	gc = ac.globalConfig
-        #
-        #gc.setValue("v_att_diff_bias_ig", 0b111000)                            
-        #gc.setValue("v_att_diff_bias_ig", 0b100011)                  
 
 	for channel, cc in enumerate(ac.channelConfig):
                 #print channel
                 #print cc                
 
-                if args.triggerAllChannels==1:
+                if args.enabledChannels=="":
                         cc.setValue("trigger_mode_1", 0b00)
                 else:
                         # Disable channel from triggering.
                         cc.setValue("trigger_mode_1", 0b11)
-
-                        # Integrator gain G1
-                        #cc.setValue("att", 0b111)
-                        #cc.setValue("att", 0b000)
-                        #if( chip==4 and (channel==11 or channel==36) ):
-                        #    cc.setValue("att", 0b110)
 
                         # Will selectively enable channels below
                         for ich, chEnabled in enumerate(channelsEnabled):                                
