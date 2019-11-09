@@ -75,6 +75,8 @@ def RUN(runtype,time,ov,ovref,gate,label,enabledCh="",thresholds=""):
 
     if(runtype == "PED"):
         commandRun = "python run_TOFPET.py -c "+ opt.configFile+" --runType PED -d acquire_pedestal_data " + "-t "+ str(time)+" -v "+str(ov)+" --ovref "+str(ovref)+" -l "+str(newlabel)+" -g "+str(gate)+" -o "+opt.outputFolder+" --pedAllChannels " + str(opt.pedAllChannels)
+        if (enabledCh!=""):
+            commandRun = commandRun +" --enabledChannels " + str(enabledCh) 
 
     if(runtype == "PHYS"):
         commandRun = "python run_TOFPET.py -c "+ opt.configFile+" --runType PHYS -d my_acquire_sipm_data " + "-t "+ str(time)+" -v "+str(ov)+" --ovref "+str(ovref)+" -l "+str(newlabel)+" -g "+str(gate)+" -o "+opt.outputFolder
@@ -185,22 +187,22 @@ posFirstBarY = posRefY
 
 dict_PosScan = {
     ## BAD BARS (at least one channel with no signal): 8, 10, 13
-    0: (round(posFirstBarX,1),round(posFirstBarY,1),"0_1_2_17_18","0_0_10_0_10"),
-    1: (round(posFirstBarX-1*stepX,1),round(posFirstBarY,1),"0_1_2_3_17_18_19","0_10_0_10_10_0_10"),
-    2: (round(posFirstBarX-2*stepX,1),round(posFirstBarY,1),"0_2_3_4_18_19_20","0_10_0_10_10_0_10"),
-    3: (round(posFirstBarX-3*stepX,1),round(posFirstBarY,1),"0_3_4_5_19_20_21","0_10_0_10_10_0_10"),
-    4: (round(posFirstBarX-4*stepX,1),round(posFirstBarY,1),"0_4_5_6_20_21_22","0_10_0_10_10_0_10"),
+#    0: (round(posFirstBarX,1),round(posFirstBarY,1),"0_1_2_17_18","0_0_10_0_10"),
+#    1: (round(posFirstBarX-1*stepX,1),round(posFirstBarY,1),"0_1_2_3_17_18_19","0_10_0_10_10_0_10"),
+#    2: (round(posFirstBarX-2*stepX,1),round(posFirstBarY,1),"0_2_3_4_18_19_20","0_10_0_10_10_0_10"),
+#    3: (round(posFirstBarX-3*stepX,1),round(posFirstBarY,1),"0_3_4_5_19_20_21","0_10_0_10_10_0_10"),
+#    4: (round(posFirstBarX-4*stepX,1),round(posFirstBarY,1),"0_4_5_6_20_21_22","0_10_0_10_10_0_10"),
     5: (round(posFirstBarX-5*stepX,1),round(posFirstBarY,1),"0_5_6_7_21_22_23","0_10_0_10_10_0_10"),
-    6: (round(posFirstBarX-6*stepX,1),round(posFirstBarY,1),"0_6_7_8_22_23_24","0_10_0_10_10_0_10"),
-    7: (round(posFirstBarX-7*stepX,1),round(posFirstBarY,1),"0_7_8_9_23_24_25","0_10_0_10_10_0_10"),
-#    8: (round(posFirstBarX-8*stepX,1),round(posFirstBarY,1),"0_8_9_10_24_25_26","0_10_0_10_10_0_10"),
-    9: (round(posFirstBarX-9*stepX,1),round(posFirstBarY,1),"0_9_10_11_25_26_27","0_10_0_10_10_0_10"),
-#    10: (round(posFirstBarX-10*stepX,1),round(posFirstBarY,1),"0_10_11_12_26_27_28","0_10_0_10_10_0_10"),
-    11: (round(posFirstBarX-11*stepX,1),round(posFirstBarY,1),"0_11_12_13_27_28_29","0_10_0_10_10_0_10"),
-    12: (round(posFirstBarX-12*stepX,1),round(posFirstBarY,1),"0_12_13_14_28_29_30","0_10_0_10_10_0_10"),
-#    13: (round(posFirstBarX-13*stepX,1),round(posFirstBarY,1),"0_13_14_15_29_30_31","0_10_0_10_10_0_10"),
-    14: (round(posFirstBarX-14*stepX,1),round(posFirstBarY,1),"0_14_15_16_30_31_32","0_10_0_10_10_0_10"),
-    15: (round(posFirstBarX-15*stepX,1),round(posFirstBarY,1),"0_15_16_31_32","0_10_0_10_0")
+#    6: (round(posFirstBarX-6*stepX,1),round(posFirstBarY,1),"0_6_7_8_22_23_24","0_10_0_10_10_0_10"),
+#    7: (round(posFirstBarX-7*stepX,1),round(posFirstBarY,1),"0_7_8_9_23_24_25","0_10_0_10_10_0_10"),
+##    8: (round(posFirstBarX-8*stepX,1),round(posFirstBarY,1),"0_8_9_10_24_25_26","0_10_0_10_10_0_10"),
+#    9: (round(posFirstBarX-9*stepX,1),round(posFirstBarY,1),"0_9_10_11_25_26_27","0_10_0_10_10_0_10"),
+##    10: (round(posFirstBarX-10*stepX,1),round(posFirstBarY,1),"0_10_11_12_26_27_28","0_10_0_10_10_0_10"),
+#    11: (round(posFirstBarX-11*stepX,1),round(posFirstBarY,1),"0_11_12_13_27_28_29","0_10_0_10_10_0_10"),
+#    12: (round(posFirstBarX-12*stepX,1),round(posFirstBarY,1),"0_12_13_14_28_29_30","0_10_0_10_10_0_10"),
+##    13: (round(posFirstBarX-13*stepX,1),round(posFirstBarY,1),"0_13_14_15_29_30_31","0_10_0_10_10_0_10"),
+#    14: (round(posFirstBarX-14*stepX,1),round(posFirstBarY,1),"0_14_15_16_30_31_32","0_10_0_10_10_0_10"),
+#    15: (round(posFirstBarX-15*stepX,1),round(posFirstBarY,1),"0_15_16_31_32","0_10_0_10_0")
 }
 print "Position scan" , dict_PosScan
 
@@ -224,9 +226,9 @@ for seq in range(0,nseq):
                     thisname = name+"_POS"+str(posStep)+"_X"+str(posInfo[0])+"_Y"+str(posInfo[1])+"_CH"+str(posInfo[2]).replace("_","-")+"_ETHR"+str(posInfo[3]).replace("_","-")
 
                     #============================================
-                    RUN("PED",t_ped,ov,ovref,gate,thisname,"","")
+                    RUN("PED",t_ped,ov,ovref,gate,thisname,posInfo[2],"")
                     RUN("PHYS",t_phys,ov,ovref,gate,thisname,posInfo[2],posInfo[3]) 
-                    RUN("PED",t_ped,ov,ovref,gate,thisname,"","")
+                    RUN("PED",t_ped,ov,ovref,gate,thisname,posInfo[2],"")
                     #============================================
                     
                     ##RUN("PHYS",t_phys,ov,ovref,gate,thisname,"0_6_7_8_22_23_24","0_10_0_10_10_0_10") #trigger on a subset of channels

@@ -49,18 +49,15 @@ parser.add_option("--pedAllChannels", dest="pedAllChannels", default=0,
                   help="Set to 1 to collect pedestals for all channels (default is 0)")
 
 parser.add_option("--enabledChannels", dest="enabledChannels", default="",
-                  help="List of channels with trigger enabled. The string format is 0_1_2_3 to eanble channels CH0, CH1, CH2, CH3 accordingly to configuration file. If nothing is specified all channels in configuration file can trigger.")
+                  help="List of channels with trigger enabled. The string format is 0_1_2_3 to eanble channels CH0, CH1, CH2, CH3 accordingly to configuration file. If nothing is specified all channels in configuration file can trigger. For pedestal run: ignored if pedAllChannels is set to 1.")
 
 parser.add_option("--energyThr", dest="energyThr", default="", 
-                  help="List of energy thresholds for triggering. The string format is 0_10_5_3 to reduce the energy thresholds with respect to the config file by to 0, 10, 5, 3 for channels CH0, CH1, CH2, CH3.")
+                  help="List of energy thresholds for triggering. The string format is 0_10_5_3 to reduce the energy thresholds with respect to the config file by to 0, 10, 5, 3 for channels CH0, CH1, CH2, CH3. For pedestal run: ignored.")
 
 (opt, args) = parser.parse_args()
 
 if not opt.configFile:   
     parser.error('config file not provided')
-
-if (opt.enabledChannels != "" and opt.energyThr == ""):
-    parser.error('Please provide the energy threshold modifiers for the channels enabled in the trigger.')                
 
 ################################################
 
@@ -558,6 +555,8 @@ commandRun = ""
 print daqscript
 if (daqscript == "acquire_pedestal_data"):
     commandRun = "./"+daqscript+" --config "+ config_current +" --mode "+ mode +" --time "+ runtime +" -o "+newname+" --cfgChannels "+opt.configFile+" --pedAllChannels " + str(opt.pedAllChannels)
+    if (opt.enabledChannels != ""):
+        commandRun = commandRun +" --enabledChannels " + str(opt.enabledChannels)         
 else:
     commandRun = "./"+daqscript+" --config "+ config_current +" --mode "+ mode +" --time "+ runtime +" -o "+newname+" --cfgChannels "+opt.configFile
     if (opt.enabledChannels != ""):
