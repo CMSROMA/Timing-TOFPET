@@ -584,7 +584,7 @@ for event in range (0,treeCoinc.GetEntries()):
     for ibar in range(0,16):
 
         #FIXME
-        ##array only
+        #array only
         #if( treeCoinc.energy[ibar+1]>-9. and treeCoinc.energy[ibar+17]>-9. ):
         #    energy1 = treeCoinc.energy[ibar+1]-mean_PedTot[(channels[ibar+1],treeCoinc.tacID[ibar+1])]
         #    energy2 = treeCoinc.energy[ibar+17]-mean_PedTot[(channels[ibar+17],treeCoinc.tacID[ibar+17])]
