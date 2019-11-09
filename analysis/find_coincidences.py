@@ -51,10 +51,10 @@ if not opt.outputRootFile:
 gROOT.SetBatch(True)
 gROOT.ProcessLine(".L /home/cmsdaq/Workspace/TOFPET/Timing-TOFPET/analysis/findCoincidences.C+")
 
-gROOT.ProcessLine("findCoincidences analysis")
 gROOT.ProcessLine('TFile* f = new TFile("%s");'%opt.inputRootFile)
 gROOT.ProcessLine('TTree* tree; f->GetObject("data",tree);')
-gROOT.ProcessLine('analysis.Init(tree)')
+gROOT.ProcessLine("findCoincidences analysis(tree)")
+#gROOT.ProcessLine('analysis.Init(tree)')
 gROOT.ProcessLine('analysis.configFile="%s"'%opt.configFile)
 gROOT.ProcessLine('analysis.outputFile="%s"'%opt.outputRootFile)
 gBenchmark.Start( 'findCoincidences' )
