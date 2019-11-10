@@ -569,6 +569,7 @@ os.system(commandRun)
 print "End run"
 print "\n"
 
+'''
 ###############################
 ### 7) Convert output to ROOT trees
 ###############################
@@ -688,10 +689,19 @@ print commandConvertCoincidences
 os.system(commandConvertCoincidences)
 print "File created."
 print "\n"
+'''
 
-#copy content and clear temporary file with temperatures
+## Copy content and clear temporary file with temperatures
+
+#copy in output dir
+newtemperaturetxt = newname+".temp"
+commandCopyTempFinal = "cp "+temperaturefile+" "+newtemperaturetxt
+print commandCopyTempFinal
+os.system(commandCopyTempFinal)
+#copy in file temperature_all
 print commandCopyTemp
 os.system(commandCopyTemp)
+#rm file
 print commandRmTemp
 os.system(commandRmTemp)
 
