@@ -12,7 +12,7 @@ from array import array
 
 from ROOT import *
 
-usage = "usage: run from Timing-TOFPET: python analysis/find_coincidences.py -c config_main.txt -i xxx_singles.root -o xxx_coincidences.root -n 3"
+usage = "usage: run from Timing-TOFPET: python analysis/find_coincidences.py -c config_main.txt -i xxx_singles.root -o xxx_coincidences.root"
 
 parser = optparse.OptionParser(usage)
 
@@ -25,8 +25,8 @@ parser.add_option("-i", "--input", dest="inputRootFile",
 parser.add_option("-o", "--output", dest="outputRootFile",
                   help="output root file with coincidences")
 
-parser.add_option("-n", "--nch", dest="nch",
-                  help="number of active channels")
+#parser.add_option("-n", "--nch", dest="nch",
+#                  help="number of active channels")
 
 parser.add_option("-p", "--prescale", dest="prescale",
                   default=1,
