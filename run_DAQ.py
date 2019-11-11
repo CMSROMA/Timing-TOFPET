@@ -202,7 +202,7 @@ dict_PosScan = {
     12: (round(posFirstBarX-12*stepX,1),round(posFirstBarY,1),"0_12_13_14_28_29_30","0_10_0_10_10_0_10"),
 #    13: (round(posFirstBarX-13*stepX,1),round(posFirstBarY,1),"0_13_14_15_29_30_31","0_10_0_10_10_0_10"),
     14: (round(posFirstBarX-14*stepX,1),round(posFirstBarY,1),"0_14_15_16_30_31_32","0_10_0_10_10_0_10"),
-    15: (round(posFirstBarX-15*stepX,1),round(posFirstBarY,1),"0_15_16_31_32","0_10_0_10_0")
+#    15: (round(posFirstBarX-15*stepX,1),round(posFirstBarY,1),"0_15_16_31_32","0_10_0_10_0")
 }
 print "Position scan" , dict_PosScan
 
