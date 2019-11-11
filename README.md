@@ -186,6 +186,10 @@ Create root files:
 ```
 python process_runs.py -r 1,2,3 -d /data/TOFPET/LYSOARRAYS 
 ```
+or
+```
+python process_runs.py -r 1-3 -d /data/TOFPET/LYSOARRAYS 
+```
 Note: put the comma-separated list of the runs you want to analyze.
 
 Run analysis:
