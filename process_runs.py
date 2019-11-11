@@ -14,12 +14,12 @@ import re
 
 from ROOT import *
 
-usage = "usage: run from Timing-TOFPET: process_runs.py -r 1,2,3,4,5 -d myfolder"
+usage = "usage: run from Timing-TOFPET: process_runs.py -r 1,2,3,4,5 [or 1-5] -d myfolder"
 
 parser = optparse.OptionParser(usage)
 
 parser.add_option("-r", "--runs", dest="runs",
-                  help="comma separated list of run numbers to be analyzed: 1,2,3,4,5,6")
+                  help="list of run numbers to be analyzed: 1,2,3,4,5,6 or 1-6")
 
 parser.add_option("-d", "--directory", dest="directory",
                   help="input/output directory")
@@ -38,8 +38,18 @@ gROOT.SetBatch(True)
 
 ################################################
 
-run_list = opt.runs.split(",")
-print "Runs to be processed ", run_list, " in directory ", opt.directory
+run_list = []
+if ("," in opt.runs) and ("-" not in opt.runs):
+    run_list = opt.runs.split(",")
+    print "Runs to be processed ", run_list, " in directory ", opt.directory
+if ("-" in opt.runs) and ("," not in opt.runs):
+    run_list_tmp = opt.runs.split("-")
+    for ii in range( int(run_list_tmp[0]) , int(run_list_tmp[1])+1 ) :
+        run_list.append(str(ii))
+    print "Runs to be processed ", run_list, " in directory ", opt.directory 
+
+if len(run_list) == 0:
+    parser.error('No good run list provided')
 
 list_allfiles = os.listdir(opt.directory)
 
