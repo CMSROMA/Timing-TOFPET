@@ -57,10 +57,10 @@ for step in range(0,nFilesInScan):
     currentRun = int(opt.firstRun) + step*3    
     command = "python analysis/analyze_run_array.py --run "+ str(currentRun) +" --arrayCode "+str(opt.arrayCode)+" -i "+str(opt.inputDir)+" -o "+str(opt.outputDir)
     print command
-    #os.system(command)
+    os.system(command)
 
     #Update command to merge trees
     commandMerge = commandMerge+" "+str(opt.outputDir)+"/"+"tree"+"_Run"+str(currentRun).zfill(6)+"_*"
     
 print commandMerge
-#os.system(commandMerge)
+os.system(commandMerge)
