@@ -466,6 +466,10 @@ for event in range (0,treePed2.GetEntries()):
             histos_Ped2[ch].Fill(treePed2.tacID,treePed2.energy)
             histos_PedTot[ch].Fill(treePed2.tacID,treePed2.energy)
 
+h1_pedTotMean=TH1F("h1_pedTotMean","",3000,-0.5,2999.5)
+h1_pedTotRms=TH1F("h1_pedTotRms","",3000,-0.5,2999.5)
+
+
 for ch in channels:
 
     for tac in range (0,4):
