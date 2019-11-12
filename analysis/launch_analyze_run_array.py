@@ -41,26 +41,26 @@ if not opt.outputDir:
 
 #------------------------------------------------
 
-nFilesInScan = 15
+nFilesInScan = 12
 
 commandMerge = "hadd -f "+str(opt.outputDir)+"/"+"tree_"+"FirstRun" + str(opt.firstRun.zfill(6)) + "_LastRun" + str((int(opt.firstRun)+(nFilesInScan-1)*3)).zfill(6) + "_ARRAY" + str(opt.arrayCode.zfill(6))+".root"
 print commandMerge
 
 for step in range(0,nFilesInScan):
 
-    #Inactive bars (disconnected or not working)
-    if (step==8 or step==10 or step==13):
-        continue
+    #    #Inactive bars (disconnected or not working)
+    #    if (step==8 or step==10 or step==13):
+    #        continue
 
     #Launch analysis for each step of the position scan
     print step
     currentRun = int(opt.firstRun) + step*3    
     command = "python analysis/analyze_run_array.py --run "+ str(currentRun) +" --arrayCode "+str(opt.arrayCode)+" -i "+str(opt.inputDir)+" -o "+str(opt.outputDir)
     print command
-    os.system(command)
+    #os.system(command)
 
     #Update command to merge trees
     commandMerge = commandMerge+" "+str(opt.outputDir)+"/"+"tree"+"_Run"+str(currentRun).zfill(6)+"_*"
     
 print commandMerge
-os.system(commandMerge)
+#os.system(commandMerge)
