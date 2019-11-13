@@ -12,35 +12,6 @@ from array import array
 
 from ROOT import *
 
-def Map(tf):
-    """                                                                                                                  
-    Maps objets as dict[obj_name][0] using a TFile (tf) and TObject to browse.                                           
-    """
-    m = {}
-    for k in tf.GetListOfKeys():
-        n = k.GetName()
-        m[n] = tf.Get(n)
-    return m
-
-def crystalball(x, alpha, n, sigma, mean):
-  if (sigma < 0.):
-      return 0.
-  z = (x - mean)/sigma;
-  if (alpha < 0):
-      z = -z;
-  abs_alpha = abs(alpha);
-  if (z  > - abs_alpha):
-    return TMath.Exp(- 0.5 * z * z)
-  else:
-    nDivAlpha = n/abs_alpha
-    AA =  TMath.Exp(-0.5*abs_alpha*abs_alpha)
-    B = nDivAlpha -abs_alpha
-    arg = nDivAlpha/(B-z)
-    return AA * TMath.Power(arg,n)
-
-def crystalball_function(x, p):
-  return p[0] * crystalball(x[0], p[3], p[4], p[2], p[1])
-
 def setParameters(function,Norm,Peak):
 
     ## Normalisation
@@ -436,22 +407,6 @@ if not (alignedBar >-1 and alignedBar<16):
 else:
     print "Bar aligned with radioactive source and pixel: ", alignedBar
 
-posX = float(((input_filename_coinc.split("_X")[1]).split("_"))[0])
-if not (posX >-1 and posX<60):
-    parser.error('Info on array position  not found in the input filename')
-else:
-    print "PosX: ", posX
-
-posY = float(((input_filename_coinc.split("_Y")[1]).split("_"))[0])
-if not (posY >-1 and posY<60):
-    parser.error('Info on array position  not found in the input filename')
-else:
-    print "PosY: ", posY
-
-commandOutputDir = "mkdir -p "+opt.outputDir
-print commandOutputDir
-os.system(commandOutputDir)
-
 ################################################
 ## 2) Analyze pedestals
 ################################################
@@ -514,7 +469,9 @@ for event in range (0,treePed2.GetEntries()):
 h1_pedTotMean=TH1F("h1_pedTotMean","",3000,-0.5,2999.5)
 h1_pedTotRms=TH1F("h1_pedTotRms","",3000,-0.5,2999.5)
 
+
 for ch in channels:
+
     for tac in range (0,4):
 
         mean_Ped1[(ch,tac)]=histos_Ped1[ch].GetBinContent(tac+1)
@@ -526,17 +483,6 @@ for ch in channels:
         mean_PedTot[(ch,tac)]=histos_PedTot[ch].GetBinContent(tac+1)
         rms_PedTot[(ch,tac)]=histos_PedTot[ch].GetBinError(tac+1)
 
-        h1_pedTotMean.SetBinContent(ch*4+tac+1,mean_PedTot[(ch,tac)])
-        h1_pedTotMean.SetBinError(ch*4+tac+1,0)
-        h1_pedTotRms.SetBinContent(ch*4+tac+1,rms_PedTot[(ch,tac)])
-        h1_pedTotRms.SetBinError(ch*4+tac+1,0)
-
-pedoutput = TFile( opt.outputDir+"/"+"ped_Run"+run+"_ARRAY"+str(str(opt.arrayCode).zfill(6))+".root", "recreate" )
-pedoutput.cd()
-h1_pedTotMean.Write()
-h1_pedTotRms.Write()
-pedoutput.Close()
-
 print "Pedestals analyzed"
 
 ################################################
@@ -545,17 +491,27 @@ print "Pedestals analyzed"
 
 print "Analzying singles"
 
-gROOT.ProcessLine('o = TString(gSystem->GetMakeSharedLib()); o = o.ReplaceAll(" -c ", " -std=c++11 -c "); gSystem->SetMakeSharedLib(o.Data());')
-gROOT.ProcessLine(".L /home/cmsdaq/Workspace/TOFPET/Timing-TOFPET/analysis/singleAnalysis.C+")
-gROOT.ProcessLine('TFile* f = new TFile("%s");'%input_filename_singles)
-gROOT.ProcessLine('TTree* tree; f->GetObject("data",tree);')
-gROOT.ProcessLine("singleAnalysis sAnalysis(tree);")
-gROOT.ProcessLine('sAnalysis.LoadPedestals("%s");'%(opt.outputDir+"/"+"ped_Run"+run+"_ARRAY"+str(str(opt.arrayCode).zfill(6))+".root"))
-gROOT.ProcessLine('sAnalysis.pixelChId=%d;'%channels[0])
-gROOT.ProcessLine('sAnalysis.outputFile="%s";'%(opt.outputDir+"/"+"histo_Run"+run+"_ARRAY"+str(str(opt.arrayCode).zfill(6))+".root"))
-gBenchmark.Start( 'singleAnalysis' )
-gROOT.ProcessLine("sAnalysis.Loop();")
-gBenchmark.Show( 'singleAnalysis' )
+tfileSingles = TFile.Open(input_filename_singles)
+treeSingles = tfileSingles.Get("data")
+h1_energy_pixel = TH1F("h1_energy_pixel", "", 200, 0, 200)
+c1_energy_pixel = TCanvas("c1_energy_pixel", "", 900, 700)
+c1_sat_pixel = TCanvas("c1_sat_pixel", "", 900, 700)
+h1_temp_pixel = TH1F("h1_temp_pixel", "", 1000, 15, 50)
+h1_temp_bar = TH1F("h1_temp_bar", "", 1000, 15, 50)
+h1_temp_int = TH1F("h1_temp_int", "", 1000, 15, 50)
+
+tfileSingles.cd()
+for event in range (0,treeSingles.GetEntries()):
+    treeSingles.GetEntry(event)
+    if( treeSingles.channelID==channels[0] and treeSingles.tacID > -9):
+        h1_energy_pixel.Fill(treeSingles.energy-mean_PedTot[(channels[0],treeSingles.tacID)])
+        h1_temp_pixel.Fill(treeSingles.tempSiPMRef)
+        h1_temp_bar.Fill(treeSingles.tempSiPMTest)
+        h1_temp_int.Fill(treeSingles.tempInt)
+
+Temp_pixel = h1_temp_pixel.GetMean()
+Temp_bar = h1_temp_bar.GetMean()
+Temp_internal = h1_temp_int.GetMean()
 
 print "Singles analyzed"
 
@@ -565,47 +521,131 @@ print "Singles analyzed"
 
 print "Analyzing coincidences"
 
-gROOT.ProcessLine(".L /home/cmsdaq/Workspace/TOFPET/Timing-TOFPET/analysis/coincidenceAnalysis.C+")
-gROOT.ProcessLine('TFile* f = new TFile("%s");'%input_filename_coinc)
-gROOT.ProcessLine('TTree* tree; f->GetObject("data",tree);')
-gROOT.ProcessLine("coincidenceAnalysis cAnalysis(tree);")
-gROOT.ProcessLine('cAnalysis.LoadPedestals("%s");'%(opt.outputDir+"/"+"ped_Run"+run+"_ARRAY"+str(str(opt.arrayCode).zfill(6))+".root"))
-gROOT.ProcessLine('cAnalysis.outputFile="%s";'%(opt.outputDir+"/"+"histo_Run"+run+"_ARRAY"+str(str(opt.arrayCode).zfill(6))+".root"))
-gBenchmark.Start( 'coincidenceAnalysis' )
-gROOT.ProcessLine("cAnalysis.Loop();")
-gBenchmark.Show( 'coincidenceAnalysis' )
+tfileCoinc = TFile.Open(input_filename_coinc)
+treeCoinc = tfileCoinc.Get("data")
+
+h1_energyTot_bar = {} 
+h1_energy1_bar = {}
+h1_energy2_bar = {}
+h1_energyDiff_bar = {}
+h2_energy1VSenergy2_bar = {}
+#-
+c1_energyTot_bar = {}
+
+h1_energyTot_bar_coinc = {} 
+h1_energy1_bar_coinc = {}
+h1_energy2_bar_coinc = {}
+h1_energyDiff_bar_coinc = {}
+h1_energy_pixel_coinc = {}
+h2_energy1VSenergy2_bar_coinc = {}
+h2_energyPixelVSenergyBar_coinc = {}
+#-
+c1_energy_pixel_coinc = {} 
+c1_energyTot_bar_coinc = {}
+
+for ibar in range(0,16):
+
+    histo_energyTot = TH1F("h1_energyTot_bar"+str(ibar), "", 200, 0, 200)
+    h1_energyTot_bar[ibar]=histo_energyTot
+    histo_energy1 = TH1F("h1_energy1_bar"+str(ibar), "", 200, 0, 200)
+    h1_energy1_bar[ibar]=histo_energy1
+    histo_energy2 = TH1F("h1_energy2_bar"+str(ibar), "", 200, 0, 200)
+    h1_energy2_bar[ibar]=histo_energy2
+    histo_energyDiff = TH1F("h1_energyDiff_bar"+str(ibar), "", 100, -50, 50)
+    h1_energyDiff_bar[ibar]=histo_energyDiff
+    histo_energy1VSenergy2 = TH2F("h2_energy1VSenergy2_bar"+str(ibar), "", 200, 0, 200, 200, 0, 200)
+    h2_energy1VSenergy2_bar[ibar]=histo_energy1VSenergy2
+
+    c1_energyTot = TCanvas("c1_energyTot_bar"+str(ibar), "", 900, 700)
+    c1_energyTot_bar[ibar]=c1_energyTot
+    #c1_sat_bar = TCanvas("c1_sat_bar", "", 900, 700)
+
+    histo_energyTotCoinc = TH1F("h1_energyTot_bar_coinc"+str(ibar), "", 200, 0, 200)
+    h1_energyTot_bar_coinc[ibar]=histo_energyTotCoinc
+    histo_energy1Coinc = TH1F("h1_energy1_bar_coinc"+str(ibar), "", 200, 0, 200)
+    h1_energy1_bar_coinc[ibar]=histo_energy1Coinc
+    histo_energy2Coinc = TH1F("h1_energy2_bar_coinc"+str(ibar), "", 200, 0, 200)
+    h1_energy2_bar_coinc[ibar]=histo_energy2Coinc
+    histo_energyDiffCoinc = TH1F("h1_energyDiff_bar_coinc"+str(ibar), "", 100, -50, 50)
+    h1_energyDiff_bar_coinc[ibar]=histo_energyDiffCoinc
+    histo_energyPixelCoinc = TH1F("h1_energy_pixel_coinc"+str(ibar), "", 200, 0, 200)
+    h1_energy_pixel_coinc[ibar]=histo_energyPixelCoinc
+    histo_energy1VSenergy2Coinc = TH2F("h2_energy1VSenergy2_bar_coinc"+str(ibar), "", 200, 0, 200, 200, 0, 200)
+    h2_energy1VSenergy2_bar_coinc[ibar]=histo_energy1VSenergy2Coinc
+    histo_energyPixelVSenergyBarCoinc = TH2F("h2_energyPixelVSenergyBar_coinc"+str(ibar), "", 200, 0, 200, 200, 0, 200)
+    h2_energyPixelVSenergyBar_coinc[ibar]=histo_energyPixelVSenergyBarCoinc
+
+    c1_energyPixelCoinc = TCanvas("c1_energy_pixel_coinc"+str(ibar), "", 900, 700)
+    c1_energy_pixel_coinc[ibar]=c1_energyPixelCoinc
+    c1_energyTotCoinc = TCanvas("c1_energyTot_bar_coinc"+str(ibar), "", 900, 700)
+    c1_energyTot_bar_coinc[ibar]=c1_energyTotCoinc
+
+tfileCoinc.cd()
+
+for event in range (0,treeCoinc.GetEntries()):
+    treeCoinc.GetEntry(event)
+
+    for ibar in range(0,16):
+
+        #FIXME
+        #array only
+        #if( treeCoinc.energy[ibar+1]>-9. and treeCoinc.energy[ibar+17]>-9. ):
+        #    energy1 = treeCoinc.energy[ibar+1]-mean_PedTot[(channels[ibar+1],treeCoinc.tacID[ibar+1])]
+        #    energy2 = treeCoinc.energy[ibar+17]-mean_PedTot[(channels[ibar+17],treeCoinc.tacID[ibar+17])]
+        #    energyBar =  energy1 + energy2
+        #    h1_energyTot_bar[ibar].Fill(energyBar)
+        #    h1_energy1_bar[ibar].Fill(energy1)
+        #    h1_energy2_bar[ibar].Fill(energy2)
+        #    h1_energyDiff_bar[ibar].Fill(energy1-energy2)
+        #    h2_energy1VSenergy2_bar[ibar].Fill(energy1,energy2)
+
+        #array + pixel
+        if( treeCoinc.energy[0]> -9. and treeCoinc.energy[ibar+1]>-9. and treeCoinc.energy[ibar+17]>-9. ):
+
+            energyPixel = treeCoinc.energy[0]-mean_PedTot[(channels[0],treeCoinc.tacID[0])]
+            energy1 = treeCoinc.energy[ibar+1]-mean_PedTot[(channels[ibar+1],treeCoinc.tacID[ibar+1])]
+            energy2 = treeCoinc.energy[ibar+17]-mean_PedTot[(channels[ibar+17],treeCoinc.tacID[ibar+17])]
+            energyBar =  energy1 + energy2
+
+            h1_energyTot_bar_coinc[ibar].Fill(energyBar)
+            h1_energy1_bar_coinc[ibar].Fill(energy1)
+            h1_energy2_bar_coinc[ibar].Fill(energy2)
+            h1_energyDiff_bar_coinc[ibar].Fill(energy1-energy2)
+            h1_energy_pixel_coinc[ibar].Fill(energyPixel)
+            h2_energy1VSenergy2_bar_coinc[ibar].Fill(energy1,energy2)
+            h2_energyPixelVSenergyBar_coinc[ibar].Fill(energyBar,energyPixel)
 
 print "Coincidences analyzed"
+
+if (h1_energy_pixel.GetEntries()<50):
+    print "ERROR: Too few events ("+ str(h1_energy_pixel.GetEntries()) +") in histogram "+h1_energy_pixel.GetName()
+    print "Exiting..."
+    sys.exit()
+
+if (h1_energy_pixel_coinc[alignedBar].GetEntries()<50):
+    print "ERROR: Too few events ("+ str(h1_energy_pixel_coinc[alignedBar].GetEntries()) +") in histogram "+h1_energy_pixel_coinc[alignedBar].GetName()
+    print "Exiting..."
+    sys.exit()
+
+if (h1_energyTot_bar_coinc[alignedBar].GetEntries()<50):
+    print "ERROR: Too few events ("+ str(h1_energyTot_bar_coinc[alignedBar].GetEntries()) +") in histogram "+h1_energyTot_bar_coinc[alignedBar].GetName()
+    print "Exiting..."
+    sys.exit()
 
 ################################################
 ## 5) Output file
 ################################################
 
-tfileoutput = TFile( opt.outputDir+"/"+"histo_Run"+run+"_ARRAY"+str(str(opt.arrayCode).zfill(6))+".root", "update" )
+commandOutputDir = "mkdir -p "+opt.outputDir
+print commandOutputDir
+os.system(commandOutputDir)
+
+tfileoutput = TFile( opt.outputDir+"/"+"histo_Run"+run+"_ARRAY"+str(str(opt.arrayCode).zfill(6))+".root", "recreate" )
 tfileoutput.cd()
-histos=Map(tfileoutput)
-
-if (histos['h1_energy_pixel'].GetEntries()<50):
-    print "ERROR: Too few events ("+ str(histos['h1_energy_pixel'].GetEntries()) +") in histogram "+histos['h1_energy_pixel'].GetName()
-    print "Exiting..."
-    sys.exit()
-
-if (histos['h1_energy_pixel_coinc%d'%alignedBar].GetEntries()<50):
-    print "ERROR: Too few events ("+ str(histos['h1_energy_pixel_coinc%d'%alignedBar].GetEntries()) +") in histogram "+histos['h1_energy_pixel_coinc%d'%alignedBar].GetName()
-    print "Exiting..."
-    sys.exit()
-
-if (histos['h1_energyTot_bar_coinc%d'%alignedBar].GetEntries()<50):
-    print "ERROR: Too few events ("+ str(histos['h1_energyTot_bar_coinc%d'%alignedBar].GetEntries()) +") in histogram "+histos['h1_energyTot_bar_coinc%d'%alignedBar].GetName()
-    print "Exiting..."
-    sys.exit()
-
 
 ################################################
 ## 6) Fit energy spectra
 ################################################
-c1_energy = TCanvas("c1_energy_pixel", "", 900, 700)
-
 
 fitResults = {}
 
@@ -619,9 +659,8 @@ n_paramameters = 19
 ## Pixel
 fTot_pixel = TF1("fTot_pixel",totalFunction,minEnergy,maxEnergy,n_paramameters)
 fTot_pixel.SetNpx(1000)
-fitSpectrum(histos['h1_energy_pixel'],fTot_pixel,minEnergy,maxEnergy,c1_energy,fitResults,"pixel",opt.arrayCode,alignedBar,opt.run,opt.outputDir)
+fitSpectrum(h1_energy_pixel,fTot_pixel,minEnergy,maxEnergy,c1_energy_pixel,fitResults,"pixel",opt.arrayCode,alignedBar,opt.run,opt.outputDir)
 
-histos['h1_energy_pixel'].Write()
 '''
 ## Bar
 fTot_bar = TF1("fTot_bar",totalFunction,minEnergy,maxEnergy,n_paramameters)
@@ -640,9 +679,8 @@ maxEnergy_coinc = 160
 
 fTot_pixel_coinc = TF1("fTot_pixel_coinc",totalFunction_coinc,minEnergy_coinc,maxEnergy_coinc,n_paramameters_coinc)
 fTot_pixel_coinc.SetNpx(1000)
-fitSpectrum_coinc(histos['h1_energy_pixel_coinc%d'%alignedBar],fTot_pixel_coinc,minEnergy_coinc,maxEnergy_coinc,c1_energy,fitResults,"pixelCoinc",opt.arrayCode,alignedBar,opt.run,opt.outputDir)
+fitSpectrum_coinc(h1_energy_pixel_coinc[alignedBar],fTot_pixel_coinc,minEnergy_coinc,maxEnergy_coinc,c1_energy_pixel_coinc[alignedBar],fitResults,"pixelCoinc",opt.arrayCode,alignedBar,opt.run,opt.outputDir)
 
-histos['h1_energy_pixel_coinc%d'%alignedBar].Write()
 ## Bar
 #minEnergy_coinc = 4
 #maxEnergy_coinc = 45
@@ -651,10 +689,9 @@ maxEnergy_coinc = 100
 
 fTot_bar_coinc = TF1("fTot_bar_coinc",totalFunction_coinc,minEnergy_coinc,maxEnergy_coinc,n_paramameters_coinc)
 fTot_bar_coinc.SetNpx(1000)
-fitSpectrum_coinc(histos['h1_energyTot_bar_coinc%d'%alignedBar],fTot_bar_coinc,minEnergy_coinc,maxEnergy_coinc,c1_energy,fitResults,"barCoinc",opt.arrayCode,alignedBar,opt.run,opt.outputDir)
+fitSpectrum_coinc(h1_energyTot_bar_coinc[alignedBar],fTot_bar_coinc,minEnergy_coinc,maxEnergy_coinc,c1_energyTot_bar_coinc[alignedBar],fitResults,"barCoinc",opt.arrayCode,alignedBar,opt.run,opt.outputDir)
 
-histos['h1_energyTot_bar_coinc%d'%alignedBar].Write()
-tfileoutput.Close()
+
 '''
 ################################################
 ## 7) Fit response vs photon energy
@@ -677,51 +714,133 @@ fitSaturation(fExpo_bar,minE,maxE,c1_sat_bar,fitResults,"bar")
 ## 7) Coincidence time resolution (CTR) and cross-talk
 ######################################################
 
+tfileCoinc.cd()
+
+#CTR
+h1_CTR = TH1F("h1_CTR", "", 800, -10000, 10000)
+c1_CTR = TCanvas("c1_CTR", "", 900, 700)
+
+#Cross-talk
+h1_nhits_Xtalk = TH1F("h1_nhits_Xtalk", "", 8, 0, 8)
+h1_nbars_Xtalk = TH1F("h1_nbars_Xtalk", "", 17, 0, 17)
+h2_nbars_vs_nhits_Xtalk = TH2F("h2_nbars_vs_nhits_Xtalk", "", 8, 0, 8, 17, 0, 17)
+h1_energySum_Xtalk = TH1F("h1_energySum_Xtalk", "", 220, -20, 200)
+h2_energySum_vs_energyBar_Xtalk = TH2F("h2_energySum_vs_energyBar_Xtalk", "", 220, -20, 200, 220, -20, 200)
+h1_energyTot_bar_Xtalk = {} 
+h1_energy1_bar_Xtalk = {}
+h1_energy2_bar_Xtalk = {}
+#h2_deltaT_vs_energyTot_bar_Xtalk = {} 
+
+for ibar in range(0,16):            
+    histo_energyTot_Xtalk = TH1F("h1_energyTot_bar_Xtalk"+str(ibar), "", 220, -20, 200)
+    h1_energyTot_bar_Xtalk[ibar]=histo_energyTot_Xtalk
+    histo_energy1_Xtalk = TH1F("h1_energy1_bar_Xtalk"+str(ibar), "", 220, -20, 200)
+    h1_energy1_bar_Xtalk[ibar]=histo_energy1_Xtalk
+    histo_energy2_Xtalk = TH1F("h1_energy2_bar_Xtalk"+str(ibar), "", 220, -20, 200)
+    h1_energy2_bar_Xtalk[ibar]=histo_energy2_Xtalk
+    #histo_deltaTVSenergyBarXtalk = TH2F("h2_deltaT_vs_energyTot_bar_Xtalk"+str(ibar), "", 220, -20, 200, 800, -10000, 10000)
+    #h2_deltaT_vs_energyTot_bar_Xtalk[ibar]=histo_deltaTVSenergyBarXtalk
+
 print "Cuts for CTR calculation:"
 print fitResults[('pixelCoinc',"peak1","mean","value")] - fitResults[('pixelCoinc',"peak1","sigma","value")]
 print fitResults[('pixelCoinc',"peak1","mean","value")] + fitResults[('pixelCoinc',"peak1","sigma","value")]
 print fitResults[('barCoinc',"peak1","mean","value")] - fitResults[('barCoinc',"peak1","sigma","value")]
 print fitResults[('barCoinc',"peak1","mean","value")] + fitResults[('barCoinc',"peak1","sigma","value")]
 
+for event in range (0,treeCoinc.GetEntries()):
+    treeCoinc.GetEntry(event)
 
-gROOT.ProcessLine(".L /home/cmsdaq/Workspace/TOFPET/Timing-TOFPET/analysis/ctrAnalysis.C+")
-gROOT.ProcessLine('TFile* f = new TFile("%s");'%input_filename_coinc)
-gROOT.ProcessLine('TTree* tree; f->GetObject("data",tree);')
-gROOT.ProcessLine("ctrAnalysis ctAnalysis(tree);")
+    if( treeCoinc.energy[0]> -9. 
+        and treeCoinc.energy[alignedBar+1]>-9. 
+        and treeCoinc.energy[alignedBar+17]>-9.):
 
-gROOT.ProcessLine('ctAnalysis.LoadPedestals("%s");'%(opt.outputDir+"/"+"ped_Run"+run+"_ARRAY"+str(str(opt.arrayCode).zfill(6))+".root"))
-gROOT.ProcessLine('ctAnalysis.outputFile="%s";'%(opt.outputDir+"/"+"histo_Run"+run+"_ARRAY"+str(str(opt.arrayCode).zfill(6))+".root"))
-gROOT.ProcessLine('ctAnalysis.pixel_511Peak_mean=%f;'%fitResults[('pixelCoinc',"peak1","mean","value")])
-gROOT.ProcessLine('ctAnalysis.pixel_511Peak_sigma=%f;'%fitResults[('pixelCoinc',"peak1","sigma","value")])
-gROOT.ProcessLine('ctAnalysis.alignedBar_511Peak_mean=%f;'%fitResults[('barCoinc',"peak1","mean","value")])
-gROOT.ProcessLine('ctAnalysis.alignedBar_511Peak_sigma=%f;'%fitResults[('barCoinc',"peak1","sigma","value")])
-gROOT.ProcessLine('ctAnalysis.alignedBar=%d;'%alignedBar)
+        energy1 = treeCoinc.energy[alignedBar+1]-mean_PedTot[(channels[alignedBar+1],treeCoinc.tacID[alignedBar+1])]
+        energy2 = treeCoinc.energy[alignedBar+17]-mean_PedTot[(channels[alignedBar+17],treeCoinc.tacID[alignedBar+17])]
+        energyBar =  energy1 + energy2
+        
+        energyPixel = treeCoinc.energy[0]-mean_PedTot[(channels[0],treeCoinc.tacID[0])]
+        timeBar = (treeCoinc.time[alignedBar+1]+treeCoinc.time[alignedBar+17])/2
+        timePixel = treeCoinc.time[0]
+        deltaT = timeBar - timePixel 
 
-gBenchmark.Start( 'ctrAnalysis' )
-gROOT.ProcessLine("ctAnalysis.Loop();")
-gBenchmark.Show( 'ctrAnalysis' )
+        #CTR
+        NsigmaCut = 1
+        if( energyPixel > fitResults[('pixelCoinc',"peak1","mean","value")] - NsigmaCut*fitResults[('pixelCoinc',"peak1","sigma","value")] 
+            and energyPixel < fitResults[('pixelCoinc',"peak1","mean","value")] + NsigmaCut*fitResults[('pixelCoinc',"peak1","sigma","value")] 
+            and energyBar > fitResults[('barCoinc',"peak1","mean","value")] - NsigmaCut*fitResults[('barCoinc',"peak1","sigma","value")]
+            and energyBar < fitResults[('barCoinc',"peak1","mean","value")] + NsigmaCut*fitResults[('barCoinc',"peak1","sigma","value")] ):
+      
+            h1_CTR.Fill(deltaT)  
 
+        #Cross-talk
+        NsigmaCut = 2
+        nhits_xtalk = 0
+        nbars_xtalk = 0
+        energySum_xtalk = 0.
+        if( energyBar > fitResults[('barCoinc',"peak1","mean","value")] - NsigmaCut*fitResults[('barCoinc',"peak1","sigma","value")]
+            and energyBar < fitResults[('barCoinc',"peak1","mean","value")] + NsigmaCut*fitResults[('barCoinc',"peak1","sigma","value")] ):
+
+            ## loop over bars except aligned bar
+            for ibar in range(0,16):            
+
+                if (ibar==alignedBar):
+                    continue
+
+                energy1current = 0.
+                energy2current = 0.
+                time1current = 0.
+                time2current = 0.
+
+                if treeCoinc.energy[ibar+1]==-9.:    
+                    energy1current = 0.
+                    time1current = 0.
+                else:
+                    nhits_xtalk += 1
+                    energy1current = treeCoinc.energy[ibar+1]-mean_PedTot[(channels[ibar+1],treeCoinc.tacID[ibar+1])]
+                    time1current = treeCoinc.time[ibar+1]
+
+                if treeCoinc.energy[ibar+17]==-9.:
+                    energy2current = 0.
+                    time2current = 0.
+                else:
+                    nhits_xtalk += 1
+                    energy2current = treeCoinc.energy[ibar+17]-mean_PedTot[(channels[ibar+17],treeCoinc.tacID[ibar+17])]
+                    time2current = treeCoinc.time[ibar+17]
+
+                if treeCoinc.energy[ibar+1]>-9. and treeCoinc.energy[ibar+17]>-9. :
+                    nbars_xtalk += 1
+
+                energyBarcurrent =  energy1current + energy2current                
+                energySum_xtalk += energyBarcurrent
+                #timeBarcurrent = (time1current + time2current)/2
+                #timeDiff = timeBarcurrent - timePixel
+
+                h1_energyTot_bar_Xtalk[ibar].Fill(energyBarcurrent) 
+                h1_energy1_bar_Xtalk[ibar].Fill(energy1current) 
+                h1_energy2_bar_Xtalk[ibar].Fill(energy2current) 
+                #h2_deltaT_vs_energyTot_bar_Xtalk[ibar].Fill(energyBarcurrent,timeDiff)
+
+                ## --> end loop over bars
+                
+            h1_nhits_Xtalk.Fill(nhits_xtalk)           
+            h2_nbars_vs_nhits_Xtalk.Fill(nhits_xtalk,nbars_xtalk)
+            h1_energySum_Xtalk.Fill(energySum_xtalk)
+            if(nhits_xtalk>0):
+                h2_energySum_vs_energyBar_Xtalk.Fill(energySum_xtalk,energyBar)
 
 ##CTR
-tfileoutput = TFile( opt.outputDir+"/"+"histo_Run"+run+"_ARRAY"+str(str(opt.arrayCode).zfill(6))+".root", "update" )
-tfileoutput.cd()
-histos=Map(tfileoutput)
-
-print histos
-
-c1_energy.cd()
-
-histos['h1_CTR'].Draw("PE")  
-#f_gaus = TF1("f_gaus","gaus",histos['h1_CTR'].GetMean()-2*histos['h1_CTR'].GetRMS(),histos['h1_CTR'].GetMean()+2*histos['h1_CTR'].GetRMS())
-#histos['h1_CTR'].Fit(f_gaus,"LR+0N","",histos['h1_CTR'].GetMean()-1*histos['h1_CTR'].GetRMS(),histos['h1_CTR'].GetMean()+1*histos['h1_CTR'].GetRMS())
-#histos['h1_CTR'].Fit(f_gaus,"LR+","",f_gaus.GetParameter(1)-3.5*f_gaus.GetParameter(2),f_gaus.GetParameter(1)+3.5*f_gaus.GetParameter(2))
-f_gaus = TF1("f_gaus","gaus",histos['h1_CTR'].GetMean()-550.,histos['h1_CTR'].GetMean()+550.)
-histos['h1_CTR'].Fit(f_gaus,"R+0N","",histos['h1_CTR'].GetMean()-550.,histos['h1_CTR'].GetMean()+550.)
-histos['h1_CTR'].Fit(f_gaus,"R+","",f_gaus.GetParameter(1)-550.,f_gaus.GetParameter(1)+550.)
-histos['h1_CTR'].GetXaxis().SetRangeUser(f_gaus.GetParameter(1)-550.,f_gaus.GetParameter(1)+550.)
-histos['h1_CTR'].GetXaxis().SetTitle("t_{bar} - t_{pixel} [ps]")
-histos['h1_CTR'].GetYaxis().SetTitle("Events")
-histos['h1_CTR'].GetYaxis().SetTitleOffset(1.6)
+c1_CTR.cd()
+h1_CTR.Draw("PE")  
+#f_gaus = TF1("f_gaus","gaus",h1_CTR.GetMean()-2*h1_CTR.GetRMS(),h1_CTR.GetMean()+2*h1_CTR.GetRMS())
+#h1_CTR.Fit(f_gaus,"LR+0N","",h1_CTR.GetMean()-1*h1_CTR.GetRMS(),h1_CTR.GetMean()+1*h1_CTR.GetRMS())
+#h1_CTR.Fit(f_gaus,"LR+","",f_gaus.GetParameter(1)-3.5*f_gaus.GetParameter(2),f_gaus.GetParameter(1)+3.5*f_gaus.GetParameter(2))
+f_gaus = TF1("f_gaus","gaus",h1_CTR.GetMean()-550.,h1_CTR.GetMean()+550.)
+h1_CTR.Fit(f_gaus,"R+0N","",h1_CTR.GetMean()-550.,h1_CTR.GetMean()+550.)
+h1_CTR.Fit(f_gaus,"R+","",f_gaus.GetParameter(1)-550.,f_gaus.GetParameter(1)+550.)
+h1_CTR.GetXaxis().SetRangeUser(f_gaus.GetParameter(1)-550.,f_gaus.GetParameter(1)+550.)
+h1_CTR.GetXaxis().SetTitle("t_{bar} - t_{pixel} [ps]")
+h1_CTR.GetYaxis().SetTitle("Events")
+h1_CTR.GetYaxis().SetTitleOffset(1.6)
 
 fitResults[("barCoinc","CTR","mean","value")]=f_gaus.GetParameter(1)
 fitResults[("barCoinc","CTR","mean","sigma")]=f_gaus.GetParError(1)
@@ -733,108 +852,13 @@ text3 = pt3.AddText( "Run" + str(opt.run.zfill(6)) + " ARRAY" + str(opt.arrayCod
 pt3.SetFillColor(0)
 pt3.Draw()
 #FIXME: check why it does not show the label on the canvas!
-c1_energy.cd()
-c1_energy.Update()
-c1_energy.SaveAs(opt.outputDir+"/"+"Run"+str(opt.run.zfill(6))+"_ARRAY"+str(opt.arrayCode.zfill(6))+"_BAR"+str(alignedBar)+"_CTR"+".pdf")
-c1_energy.SaveAs(opt.outputDir+"/"+"Run"+str(opt.run.zfill(6))+"_ARRAY"+str(opt.arrayCode.zfill(6))+"_BAR"+str(alignedBar)+"_CTR"+".png")
-c1_energy.Write()
-histos['h1_CTR'].Write()
 
-histos['h1_energySum_Xtalk'].Draw("PE") 
-f_cb=TF1("f_cb",crystalball_function,-10,100,5)
-f_cb.SetParameter(0,100)
-f_cb.SetParameter(1,5)
-f_cb.SetParameter(2,2)
-f_cb.FixParameter(3,-2)
-f_cb.SetParameter(4,20)
-
-histos['h1_energySum_Xtalk'].Fit(f_cb,"R+","",0,50)
-histos['h1_energySum_Xtalk'].GetXaxis().SetRangeUser(-10,50)
-histos['h1_energySum_Xtalk'].GetXaxis().SetTitle("Energy Lateral (Left + Right)")
-histos['h1_energySum_Xtalk'].GetYaxis().SetTitle("Events")
-histos['h1_energySum_Xtalk'].GetYaxis().SetTitleOffset(1.6)
-
-fitResults[("barCoinc","Xtalk","mean","value")]=f_cb.GetParameter(1)
-fitResults[("barCoinc","Xtalk","mean","sigma")]=f_cb.GetParError(1)
-fitResults[("barCoinc","Xtalk","sigma","value")]=f_cb.GetParameter(2)
-fitResults[("barCoinc","Xtalk","sigma","sigma")]=f_cb.GetParError(2)
-
-pt3.Draw()
-
-c1_energy.cd()
-c1_energy.Update()
-c1_energy.SaveAs(opt.outputDir+"/"+"Run"+str(opt.run.zfill(6))+"_ARRAY"+str(opt.arrayCode.zfill(6))+"_BAR"+str(alignedBar)+"_Xtalk"+".pdf")
-c1_energy.SaveAs(opt.outputDir+"/"+"Run"+str(opt.run.zfill(6))+"_ARRAY"+str(opt.arrayCode.zfill(6))+"_BAR"+str(alignedBar)+"_Xtalk"+".png")
-c1_energy.Write()
-histos['h1_energySum_Xtalk'].Write()
-
-if (alignedBar-1>0):
-    histos['h1_energyTot_bar_Xtalk%d'%(alignedBar-1)].Draw("PE") 
-    f_cb_Left=TF1("f_cb_Left",crystalball_function,-10,100,5)
-    f_cb_Left.SetParameter(0,100)
-    f_cb_Left.SetParameter(1,5)
-    f_cb_Left.SetParameter(2,2)
-    f_cb_Left.FixParameter(3,-2)
-    f_cb_Left.SetParameter(4,20)
-
-    histos['h1_energyTot_bar_Xtalk%d'%(alignedBar-1)].Fit(f_cb_Left,"R+","",0,50)
-    histos['h1_energyTot_bar_Xtalk%d'%(alignedBar-1)].GetXaxis().SetRangeUser(-10,50)
-    histos['h1_energyTot_bar_Xtalk%d'%(alignedBar-1)].GetXaxis().SetTitle("Energy Left")
-    histos['h1_energyTot_bar_Xtalk%d'%(alignedBar-1)].GetYaxis().SetTitle("Events")
-    histos['h1_energyTot_bar_Xtalk%d'%(alignedBar-1)].GetYaxis().SetTitleOffset(1.6)
-
-    fitResults[("barCoinc","XtalkLeft","mean","value")]=f_cb_Left.GetParameter(1)
-    fitResults[("barCoinc","XtalkLeft","mean","sigma")]=f_cb_Left.GetParError(1)
-    fitResults[("barCoinc","XtalkLeft","sigma","value")]=f_cb_Left.GetParameter(2)
-    fitResults[("barCoinc","XtalkLeft","sigma","sigma")]=f_cb_Left.GetParError(2)
-
-    pt3.Draw()
-
-    c1_energy.cd()
-    c1_energy.Update()
-    c1_energy.SaveAs(opt.outputDir+"/"+"Run"+str(opt.run.zfill(6))+"_ARRAY"+str(opt.arrayCode.zfill(6))+"_BAR"+str(alignedBar)+"_XtalkLeft"+".pdf")
-    c1_energy.SaveAs(opt.outputDir+"/"+"Run"+str(opt.run.zfill(6))+"_ARRAY"+str(opt.arrayCode.zfill(6))+"_BAR"+str(alignedBar)+"_XtalkLeft"+".png")
-    c1_energy.Write()
-    histos['h1_energyTot_bar_Xtalk%d'%(alignedBar-1)].Write()
-else:
-    fitResults[("barCoinc","XtalkLeft","mean","value")]=-1
-    fitResults[("barCoinc","XtalkLeft","mean","sigma")]=-1
-    fitResults[("barCoinc","XtalkLeft","sigma","value")]=-1
-    fitResults[("barCoinc","XtalkLeft","sigma","sigma")]=-1
-    
-if (alignedBar+1<16):
-    histos['h1_energyTot_bar_Xtalk%d'%(alignedBar+1)].Draw("PE") 
-    f_cb_Right=TF1("f_cb_Right",crystalball_function,-10,100,5)
-    f_cb_Right.SetParameter(0,100)
-    f_cb_Right.SetParameter(1,5)
-    f_cb_Right.SetParameter(2,2)
-    f_cb_Right.FixParameter(3,-2)
-    f_cb_Right.SetParameter(4,20)
-
-    histos['h1_energyTot_bar_Xtalk%d'%(alignedBar+1)].Fit(f_cb_Right,"R+","",0,50)
-    histos['h1_energyTot_bar_Xtalk%d'%(alignedBar+1)].GetXaxis().SetRangeUser(-10,50)
-    histos['h1_energyTot_bar_Xtalk%d'%(alignedBar+1)].GetXaxis().SetTitle("Energy Right")
-    histos['h1_energyTot_bar_Xtalk%d'%(alignedBar+1)].GetYaxis().SetTitle("Events")
-    histos['h1_energyTot_bar_Xtalk%d'%(alignedBar+1)].GetYaxis().SetTitleOffset(1.6)
-
-    fitResults[("barCoinc","XtalkRight","mean","value")]=f_cb_Right.GetParameter(1)
-    fitResults[("barCoinc","XtalkRight","mean","sigma")]=f_cb_Right.GetParError(1)
-    fitResults[("barCoinc","XtalkRight","sigma","value")]=f_cb_Right.GetParameter(2)
-    fitResults[("barCoinc","XtalkRight","sigma","sigma")]=f_cb_Right.GetParError(2)
-
-    pt3.Draw()
-
-    c1_energy.cd()
-    c1_energy.Update()
-    c1_energy.SaveAs(opt.outputDir+"/"+"Run"+str(opt.run.zfill(6))+"_ARRAY"+str(opt.arrayCode.zfill(6))+"_BAR"+str(alignedBar)+"_XtalkRight"+".pdf")
-    c1_energy.SaveAs(opt.outputDir+"/"+"Run"+str(opt.run.zfill(6))+"_ARRAY"+str(opt.arrayCode.zfill(6))+"_BAR"+str(alignedBar)+"_XtalkRight"+".png")
-    c1_energy.Write()
-    histos['h1_energyTot_bar_Xtalk%d'%(alignedBar+1)].Write()
-else:
-    fitResults[("barCoinc","XtalkRight","mean","value")]=-1
-    fitResults[("barCoinc","XtalkRight","mean","sigma")]=-1
-    fitResults[("barCoinc","XtalkRight","sigma","value")]=-1
-    fitResults[("barCoinc","XtalkRight","sigma","sigma")]=-1
+tfileoutput.cd()
+c1_CTR.cd()
+c1_CTR.Update()
+c1_CTR.SaveAs(opt.outputDir+"/"+"Run"+str(opt.run.zfill(6))+"_ARRAY"+str(opt.arrayCode.zfill(6))+"_BAR"+str(alignedBar)+"_CTR"+".pdf")
+c1_CTR.SaveAs(opt.outputDir+"/"+"Run"+str(opt.run.zfill(6))+"_ARRAY"+str(opt.arrayCode.zfill(6))+"_BAR"+str(alignedBar)+"_CTR"+".png")
+c1_CTR.Write()
 
 ###XTALK 
 #if(alignedBar>0 and alignedBar<7):
@@ -842,13 +866,12 @@ else:
 #    e_2 = 
 
 ################################################
-## 8) Write additional histograms
+## 8) Write histograms
 ################################################
 
-#Pedestals
-h1_pedTotMean.Write()
-h1_pedTotRms.Write()
+tfileoutput.cd()
 
+#Pedestals
 for ch in channels:
 
     #pedestals
@@ -865,6 +888,7 @@ for ch in channels:
         print "PedestalTot "+str(mean_PedTot[(ch,tac)])+" "+str(rms_PedTot[(ch,tac)]) 
 
 #Pixel
+h1_energy_pixel.Write()
 print "--- Pixel ---"
 print "Pixel Peak 1: "+str(fitResults[('pixel',"peak1","mean","value")])+" +/- "+str(fitResults[('pixel',"peak1","mean","sigma")]) 
 print "Pixel Peak 2: "+str(fitResults[('pixel',"peak2","mean","value")])+" +/- "+str(fitResults[('pixel',"peak2","mean","sigma")]) 
@@ -873,6 +897,13 @@ print "Pixel Peak 1 Coinc: "+str(fitResults[('pixelCoinc',"peak1","mean","value"
 #print "Pixel Alpha: "+str(fitResults[('pixel',"peak12","alpha","value")])+" +/- "+str(fitResults[('pixel',"peak12","alpha","sigma")]) 
 #print "Pixel Beta: "+str(fitResults[('pixel',"peak12","beta","value")])+" +/- "+str(fitResults[('pixel',"peak12","beta","sigma")]) 
 
+#Array
+for ibar in range(0,16):
+    h1_energyTot_bar[ibar].Write()
+    h1_energy1_bar[ibar].Write()
+    h1_energy2_bar[ibar].Write()
+    h1_energyDiff_bar[ibar].Write()
+    h2_energy1VSenergy2_bar[ibar].Write()
 print "--- Bar ---"
 #print "Bar Peak 1: "+str(fitResults[('bar',"peak1","mean","value")])+" +/- "+str(fitResults[('bar',"peak1","mean","sigma")]) 
 #print "Bar Peak 2: "+str(fitResults[('bar',"peak2","mean","value")])+" +/- "+str(fitResults[('bar',"peak2","mean","sigma")]) 
@@ -881,31 +912,39 @@ print "Bar Peak 1 Coinc: "+str(fitResults[('barCoinc',"peak1","mean","value")])+
 #print "Pixel Alpha: "+str(fitResults[('bar',"peak12","alpha","value")])+" +/- "+str(fitResults[('bar',"peak12","alpha","sigma")]) 
 #print "Pixel Beta: "+str(fitResults[('bar',"peak12","beta","value")])+" +/- "+str(fitResults[('bar',"peak12","beta","sigma")]) 
 
+#Array+pixel
+for ibar in range(0,16):
+    h1_energyTot_bar_coinc[ibar].Write()
+    h1_energy1_bar_coinc[ibar].Write()
+    h1_energy2_bar_coinc[ibar].Write()
+    h1_energyDiff_bar_coinc[ibar].Write()
+    h1_energy_pixel_coinc[ibar].Write()
+    h2_energy1VSenergy2_bar_coinc[ibar].Write()
+    h2_energyPixelVSenergyBar_coinc[ibar].Write()
+
+#Xtalk
+h1_nhits_Xtalk.Write()         
+h1_energySum_Xtalk.Write()
+h2_energySum_vs_energyBar_Xtalk.Write()
+for ibar in range(0,16):
+    h1_energyTot_bar_Xtalk[ibar].Write()
+    h1_energy1_bar_Xtalk[ibar].Write()
+    h1_energy2_bar_Xtalk[ibar].Write()
+    #h2_deltaT_vs_energyTot_bar_Xtalk[ibar].Write()
+
 print "--- CTR ---"
 print "CTR mean: "+str(fitResults[('barCoinc',"CTR","mean","value")])+" +/- "+str(fitResults[('barCoinc',"CTR","mean","sigma")]) 
 print "CTR sigma: "+str(fitResults[('barCoinc',"CTR","sigma","value")])+" +/- "+str(fitResults[('barCoinc',"CTR","sigma","sigma")]) 
-
-print "--- Xtalk ---"
-print "Xtalk mean: "+str(fitResults[('barCoinc',"Xtalk","mean","value")])+" +/- "+str(fitResults[('barCoinc',"Xtalk","mean","sigma")]) 
-print "Xtalk sigma: "+str(fitResults[('barCoinc',"Xtalk","sigma","value")])+" +/- "+str(fitResults[('barCoinc',"Xtalk","sigma","sigma")]) 
-
-print "--- Xtalk Left ---"
-print "XtalkLeft mean: "+str(fitResults[('barCoinc',"XtalkLeft","mean","value")])+" +/- "+str(fitResults[('barCoinc',"XtalkLeft","mean","sigma")]) 
-print "XtalkLeft sigma: "+str(fitResults[('barCoinc',"XtalkLeft","sigma","value")])+" +/- "+str(fitResults[('barCoinc',"XtalkLeft","sigma","sigma")]) 
-
-print "--- Xtalk Right ---"
-print "XtalkRight mean: "+str(fitResults[('barCoinc',"XtalkRight","mean","value")])+" +/- "+str(fitResults[('barCoinc',"XtalkRight","mean","sigma")]) 
-print "XtalkRight sigma: "+str(fitResults[('barCoinc',"XtalkRight","sigma","value")])+" +/- "+str(fitResults[('barCoinc',"XtalkRight","sigma","sigma")]) 
-
-Temp_pixel = histos['h1_temp_pixel'].GetMean()
-Temp_bar = histos['h1_temp_bar'].GetMean()
-Temp_internal = histos['h1_temp_int'].GetMean()
 
 tfileoutput.Close()
 tfilePed1.cd()
 tfilePed1.Close()
 tfilePed2.cd()
 tfilePed2.Close()
+tfileSingles.cd()
+tfileSingles.Close()
+tfileCoinc.cd()
+tfileCoinc.Close()
 
 ################################################
 ## 9) Write root tree with measurements
@@ -955,26 +994,9 @@ err_CTR_mean_barCoinc = array( 'd', [ -999. ] )
 CTR_sigma_barCoinc = array( 'd', [ -999. ] )
 err_CTR_sigma_barCoinc = array( 'd', [ -999. ] )
 #
-Xtalk_mean_barCoinc = array( 'd', [ -999. ] )
-err_Xtalk_mean_barCoinc = array( 'd', [ -999. ] )
-Xtalk_sigma_barCoinc = array( 'd', [ -999. ] )
-err_Xtalk_sigma_barCoinc = array( 'd', [ -999. ] )
-#
-XtalkLeft_mean_barCoinc = array( 'd', [ -999. ] )
-err_XtalkLeft_mean_barCoinc = array( 'd', [ -999. ] )
-XtalkLeft_sigma_barCoinc = array( 'd', [ -999. ] )
-err_XtalkLeft_sigma_barCoinc = array( 'd', [ -999. ] )
-#
-XtalkRight_mean_barCoinc = array( 'd', [ -999. ] )
-err_XtalkRight_mean_barCoinc = array( 'd', [ -999. ] )
-XtalkRight_sigma_barCoinc = array( 'd', [ -999. ] )
-err_XtalkRight_sigma_barCoinc = array( 'd', [ -999. ] )
-#
 temp_pixel = array( 'd', [ -999. ] )
 temp_bar = array( 'd', [ -999. ] )
 temp_int = array( 'd', [ -999. ] )
-pos_X = array( 'd', [ -999. ] )
-pos_Y = array( 'd', [ -999. ] )
 #
 bar = array( 'i', [ -9 ] )
 code_array = array( 'i', [ -9 ] )
@@ -1019,26 +1041,9 @@ treeOutput.Branch( 'err_CTR_mean_barCoinc', err_CTR_mean_barCoinc, 'err_CTR_mean
 treeOutput.Branch( 'CTR_sigma_barCoinc', CTR_sigma_barCoinc, 'CTR_sigma_barCoinc/D' )
 treeOutput.Branch( 'err_CTR_sigma_barCoinc', err_CTR_sigma_barCoinc, 'err_CTR_sigma_barCoinc/D' )
 #
-treeOutput.Branch( 'Xtalk_mean_barCoinc', Xtalk_mean_barCoinc, 'Xtalk_mean_barCoinc/D' )
-treeOutput.Branch( 'err_Xtalk_mean_barCoinc', err_Xtalk_mean_barCoinc, 'err_Xtalk_mean_barCoinc/D' )
-treeOutput.Branch( 'Xtalk_sigma_barCoinc', Xtalk_sigma_barCoinc, 'Xtalk_sigma_barCoinc/D' )
-treeOutput.Branch( 'err_Xtalk_sigma_barCoinc', err_Xtalk_sigma_barCoinc, 'err_Xtalk_sigma_barCoinc/D' )
-#
-treeOutput.Branch( 'XtalkLeft_mean_barCoinc', XtalkLeft_mean_barCoinc, 'XtalkLeft_mean_barCoinc/D' )
-treeOutput.Branch( 'err_XtalkLeft_mean_barCoinc', err_XtalkLeft_mean_barCoinc, 'err_XtalkLeft_mean_barCoinc/D' )
-treeOutput.Branch( 'XtalkLeft_sigma_barCoinc', XtalkLeft_sigma_barCoinc, 'XtalkLeft_sigma_barCoinc/D' )
-treeOutput.Branch( 'err_XtalkLeft_sigma_barCoinc', err_XtalkLeft_sigma_barCoinc, 'err_XtalkLeft_sigma_barCoinc/D' )
-#
-treeOutput.Branch( 'XtalkRight_mean_barCoinc', XtalkRight_mean_barCoinc, 'XtalkRight_mean_barCoinc/D' )
-treeOutput.Branch( 'err_XtalkRight_mean_barCoinc', err_XtalkRight_mean_barCoinc, 'err_XtalkRight_mean_barCoinc/D' )
-treeOutput.Branch( 'XtalkRight_sigma_barCoinc', XtalkRight_sigma_barCoinc, 'XtalkRight_sigma_barCoinc/D' )
-treeOutput.Branch( 'err_XtalkRight_sigma_barCoinc', err_XtalkRight_sigma_barCoinc, 'err_XtalkRight_sigma_barCoinc/D' )
-#
 treeOutput.Branch( 'temp_pixel', temp_pixel, 'temp_pixel/D' )
 treeOutput.Branch( 'temp_bar', temp_bar, 'temp_bar/D' )
 treeOutput.Branch( 'temp_int', temp_int, 'temp_int/D' )
-treeOutput.Branch( 'pos_X', pos_X, 'pos_X/D' )
-treeOutput.Branch( 'pos_Y', pos_Y, 'pos_Y/D' )
 #
 treeOutput.Branch( 'bar', bar, 'bar/I' )
 treeOutput.Branch( 'code_array', code_array, 'code_array/I' )
@@ -1083,26 +1088,9 @@ err_CTR_mean_barCoinc[0] = fitResults[('barCoinc',"CTR","mean","sigma")]
 CTR_sigma_barCoinc[0] = fitResults[('barCoinc',"CTR","sigma","value")]
 err_CTR_sigma_barCoinc[0] = fitResults[('barCoinc',"CTR","sigma","sigma")]
 #
-Xtalk_mean_barCoinc[0] = fitResults[('barCoinc',"Xtalk","mean","value")]
-err_Xtalk_mean_barCoinc[0] = fitResults[('barCoinc',"Xtalk","mean","sigma")]
-Xtalk_sigma_barCoinc[0] = fitResults[('barCoinc',"Xtalk","sigma","value")]
-err_Xtalk_sigma_barCoinc[0] = fitResults[('barCoinc',"Xtalk","sigma","sigma")]
-#
-XtalkLeft_mean_barCoinc[0] = fitResults[('barCoinc',"XtalkLeft","mean","value")]
-err_XtalkLeft_mean_barCoinc[0] = fitResults[('barCoinc',"XtalkLeft","mean","sigma")]
-XtalkLeft_sigma_barCoinc[0] = fitResults[('barCoinc',"XtalkLeft","sigma","value")]
-err_XtalkLeft_sigma_barCoinc[0] = fitResults[('barCoinc',"XtalkLeft","sigma","sigma")]
-#
-XtalkRight_mean_barCoinc[0] = fitResults[('barCoinc',"XtalkRight","mean","value")]
-err_XtalkRight_mean_barCoinc[0] = fitResults[('barCoinc',"XtalkRight","mean","sigma")]
-XtalkRight_sigma_barCoinc[0] = fitResults[('barCoinc',"XtalkRight","sigma","value")]
-err_XtalkRight_sigma_barCoinc[0] = fitResults[('barCoinc',"XtalkRight","sigma","sigma")]
-#
 temp_pixel[0] = Temp_pixel
 temp_bar[0] = Temp_bar
 temp_int[0] = Temp_internal
-pos_X[0] = posX
-pos_Y[0] = posY
 #
 bar[0] = int(alignedBar)
 runNumber[0] = int(opt.run)
