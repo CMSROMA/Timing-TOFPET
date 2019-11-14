@@ -707,7 +707,7 @@ tfileoutput = TFile( opt.outputDir+"/"+"histo_Run"+run+"_ARRAY"+str(str(opt.arra
 tfileoutput.cd()
 histos=Map(tfileoutput)
 
-print histos
+#print histos
 
 c1_energy.cd()
 
