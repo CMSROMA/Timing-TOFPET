@@ -110,11 +110,11 @@ gate_values = [15] # DeltaT[ns]/20: gate=15 -> DeltaT=300 ns
 name = "Na22PedAllChannels"
 '''
 
-'''
+
 #Main sequence (pixel+bar)
 n_ch = 3 #number of channels in config file (2 for 2 pixels, 3 for 1 pixel and 1 bar, ..)
 n_chip = 2 #number of active TOFPET2 chips
-t_ped = 1 #s
+t_ped = 0.3 #s
 t_phys = 300 #s
 t_tot = 320  #s this is approximate (it is 20-30% less of true value due to cpu processing time to make root files)
 #t_tot = 7200  #s this is approximate (it is 20-30% less of true value due to cpu processing time to make root files)
@@ -127,8 +127,9 @@ gate_values = [15] # DeltaT[ns]/20: gate=15 -> DeltaT=300 ns
 #name = "PEDESTAL_WS1_NW_NC_GATESCAN_1"
 #name = "BAR000028_WS1_NW_NC"
 name = opt.nameLabel
-'''
 
+
+'''
 #Main sequence (pixel+array)
 n_ch = 33 #number of channels in config file (2 for 2 pixels, 3 for 1 pixel and 1 bar, ..)
 n_chip = 2 #number of active TOFPET2 chips
@@ -145,37 +146,38 @@ gate_values = [15] # DeltaT[ns]/20: gate=15 -> DeltaT=300 ns
 #name = "PEDESTAL_WS1_NW_NC_GATESCAN_1"
 #name = "BAR000028_WS1_NW_NC"
 name = opt.nameLabel
+'''
 
 #--------------------------------------------------------------------
 
 if int(opt.pedAllChannels)==1:
     n_ch = n_chip*64
 
+nseq = 1
+#nseq = int( t_tot / ( (2*t_ped*n_ch+t_phys)*len(ov_values)*len(gate_values) ) )
+#print "Number of sequences in "+str(t_tot)+" seconds = "+ str(nseq)
+#if nseq==0:
+#    print "==> Please increase total time of the run (t_tot)"
+
 #--------------------------------------------------------------------
 
-'''
-#Standard
-nseq = 1
-#nseq = int( t_tot / ( (2*t_ped*n_ch+t_phys)*len(ov_values)*len(gate_values) ) )
-#print "Number of sequences in "+str(t_tot)+" seconds = "+ str(nseq)
-#if nseq==0:
-#    print "==> Please increase total time of the run (t_tot)"
+########################
+#Position scan for bar
+########################
 
-for seq in range(0,nseq):
-    for ov in ov_values:
-        for ovref in ovref_values:
-            for gate in gate_values:
-                RUN("PED",t_ped,ov,ovref,gate,name,"","")
-                RUN("PHYS",t_phys,ov,ovref,gate,name,"","") #trigger on all channels
-                RUN("PED",t_ped,ov,ovref,gate,name,"","")
-'''
+#Reference Bar 
+posFirstBarX = 23
+posFirstBarY = 25
 
+dict_PosScan = {
+    0: (round(posFirstBarX,1),round(posFirstBarY,1),"0_1_2","0_0_0"),
+}
+print "Position scan" , dict_PosScan
+
+'''
+########################
 #Position scan for array
-nseq = 1
-#nseq = int( t_tot / ( (2*t_ped*n_ch+t_phys)*len(ov_values)*len(gate_values) ) )
-#print "Number of sequences in "+str(t_tot)+" seconds = "+ str(nseq)
-#if nseq==0:
-#    print "==> Please increase total time of the run (t_tot)"
+########################
 
 #Reference Bar 
 refBar = 5 #REF BAR N. = 5 (start counting from 0) so it's the sixth bar
@@ -205,6 +207,11 @@ dict_PosScan = {
 #    15: (round(posFirstBarX-15*stepX,1),round(posFirstBarY,1),"0_15_16_31_32","0_10_0_10_0")
 }
 print "Position scan" , dict_PosScan
+'''
+
+###################################################################
+########################### Run DAQ ############################### 
+###################################################################
 
 aMover=XYMover(8820)
 print (aMover.estimatedPosition())

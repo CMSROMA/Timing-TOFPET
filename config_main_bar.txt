@@ -1,10 +1,10 @@
 #Configuration
-CONFIG_INI_TEMPLATE config_template.ini
-HV_DAC data/hvdacMezz27_ad5535_cal.tsv
-SIPM_BIAS data/sipm_bias_template.tsv
-DISC_SETTINGS data/disc_settings_template.tsv
-CHANNEL_MAP petsys_tables/febd_tofpet2tb_fake_channel_map.tsv 
-TRIGGER_MAP petsys_tables/febd_gbe_trigger_map.tsv
+CONFIG_INI_TEMPLATE /home/cmsdaq/Workspace/TOFPET/Timing-TOFPET/config_template.ini
+HV_DAC /home/cmsdaq/Workspace/TOFPET/Timing-TOFPET/data/hvdacMezz27_ad5535_cal.tsv
+SIPM_BIAS /home/cmsdaq/Workspace/TOFPET/Timing-TOFPET/data/sipm_bias_template.tsv
+DISC_SETTINGS /home/cmsdaq/Workspace/TOFPET/Timing-TOFPET/data/disc_settings_template.tsv
+CHANNEL_MAP /home/cmsdaq/Workspace/TOFPET/Timing-TOFPET/petsys_tables/febd_tofpet2tb_fake_channel_map.tsv 
+TRIGGER_MAP /home/cmsdaq/Workspace/TOFPET/Timing-TOFPET/petsys_tables/febd_gbe_trigger_map.tsv
 LSB_T1 60
 LSB_T2 60
 MIN_INTG_TIME 15
@@ -13,8 +13,8 @@ MAX_INTG_TIME 15
 
 #Calibration
 RUN_CALIB 0
-#CALIB_DIR data/calib/TestBarGood_28_03_2019
-CALIB_DIR data/calib/BarPlusPixel__Bar_S13360-3025_11041_11040__Pixel_S13360-3025CS_10579__Temp24__CoaxialCable__03_07_2019
+#CALIB_DIR /home/cmsdaq/Workspace/TOFPET/Timing-TOFPET/data/calib/TestBarGood_28_03_2019
+CALIB_DIR /home/cmsdaq/Workspace/TOFPET/Timing-TOFPET/data/calib/BarPlusPixel__Bar_S13360-3025_11041_11040__Pixel_S13360-3025CS_10579__Temp24__CoaxialCable__03_07_2019
 DISC_CALIB disc_calibration.tsv
 TDC_CALIB tdc_calibration.tsv
 QDC_CALIB qdc_calibration.tsv
@@ -37,11 +37,11 @@ CONVERTCOINCIDENCESCRIPT analysis/find_coincidences.py
 #CONVERTCOINCIDENCESCRIPT convert_raw_to_coincidence
 TEMPERATUREFILE arduino/temperature/temperature_tmp.txt
 MODE qdc
-TIME 1
+TIME 0.3
 #TIME 1
-OUTPUT_DIR /data/TOFPET/LYSOBARS
+OUTPUT_DIR output/TestBar_14_11_2019
 #OUTPUT_DIR output/Pedestal
-OUTPUT_LABEL Run000921_2019-10-09-17-27-30_BAR000028_WS1_NW_NC
+OUTPUT_LABEL Run000003_2019-11-14-14-08-55_BAR000028_POS0_X23.0_Y25.0_CH0-1-2_ETHR0-0-0
 #OUTPUT_LABEL PedestalTest13_2ch_100000delay
 
 #Channels
@@ -52,10 +52,10 @@ OVERWRITE_OV 7
 #REF is always CH0
 
 #  ID	NHV    VBR    OV    NCHIP    NCH    VTH_1    VTH_2    VTH_E    SIPM_CODE    SIPM_TYPE     X    Y    Z    CRYSTAL	
-CH 0	11     52.25  7.00  0	     59	    20	     20	      15       10579	    S13360-3025CS --   --   430  LYSO_3_3_5
+CH 0	11     52.25  7.00  0	     59	    20	     20	      15       10579	    S13360-3025CS --   --   165  LYSO_3_3_5
 #3025
-CH 1	29     51.57  7.00  4	     59	    10	     20	      15       11040	    S13360-3025CS --   --   171  LYSO_bar	
-CH 2	8      51.50  7.00  4	     35	    10	     20	      15       11041	    S13360-3025CS --   --   171  LYSO_bar	
+CH 1	29     51.57  7.00  4	     59	    10	     20	      15       11040	    S13360-3025CS --   --   435  LYSO_bar	
+CH 2	8      51.50  7.00  4	     35	    10	     20	      15       11041	    S13360-3025CS --   --   435  LYSO_bar	
 #3050
 #CH 1	29     51.77  5.00  4	     59	    20	     20	      15       12380	    S13360-3050CS --   --   140  LYSO_bar	
 #CH 2	8      51.47  5.00  4	     35	    20	     20	      15       12381	    S13360-3050CS --   --   140  LYSO_bar	
@@ -64,5 +64,5 @@ CH 2	8      51.50  7.00  4	     35	    10	     20	      15       11041	    S1336
 #CH 2	8      51.47  5.00  4	     35	    20	     20	      30       12381	    S13360-3050CS --   --   140  LYSO_bar	
 # Note on VBR: Different CHs can be connected to the same NHV. If different values of VBR are provided only the first one is set for a given NHV. 
 
-#Note: Source position 298
+#Note: Source position 305
 
