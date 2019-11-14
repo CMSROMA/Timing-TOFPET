@@ -1,46 +1,42 @@
 //////////////////////////////////////////////////////////
 // This class has been automatically generated on
-// Wed Nov  6 19:13:44 2019 by ROOT version 5.34/12
-// from TTree data/Event List
-// found on file: ../output/TestArray_06_11_2019_final/Run000002_2019-11-06-17-43-11_ARRAY000175_POS5_PHYS_qdc_Time300_Gate15_OvRef7_Ov7_singles.root
+// Mon Nov 11 15:42:09 2019 by ROOT version 5.34/12
+// from TTree data/data
+// found on file: ../output/TestArray_10_11_2019/Run000002_2019-11-10-12-07-16_ARRAY000175_POS5_X30.0_Y23.0_CH0-5-6-7-21-22-23_ETHR0-10-0-10-10-0-10_PHYS_qdc_Time300_Gate15_OvRef7_Ov7_coincidences.root
 //////////////////////////////////////////////////////////
 
-#ifndef findCoincidences_h
-#define findCoincidences_h
+#ifndef coincidenceAnalysisBar_h
+#define coincidenceAnalysisBar_h
 
 #include <TROOT.h>
 #include <TChain.h>
 #include <TFile.h>
-#include <map>
-#include <iostream>
+#include <TH1F.h>
+#include <TString.h>
+
 
 // Header file for the classes stored in the TTree if any.
 
 // Fixed size dimensions of array or collections stored in the TTree if any.
 
-std::map<int,int> chMap;
-
-class findCoincidences {
+class coincidenceAnalysisBar {
 public :
-  
+   int channels[33];
+   
+   TString         outputFile;
+   TH1F*           pedMean;
+   TH1F*           pedRms;
+
    TTree          *fChain;   //!pointer to the analyzed TTree or TChain
    Int_t           fCurrent; //!current Tree number in a TChain
 
    // Declaration of leaf types
-   Float_t         step1;
-   Float_t         step2;
-   Long64_t        time;
-   UShort_t        channelID;
-   Float_t         tot;
-   Float_t         energy;
-   UShort_t        tacID;
-   Int_t           xi;
-   Int_t           yi;
-   Float_t         x;
-   Float_t         y;
-   Float_t         z;
-   Float_t         tqT;
-   Float_t         tqE;
+   Int_t           nch;
+   Int_t           ncoinc;
+   Int_t           chId[33];   //[nch]
+   Double_t        energy[33];   //[nch]
+   Double_t        time[33];   //[nch]
+   Int_t           tacID[33];   //[nch]
    Long64_t        unixTime;
    Double_t        tempInt;
    Double_t        tempExt;
@@ -49,35 +45,23 @@ public :
    Double_t        tempSiPMTest;
    Double_t        tempSiPMRef;
 
-
-   TString       configFile;
-   TString       outputFile;
-
    // List of branches
-   TBranch        *b_step1;   //!
-   TBranch        *b_step2;   //!
-   TBranch        *b_time;   //!
-   TBranch        *b_channelID;   //!
-   TBranch        *b_tot;   //!
+   TBranch        *b_nch;   //!
+   TBranch        *b_ncoinc;   //!
+   TBranch        *b_chId;   //!
    TBranch        *b_energy;   //!
+   TBranch        *b_time;   //!
    TBranch        *b_tacID;   //!
-   TBranch        *b_xi;   //!
-   TBranch        *b_yi;   //!
-   TBranch        *b_x;   //!
-   TBranch        *b_y;   //!
-   TBranch        *b_z;   //!
-   TBranch        *b_tqT;   //!
-   TBranch        *b_tqE;   //!
    TBranch        *b_unixTime;   //!
    TBranch        *b_tempInt;   //!
    TBranch        *b_tempExt;   //!
-   TBranch        *b_tempBoardTest;   //!
+   TBranch        *b_tmpBoardTest;   //!
    TBranch        *b_tempBoardRef;   //!
    TBranch        *b_tempSiPMTest;   //!
    TBranch        *b_tempSiPMRef;   //!
 
-   findCoincidences(TTree *tree=0);
-   virtual ~findCoincidences();
+   coincidenceAnalysisBar(TTree *tree=0);
+   virtual ~coincidenceAnalysisBar();
    virtual Int_t    Cut(Long64_t entry);
    virtual Int_t    GetEntry(Long64_t entry);
    virtual Long64_t LoadTree(Long64_t entry);
@@ -85,20 +69,20 @@ public :
    virtual void     Loop();
    virtual Bool_t   Notify();
    virtual void     Show(Long64_t entry = -1);
+   virtual void     LoadPedestals(TString pedestalFile);
 };
 
 #endif
 
-#ifdef findCoincidences_cxx
-findCoincidences::findCoincidences(TTree *tree) : fChain(0) 
+#ifdef coincidenceAnalysisBar_cxx
+coincidenceAnalysisBar::coincidenceAnalysisBar(TTree *tree) : fChain(0) 
 {
 // if parameter tree is not specified (or zero), connect the file
 // used to generate this class and read the Tree.
    if (tree == 0) {
-     std::cout << "Passing a NULL tree. Reverting to default" << std::endl;
-      TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("../output/TestArray_06_11_2019_final/Run000002_2019-11-06-17-43-11_ARRAY000175_POS5_PHYS_qdc_Time300_Gate15_OvRef7_Ov7_singles.root");
+      TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("../output/TestArray_10_11_2019/Run000002_2019-11-10-12-07-16_ARRAY000175_POS5_X30.0_Y23.0_CH0-5-6-7-21-22-23_ETHR0-10-0-10-10-0-10_PHYS_qdc_Time300_Gate15_OvRef7_Ov7_coincidences.root");
       if (!f || !f->IsOpen()) {
-         f = new TFile("../output/TestArray_06_11_2019_final/Run000002_2019-11-06-17-43-11_ARRAY000175_POS5_PHYS_qdc_Time300_Gate15_OvRef7_Ov7_singles.root");
+         f = new TFile("../output/TestArray_10_11_2019/Run000002_2019-11-10-12-07-16_ARRAY000175_POS5_X30.0_Y23.0_CH0-5-6-7-21-22-23_ETHR0-10-0-10-10-0-10_PHYS_qdc_Time300_Gate15_OvRef7_Ov7_coincidences.root");
       }
       f->GetObject("data",tree);
 
@@ -106,19 +90,19 @@ findCoincidences::findCoincidences(TTree *tree) : fChain(0)
    Init(tree);
 }
 
-findCoincidences::~findCoincidences()
+coincidenceAnalysisBar::~coincidenceAnalysisBar()
 {
    if (!fChain) return;
    delete fChain->GetCurrentFile();
 }
 
-Int_t findCoincidences::GetEntry(Long64_t entry)
+Int_t coincidenceAnalysisBar::GetEntry(Long64_t entry)
 {
 // Read contents of entry.
    if (!fChain) return 0;
    return fChain->GetEntry(entry);
 }
-Long64_t findCoincidences::LoadTree(Long64_t entry)
+Long64_t coincidenceAnalysisBar::LoadTree(Long64_t entry)
 {
 // Set the environment to read one entry
    if (!fChain) return -5;
@@ -131,7 +115,7 @@ Long64_t findCoincidences::LoadTree(Long64_t entry)
    return centry;
 }
 
-void findCoincidences::Init(TTree *tree)
+void coincidenceAnalysisBar::Init(TTree *tree)
 {
    // The Init() function is called when the selector needs to initialize
    // a new tree or chain. Typically here the branch addresses and branch
@@ -147,31 +131,23 @@ void findCoincidences::Init(TTree *tree)
    fCurrent = -1;
    fChain->SetMakeClass(1);
 
-   fChain->SetBranchAddress("step1", &step1, &b_step1);
-   fChain->SetBranchAddress("step2", &step2, &b_step2);
-   fChain->SetBranchAddress("time", &time, &b_time);
-   fChain->SetBranchAddress("channelID", &channelID, &b_channelID);
-   fChain->SetBranchAddress("tot", &tot, &b_tot);
-   fChain->SetBranchAddress("energy", &energy, &b_energy);
-   fChain->SetBranchAddress("tacID", &tacID, &b_tacID);
-   fChain->SetBranchAddress("xi", &xi, &b_xi);
-   fChain->SetBranchAddress("yi", &yi, &b_yi);
-   fChain->SetBranchAddress("x", &x, &b_x);
-   fChain->SetBranchAddress("y", &y, &b_y);
-   fChain->SetBranchAddress("z", &z, &b_z);
-   fChain->SetBranchAddress("tqT", &tqT, &b_tqT);
-   fChain->SetBranchAddress("tqE", &tqE, &b_tqE);
+   fChain->SetBranchAddress("nch", &nch, &b_nch);
+   fChain->SetBranchAddress("ncoinc", &ncoinc, &b_ncoinc);
+   fChain->SetBranchAddress("chId", chId, &b_chId);
+   fChain->SetBranchAddress("energy", energy, &b_energy);
+   fChain->SetBranchAddress("time", time, &b_time);
+   fChain->SetBranchAddress("tacID", tacID, &b_tacID);
    fChain->SetBranchAddress("unixTime", &unixTime, &b_unixTime);
    fChain->SetBranchAddress("tempInt", &tempInt, &b_tempInt);
    fChain->SetBranchAddress("tempExt", &tempExt, &b_tempExt);
-   fChain->SetBranchAddress("tempBoardTest", &tempBoardTest, &b_tempBoardTest);
+   fChain->SetBranchAddress("tempBoardTest", &tempBoardTest, &b_tmpBoardTest);
    fChain->SetBranchAddress("tempBoardRef", &tempBoardRef, &b_tempBoardRef);
    fChain->SetBranchAddress("tempSiPMTest", &tempSiPMTest, &b_tempSiPMTest);
    fChain->SetBranchAddress("tempSiPMRef", &tempSiPMRef, &b_tempSiPMRef);
    Notify();
 }
 
-Bool_t findCoincidences::Notify()
+Bool_t coincidenceAnalysisBar::Notify()
 {
    // The Notify() function is called when a new file is opened. This
    // can be either for a new TTree in a TChain or when when a new TTree
@@ -182,18 +158,18 @@ Bool_t findCoincidences::Notify()
    return kTRUE;
 }
 
-void findCoincidences::Show(Long64_t entry)
+void coincidenceAnalysisBar::Show(Long64_t entry)
 {
 // Print contents of entry.
 // If entry is not specified, print current entry
    if (!fChain) return;
    fChain->Show(entry);
 }
-Int_t findCoincidences::Cut(Long64_t entry)
+Int_t coincidenceAnalysisBar::Cut(Long64_t entry)
 {
 // This function may be called from Loop.
 // returns  1 if entry is accepted.
 // returns -1 otherwise.
    return 1;
 }
-#endif // #ifdef findCoincidences_cxx
+#endif // #ifdef coincidenceAnalysisBar_cxx

@@ -1,15 +1,11 @@
-#define singleAnalysis_cxx
-#include "singleAnalysis.h"
+#define ctrAnalysisBar_cxx
+#include "ctrAnalysisBar.h"
 #include <TH2.h>
 #include <TStyle.h>
 #include <TCanvas.h>
-
-#include <TH1F.h>
-#include <vector>
-
 #include <iostream>
 
-void singleAnalysis::LoadPedestals(TString pedestalFile)
+void ctrAnalysisBar::LoadPedestals(TString pedestalFile)
 {
   TFile* f=new TFile(pedestalFile);
   f->ls();
@@ -22,11 +18,11 @@ void singleAnalysis::LoadPedestals(TString pedestalFile)
   // return;
 }
 
-void singleAnalysis::Loop()
+void ctrAnalysisBar::Loop()
 {
 //   In a ROOT session, you can do:
-//      Root > .L singleAnalysis.C
-//      Root > singleAnalysis t
+//      Root > .L ctrAnalysisBar.C
+//      Root > ctrAnalysisBar t
 //      Root > t.GetEntry(12); // Fill t data members with entry number 12
 //      Root > t.Show();       // Show values of entry 12
 //      Root > t.Show(16);     // Read and show values of entry 16
@@ -47,46 +43,55 @@ void singleAnalysis::Loop()
 // METHOD2: replace line
 //    fChain->GetEntry(jentry);       //read all branches
 //by  b_branchname->GetEntry(ientry); //read only this branch
-
-  // pixelChId = 59;
-  // myPedestals.pedMean[std::make_pair< int, int>(59,0)]=250;
-  // myPedestals.pedMean[std::make_pair< int, int>(59,1)]=250;
-  // myPedestals.pedMean[std::make_pair< int, int>(59,2)]=250;
-  // myPedestals.pedMean[std::make_pair< int, int>(59,3)]=250;
-
-  std::vector<TObject*> objectsToStore;
-  TH1F* h1_energy_pixel = new TH1F("h1_energy_pixel", "", 250, 0, 250);
-  objectsToStore.push_back(h1_energy_pixel);
-  TH1F* h1_temp_pixel = new TH1F("h1_temp_pixel", "", 1000, 15, 50);
-  objectsToStore.push_back(h1_temp_pixel);
-  TH1F* h1_temp_bar = new TH1F("h1_temp_bar", "", 1000, 15, 50);
-  objectsToStore.push_back(h1_temp_bar);
-  TH1F* h1_temp_int = new TH1F("h1_temp_int", "", 1000, 15, 50);
-  objectsToStore.push_back(h1_temp_int);
-
    if (fChain == 0) return;
+  
+   channels[0]=59;
+   channels[1]=315;
+   channels[2]=291;
+ 
+   std::vector<TObject*> objectsToStore;
+   TH1F* h1_CTR = new TH1F("h1_CTR", "", 800, -10000, 10000);
+   objectsToStore.push_back(h1_CTR);
 
    Long64_t nentries = fChain->GetEntriesFast();
 
    Long64_t nbytes = 0, nb = 0;
    for (Long64_t jentry=0; jentry<nentries;jentry++) {
-     if (jentry % 100000 == 0) 
+      if (jentry % 100000 == 0) 
        std::cout << "Processing event " << jentry << std::endl;
 
       Long64_t ientry = LoadTree(jentry);
       if (ientry < 0) break;
       nb = fChain->GetEntry(jentry);   nbytes += nb;
 
-      if( channelID != pixelChId )
+      if( energy[1]==-9. || energy[2]==-9. )
 	continue;
 
-      h1_energy_pixel->Fill(energy-pedMean->GetBinContent(channelID*4+tacID+1));
-      h1_temp_pixel->Fill(tempSiPMRef);
-      h1_temp_bar->Fill(tempSiPMTest);
-      h1_temp_int->Fill(tempInt);
+      float energy1 = energy[1]-pedMean->GetBinContent(channels[1]*4+tacID[1]+1);
+      float energy2 = energy[2]-pedMean->GetBinContent(channels[2]*4+tacID[2]+1);
+      float energyBar =  energy1 + energy2;
+
+      double timeBar = (time[1]+time[2])/2.;
+      
+      if (energy[0]>-9.)
+	{
+	  float energyPixel = energy[0]-pedMean->GetBinContent(channels[0]*4+tacID[0]+1);
+	  double timePixel = time[0];
+	  double deltaT = timeBar - timePixel;
+
+	  ///CTR
+	  float NsigmaCut = 1.5;
+	  if( (fabs(energyPixel-pixel_511Peak_mean)/pixel_511Peak_sigma)<NsigmaCut
+              &&  (fabs(energyBar - bar_511Peak_mean)/bar_511Peak_sigma)<NsigmaCut)
+	    { 
+	      h1_CTR->Fill(deltaT);  
+	    }
+	}
    }
 
-   TFile *fOut=new TFile(outputFile,"RECREATE");
+   h1_CTR->Print();
+
+   TFile *fOut=new TFile(outputFile,"UPDATE");
    fOut->cd();
 
    for ( auto &obj : objectsToStore)
@@ -94,4 +99,5 @@ void singleAnalysis::Loop()
    // fOut->Write();
    fOut->ls();
    fOut->Close();
+
 }
