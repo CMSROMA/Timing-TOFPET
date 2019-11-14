@@ -144,19 +144,94 @@ for irun in run_list:
     ## Add branches to root tree (singles)
     print "Update root file with tree (singles)..."
     inputfilename = fileNameNoExtension+"_singles.root"
-    gROOT.ProcessLine('o = TString(gSystem->GetMakeSharedLib()); o = o.ReplaceAll(" -c ", " -std=c++11 -c "); gSystem->SetMakeSharedLib(o.Data());')
-    gROOT.ProcessLine(".L /home/cmsdaq/Workspace/TOFPET/Timing-TOFPET/analysis/addTemperature.C+")
-    gROOT.ProcessLine('TFile* f = new TFile("%s","UPDATE");f->cd();'%inputfilename)
-    gROOT.ProcessLine('TTree* tree; f->GetObject("data",tree);')
-    gROOT.ProcessLine("addTemperature* addT= new addTemperature(tree);")
-    gROOT.ProcessLine('addT->out=f');
-    gROOT.ProcessLine('addT->unixtimeStart=%d;'%unixTimeStart)
-    gROOT.ProcessLine('addT->tempFile="%s";'%(input_filename_temp))
-    gBenchmark.Start( 'addTemperature_run%d'%int(irun))
-    gROOT.ProcessLine("addT->Loop();")
-    gBenchmark.Show( 'addTemperature_run%d'%int(irun))
-    gROOT.ProcessLine('f->Close();')
-    gROOT.ProcessLine('delete addT;delete f;')
+    tfileinput = TFile.Open(inputfilename,"update")
+    treeInput = tfileinput.Get("data")
+    unixTime = array( 'l' , [0])
+    tempInt = array( 'd' , [-999.])
+    tempExt = array( 'd' , [-999.])
+    tempBoardTest = array( 'd' , [-999.])
+    tempBoardRef = array( 'd' , [-999.])
+    tempSiPMTest = array( 'd' , [-999.])
+    tempSiPMRef = array( 'd' , [-999.])
+
+    unixTimeBranch = treeInput.Branch( 'unixTime', unixTime, 'unixTime/L' )
+    tempIntBranch = treeInput.Branch( 'tempInt', tempInt, 'tempInt/D' )
+    tempExtBranch = treeInput.Branch( 'tempExt', tempExt, 'tempExt/D' )
+    tempBoardTestBranch = treeInput.Branch( 'tempBoardTest', tempBoardTest, 'tempBoardTest/D' )
+    tempBoardRefBranch = treeInput.Branch( 'tempBoardRef', tempBoardRef, 'tempBoardRef/D' )
+    tempSiPMTestBranch = treeInput.Branch( 'tempSiPMTest', tempSiPMTest, 'tempSiPMTest/D' )
+    tempSiPMRefBranch = treeInput.Branch( 'tempSiPMRef', tempSiPMRef, 'tempSiPMRef/D' )
+
+    ReadNewTemperature = 0 
+    TInt = -999. 
+    TExt = -999.
+    TBoardTest = -999. 
+    TBoardRef = -999. 
+    TSiPMTest = -999.
+    TSiPMRef = -999.
+
+    previousTime = 0
+    for event in treeInput:
+        unixTime[0] = long(event.time * 10**-12) + unixTimeStart #unix time in seconds of the current event
+
+        ## Read temperatures from file every fixed DeltaT (10^12 ps = 1 s by default)
+        if previousTime==0:
+            ReadNewTemperature=1 
+            previousTime = event.time
+        elif (event.time - previousTime) <= 10**12:
+            tempInt[0] = TInt
+            tempExt[0] = TExt
+            tempBoardTest[0] = TBoardTest
+            tempBoardRef[0] = TBoardRef
+            tempSiPMTest[0] = TSiPMTest
+            tempSiPMRef[0] = TSiPMRef
+        elif (event.time - previousTime) > 10**12:
+            ReadNewTemperature=1
+            previousTime = event.time
+
+        if ReadNewTemperature==1:
+            tempFile = open(input_filename_temp, "r")    
+            for line in tempFile:
+                #skip commented out lines or empty lines
+                if (line.startswith("#")):
+                    continue
+                if line in ['\n','\r\n']:
+                    continue
+        
+                line = line.rstrip('\n')
+                splitline = line.split()
+
+                linesize = len(splitline)
+                if (linesize==7):
+                    # find match within 2 seconds
+                    if( abs(long(unixTime[0])-long(splitline[0])) < 2):
+                        #calibration for temperature sensors is included
+                        TInt = float(splitline[2])+0.16
+                        TExt = float(splitline[3])-0.03
+                        TBoardTest = float(splitline[4])-0.88
+                        TBoardRef = float(splitline[1])-0.75
+                        TSiPMTest = float(splitline[6])+0.09
+                        TSiPMRef = float(splitline[5])+0.22
+                        tempInt[0] = TInt
+                        tempExt[0] = TExt
+                        tempBoardTest[0] = TBoardTest
+                        tempBoardRef[0] = TBoardRef
+                        tempSiPMTest[0] = TSiPMTest
+                        tempSiPMRef[0] = TSiPMRef
+                        break
+            ReadNewTemperature=0
+            tempFile.close()
+        
+        unixTimeBranch.Fill()
+        tempIntBranch.Fill()
+        tempExtBranch.Fill()
+        tempBoardTestBranch.Fill()
+        tempBoardRefBranch.Fill()
+        tempSiPMTestBranch.Fill()
+        tempSiPMRefBranch.Fill()
+
+    treeInput.Write("",TFile.kOverwrite)
+    tfileinput.Close()
     print "File updated."
     print "\n"
 
