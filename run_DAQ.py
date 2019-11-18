@@ -115,7 +115,7 @@ name = "Na22PedAllChannels"
 n_ch = 3 #number of channels in config file (2 for 2 pixels, 3 for 1 pixel and 1 bar, ..)
 n_chip = 2 #number of active TOFPET2 chips
 t_ped = 0.3 #s
-t_phys = 300 #s
+t_phys = 320 #s
 t_tot = 320  #s this is approximate (it is 20-30% less of true value due to cpu processing time to make root files)
 #t_tot = 7200  #s this is approximate (it is 20-30% less of true value due to cpu processing time to make root files)
 ov_values = [7] #V
@@ -167,10 +167,74 @@ nseq = 1
 
 #Reference Bar 
 posFirstBarX = 23
-posFirstBarY = 25
+posFirstBarY = 24.5
+posPixelX = 22
+posPixelY = 23
 
 dict_PosScan = {
+    #DEFAULT
     0: (round(posFirstBarX,1),round(posFirstBarY,1),"0_1_2","0_0_0"),
+
+    #YSCAN - BAR
+    # 0: (round(posFirstBarX,1),round(posFirstBarY-3.0,1),"0_1_2","0_0_0"),
+    # 1: (round(posFirstBarX,1),round(posFirstBarY-2.5,1),"0_1_2","0_0_0"),
+    # 2: (round(posFirstBarX,1),round(posFirstBarY-2.0,1),"0_1_2","0_0_0"),
+    # 3: (round(posFirstBarX,1),round(posFirstBarY-1.5,1),"0_1_2","0_0_0"),
+    # 4: (round(posFirstBarX,1),round(posFirstBarY-1.0,1),"0_1_2","0_0_0"),
+    # 5: (round(posFirstBarX,1),round(posFirstBarY-0.5,1),"0_1_2","0_0_0"),
+    # 6: (round(posFirstBarX,1),round(posFirstBarY,1),"0_1_2","0_0_0"),
+    # 7: (round(posFirstBarX,1),round(posFirstBarY+0.5,1),"0_1_2","0_0_0"),
+    # 8: (round(posFirstBarX,1),round(posFirstBarY+1.0,1),"0_1_2","0_0_0"),
+    # 9: (round(posFirstBarX,1),round(posFirstBarY+1.5,1),"0_1_2","0_0_0"),
+    # 10: (round(posFirstBarX,1),round(posFirstBarY+2.0,1),"0_1_2","0_0_0"),
+    # 11: (round(posFirstBarX,1),round(posFirstBarY+2.5,1),"0_1_2","0_0_0"),
+    # 12: (round(posFirstBarX,1),round(posFirstBarY+3.0,1),"0_1_2","0_0_0")
+
+    #XSCAN - BAR
+   # 0: (round(posFirstBarX-15.0,1),round(posFirstBarY,1),"0_1_2","0_0_0"),
+   # 1: (round(posFirstBarX-12.0,1),round(posFirstBarY,1),"0_1_2","0_0_0"),
+   # 2: (round(posFirstBarX-9.0,1),round(posFirstBarY,1),"0_1_2","0_0_0"),
+   # 3: (round(posFirstBarX-6.0,1),round(posFirstBarY,1),"0_1_2","0_0_0"),
+   # 4: (round(posFirstBarX-4.0,1),round(posFirstBarY,1),"0_1_2","0_0_0"),
+   # 5: (round(posFirstBarX-2.0,1),round(posFirstBarY,1),"0_1_2","0_0_0"),
+   # 6: (round(posFirstBarX,1),round(posFirstBarY,1),"0_1_2","0_0_0"),
+   # 7: (round(posFirstBarX+2.0,1),round(posFirstBarY,1),"0_1_2","0_0_0"),
+   # 8: (round(posFirstBarX+4.0,1),round(posFirstBarY,1),"0_1_2","0_0_0"),
+   # 9: (round(posFirstBarX+6.0,1),round(posFirstBarY,1),"0_1_2","0_0_0"),
+   # 10: (round(posFirstBarX+9.0,1),round(posFirstBarY,1),"0_1_2","0_0_0"),
+   # 11: (round(posFirstBarX+12.0,1),round(posFirstBarY,1),"0_1_2","0_0_0"),
+   # 12: (round(posFirstBarX+15.0,1),round(posFirstBarY,1),"0_1_2","0_0_0")
+
+    #YSCAN - PIXEL
+   # 0: (round(posPixelX,1),round(posPixelY-15.0,1),"0_1_2","0_0_0"),
+   # 1: (round(posPixelX,1),round(posPixelY-12.0,1),"0_1_2","0_0_0"),
+   # 2: (round(posPixelX,1),round(posPixelY-9.0,1),"0_1_2","0_0_0"),
+   # 3: (round(posPixelX,1),round(posPixelY-6.0,1),"0_1_2","0_0_0"),
+   # 4: (round(posPixelX,1),round(posPixelY-4.0,1),"0_1_2","0_0_0"),
+   # 5: (round(posPixelX,1),round(posPixelY-2.0,1),"0_1_2","0_0_0"),
+   # 6: (round(posPixelX,1),round(posPixelY,1),"0_1_2","0_0_0"),
+   # 7: (round(posPixelX,1),round(posPixelY+2.,1),"0_1_2","0_0_0"),
+   # 8: (round(posPixelX,1),round(posPixelY+4.0,1),"0_1_2","0_0_0"),
+   # 9: (round(posPixelX,1),round(posPixelY+6.0,1),"0_1_2","0_0_0"),
+   # 10: (round(posPixelX,1),round(posPixelY+9.0,1),"0_1_2","0_0_0"),
+   # 11: (round(posPixelX,1),round(posPixelY+12.0,1),"0_1_2","0_0_0"),
+   # 12: (round(posPixelX,1),round(posPixelY+15.0,1),"0_1_2","0_0_0")
+
+    #XSCAN - PIXEL
+    #0: (round(posPixelX-15.0,1),round(posPixelY,1),"0_1_2","0_0_0"),
+    #1: (round(posPixelX-12.0,1),round(posPixelY,1),"0_1_2","0_0_0"),
+    #2: (round(posPixelX-9.0,1),round(posPixelY,1),"0_1_2","0_0_0"),
+    #3: (round(posPixelX-6.5,1),round(posPixelY,1),"0_1_2","0_0_0"),
+    #4: (round(posPixelX-4.0,1),round(posPixelY,1),"0_1_2","0_0_0"),
+    #5: (round(posPixelX-2,1),round(posPixelY,1),"0_1_2","0_0_0"),
+    #6: (round(posPixelX,1),round(posPixelY,1),"0_1_2","0_0_0"),
+    #7: (round(posPixelX+2.0,1),round(posPixelY,1),"0_1_2","0_0_0"),
+    #8: (round(posPixelX+4.0,1),round(posPixelY,1),"0_1_2","0_0_0"),
+    #9: (round(posPixelX+6.0,1),round(posPixelY,1),"0_1_2","0_0_0"),
+    #10: (round(posPixelX+9.0,1),round(posPixelY,1),"0_1_2","0_0_0"),
+    #11: (round(posPixelX+12.0,1),round(posPixelY,1),"0_1_2","0_0_0"),
+    #12: (round(posPixelX+15.0,1),round(posPixelY,1),"0_1_2","0_0_0")
+
 }
 print "Position scan" , dict_PosScan
 
@@ -214,6 +278,7 @@ print "Position scan" , dict_PosScan
 ###################################################################
 
 aMover=XYMover(8820)
+#aMover=XYMover(8821)
 print (aMover.estimatedPosition())
 
 for seq in range(0,nseq):
