@@ -15,7 +15,7 @@ class XYControlPanel(npyscreen.ActionForm):
         self.__class__.CANCEL_BUTTON_BR_OFFSET = (2, 15)
 
         # Add the TitleText widget to the form
-        self.port = self.add(npyscreen.TitleFilename, name="PORT     :", value="8820", editable=False)
+        self.port = self.add(npyscreen.TitleFilename, name="PORT     :", value="8820", editable=True)
         self.xyMover = XYMover(int(self.port.value))
         xHome=round(float(self.xyMover.estimatedPosition().split(" ")[0]),1)
         yHome=round(float(self.xyMover.estimatedPosition().split(" ")[1]),1)
