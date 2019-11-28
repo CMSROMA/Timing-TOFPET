@@ -668,9 +668,16 @@ histos['h1_CTR'].Draw("PE")
 #f_gaus = TF1("f_gaus","gaus",histos['h1_CTR'].GetMean()-2*histos['h1_CTR'].GetRMS(),histos['h1_CTR'].GetMean()+2*histos['h1_CTR'].GetRMS())
 #histos['h1_CTR'].Fit(f_gaus,"LR+0N","",histos['h1_CTR'].GetMean()-1*histos['h1_CTR'].GetRMS(),histos['h1_CTR'].GetMean()+1*histos['h1_CTR'].GetRMS())
 #histos['h1_CTR'].Fit(f_gaus,"LR+","",f_gaus.GetParameter(1)-3.5*f_gaus.GetParameter(2),f_gaus.GetParameter(1)+3.5*f_gaus.GetParameter(2))
-f_gaus = TF1("f_gaus","gaus",histos['h1_CTR'].GetMean()-550.,histos['h1_CTR'].GetMean()+550.)
-histos['h1_CTR'].Fit(f_gaus,"R+0N","",histos['h1_CTR'].GetMean()-550.,histos['h1_CTR'].GetMean()+550.)
+#fix fit range - Livia: changed from GetMean
+f_gaus = TF1("f_gaus","gaus",histos['h1_CTR'].GetBinCenter(histos['h1_CTR'].GetMaximumBin())-550.,histos['h1_CTR'].GetBinCenter(histos['h1_CTR'].GetMaximumBin())+550.)
+histos['h1_CTR'].Fit(f_gaus,"R+0N","",histos['h1_CTR'].GetBinCenter(histos['h1_CTR'].GetMaximumBin())-550.,histos['h1_CTR'].GetBinCenter(histos['h1_CTR'].GetMaximumBin())+550.)
 histos['h1_CTR'].Fit(f_gaus,"R+","",f_gaus.GetParameter(1)-550.,f_gaus.GetParameter(1)+550.)
+
+#f_gaus = TF1("f_gaus","gaus",histos['h1_CTR'].GetMean()-550.,histos['h1_CTR'].GetMean()+550.)
+#histos['h1_CTR'].Fit(f_gaus,"R+0N","",histos['h1_CTR'].GetMean()-550.,histos['h1_CTR'].GetMean()+550.)
+#histos['h1_CTR'].Fit(f_gaus,"R+","",f_gaus.GetParameter(1)-550.,f_gaus.GetParameter(1)+550.)
+
+
 histos['h1_CTR'].GetXaxis().SetRangeUser(f_gaus.GetParameter(1)-550.,f_gaus.GetParameter(1)+550.)
 histos['h1_CTR'].GetXaxis().SetTitle("t_{bar} - t_{pixel} [ps]")
 histos['h1_CTR'].GetYaxis().SetTitle("Events")
