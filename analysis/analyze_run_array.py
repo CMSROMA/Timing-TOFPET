@@ -715,8 +715,12 @@ histos['h1_CTR'].Draw("PE")
 #f_gaus = TF1("f_gaus","gaus",histos['h1_CTR'].GetMean()-2*histos['h1_CTR'].GetRMS(),histos['h1_CTR'].GetMean()+2*histos['h1_CTR'].GetRMS())
 #histos['h1_CTR'].Fit(f_gaus,"LR+0N","",histos['h1_CTR'].GetMean()-1*histos['h1_CTR'].GetRMS(),histos['h1_CTR'].GetMean()+1*histos['h1_CTR'].GetRMS())
 #histos['h1_CTR'].Fit(f_gaus,"LR+","",f_gaus.GetParameter(1)-3.5*f_gaus.GetParameter(2),f_gaus.GetParameter(1)+3.5*f_gaus.GetParameter(2))
-f_gaus = TF1("f_gaus","gaus",histos['h1_CTR'].GetMean()-550.,histos['h1_CTR'].GetMean()+550.)
-histos['h1_CTR'].Fit(f_gaus,"R+0N","",histos['h1_CTR'].GetMean()-550.,histos['h1_CTR'].GetMean()+550.)
+f_gaus = TF1("f_gaus","gaus",histos['h1_CTR'].GetBinCenter(histos['h1_CTR'].GetMaximumBin())-550.,histos['h1_CTR'].GetBinCenter(histos['h1_CTR'].GetMaximumBin())+550.)
+histos['h1_CTR'].Fit(f_gaus,"R+0N","",histos['h1_CTR'].GetBinCenter(histos['h1_CTR'].GetMaximumBin())-550.,histos['h1_CTR'].GetBinCenter(histos['h1_CTR'].GetMaximumBin())+550.)
+#f_gaus = TF1("f_gaus","gaus",histos['h1_CTR'].GetMean()-550.,histos['h1_CTR'].GetMean()+550.)
+#histos['h1_CTR'].Fit(f_gaus,"R+0N","",histos['h1_CTR'].GetMean()-550.,histos['h1_CTR'].GetMean()+550.)
+
+
 histos['h1_CTR'].Fit(f_gaus,"R+","",f_gaus.GetParameter(1)-550.,f_gaus.GetParameter(1)+550.)
 histos['h1_CTR'].GetXaxis().SetRangeUser(f_gaus.GetParameter(1)-550.,f_gaus.GetParameter(1)+550.)
 histos['h1_CTR'].GetXaxis().SetTitle("t_{bar} - t_{pixel} [ps]")
@@ -768,7 +772,7 @@ c1_energy.SaveAs(opt.outputDir+"/"+"Run"+str(opt.run.zfill(6))+"_ARRAY"+str(opt.
 c1_energy.Write()
 histos['h1_energySum_Xtalk'].Write()
 
-if (alignedBar-1>0):
+if (alignedBar-1>=0):
     histos['h1_energyTot_bar_Xtalk%d'%(alignedBar-1)].Draw("PE") 
     f_cb_Left=TF1("f_cb_Left",crystalball_function,-10,100,5)
     f_cb_Left.SetParameter(0,100)
