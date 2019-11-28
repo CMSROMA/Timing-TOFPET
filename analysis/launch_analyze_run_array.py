@@ -41,16 +41,14 @@ if not opt.outputDir:
 
 #------------------------------------------------
 
-nFilesInScan = 12
+nFilesInScan = 5
 
-commandMerge = "hadd -f "+str(opt.outputDir)+"/"+"tree_"+"FirstRun" + str(opt.firstRun.zfill(6)) + "_LastRun" + str((int(opt.firstRun)+(nFilesInScan-1)*3)).zfill(6) + "_ARRAY" + str(opt.arrayCode.zfill(6))+".root"
+mergedTree = str(opt.outputDir)+"/"+"tree_"+"FirstRun" + str(opt.firstRun.zfill(6)) + "_LastRun" + str((int(opt.firstRun)+(nFilesInScan-1)*3)).zfill(6) + "_ARRAY" + str(opt.arrayCode.zfill(6))+".root"
+
+commandMerge = "hadd -f "+mergedTree
 print commandMerge
 
 for step in range(0,nFilesInScan):
-
-    #    #Inactive bars (disconnected or not working)
-    #    if (step==8 or step==10 or step==13):
-    #        continue
 
     #Launch analysis for each step of the position scan
     print step
@@ -64,3 +62,101 @@ for step in range(0,nFilesInScan):
     
 print commandMerge
 os.system(commandMerge)
+
+#### Analysis Summary #####
+
+tfileResults = TFile.Open(mergedTree)
+treeResults = tfileResults.Get("results")
+
+h1_spectra_bar = TH1F("h1_spectra_bar", "", 1000, 0, 100)
+h1_CTR_bar = TH1F("h1_CTR_bar", "", 5000, 0, 500)
+h1_ct_bar = TH1F("h1_ct_bar", "", 1000, 0, 10)
+
+n = 5
+bar_id, ph_peak, ph_peak_err,  CTR_sigma, ct, CTR_sigma_err, ct_err, bar_err = array( 'd' ), array( 'd' ), array( 'd' ), array( 'd' ), array( 'd' ), array( 'd' ), array( 'd' ), array( 'd' )
+
+for event in range (0,treeResults.GetEntries()):
+    treeResults.GetEntry(event)
+    h1_spectra_bar.Fill(treeResults.peak1_mean_barCoinc)
+    h1_CTR_bar.Fill(treeResults.CTR_sigma_barCoinc)
+    h1_ct_bar.Fill(treeResults.Xtalk_mean_barCoinc/treeResults.peak1_mean_barCoinc)
+    bar_id.append(treeResults.bar)
+    bar_err.append(0)
+    CTR_sigma.append(treeResults.CTR_sigma_barCoinc)
+    CTR_sigma_err.append(treeResults.err_CTR_sigma_barCoinc)
+    ph_peak.append(treeResults.peak1_mean_barCoinc)
+    ph_peak_err.append(treeResults.err_peak1_mean_barCoinc)
+    ct.append((treeResults.Xtalk_mean_barCoinc)/(treeResults.peak1_mean_barCoinc))
+    xtalk_err_value=treeResults.err_Xtalk_mean_barCoinc
+    peak_err_value=treeResults.err_peak1_mean_barCoinc
+    ct_err_value=sqrt((xtalk_err_value**2)/((treeResults.peak1_mean_barCoinc)**2)+(peak_err_value**2*((treeResults.Xtalk_mean_barCoinc)**2)/((treeResults.peak1_mean_barCoinc)**4)))    
+    ct_err.append(ct_err_value)
+
+##########################################
+
+mergedLabel = str(opt.outputDir)+"/"+"tree_"+"FirstRun" + str(opt.firstRun.zfill(6)) + "_LastRun" + str((int(opt.firstRun)+(nFilesInScan-1)*3)).zfill(6) + "_ARRAY" + str(opt.arrayCode.zfill(6))
+
+#pt1 = TPaveText(0.100223,0.915556,0.613586,0.967407,"brNDC")
+#text1 = pt1.AddText( str(opt.firstRun.zfill(6)) + "_LastRun" + str((int(opt.firstRun)+(nFilesI\nScan-1)*3)).zfill(6) + "_ARRAY" + str(opt.arrayCode.zfill(6))+"plot" )
+#pt1.SetFillColor(0)
+#pt1.Draw()
+#c1_spectra.Update()
+
+gr_phe_peak = TGraphErrors( n, bar_id, ph_peak, bar_err, ph_peak_err )
+c1_spectra = TCanvas("phe_peak", "phe_peak", 900, 700)     
+
+c1_spectra.cd()  
+gStyle.SetOptStat(1111);
+c1_spectra.SetGrid();
+gr_phe_peak.GetXaxis().SetTitle("BAR ID")
+gr_phe_peak.GetYaxis().SetTitle("Energy (QDC)")
+gr_phe_peak.SetLineColor( 2 )
+gr_phe_peak.SetMarkerColor( 1 )
+gr_phe_peak.SetMarkerStyle( 21 )
+gr_phe_peak.Draw()
+c1_spectra.SaveAs(mergedLabel+"_"+"SUMMARY_phePeak.png")
+
+gr_CTR = TGraphErrors(n, bar_id, CTR_sigma, bar_err, CTR_sigma_err)
+c2_CTR = TCanvas("CTR_sigma", "CTR_sigma", 900, 700)
+c2_CTR.cd()
+gStyle.SetOptStat(1111);
+c2_CTR.SetGrid();
+gr_CTR.GetXaxis().SetTitle("BAR ID")
+gr_CTR.GetYaxis().SetTitle("CTR_sigma(ps)")
+gr_CTR.SetLineColor( 2 )
+gr_CTR.SetMarkerColor( 1 )
+gr_CTR.SetMarkerStyle( 21 )
+gr_CTR.Draw()
+c2_CTR.SaveAs(mergedLabel+"_"+"SUMMARY_CTR.png")
+
+gr_ct = TGraphErrors(n, bar_id, ct, bar_err, ct_err)
+c3_ct = TCanvas("cross-talk", "cross-talk", 900, 700)
+c3_ct.cd()
+gStyle.SetOptStat(1111);
+c3_ct.SetGrid();
+gr_ct.GetXaxis().SetTitle("BAR ID")
+gr_ct.GetYaxis().SetTitle("ct fraction")
+gr_ct.SetLineColor( 2 )
+gr_ct.SetMarkerColor( 1 )
+gr_ct.SetMarkerStyle( 21 )
+gr_ct.Draw()
+c3_ct.SaveAs(mergedLabel+"_"+"SUMMARY_xtalk.png")
+
+###################################################
+
+ph_peak_mean = h1_spectra_bar.GetMean()
+ph_peak_RMS = h1_spectra_bar.GetRMS()
+
+CTR_sigma_mean = h1_CTR_bar.GetMean()
+CTR_sigma_RMS = h1_CTR_bar.GetRMS()
+
+ct_mean = h1_ct_bar.GetMean()
+ct_RMS = h1_ct_bar.GetRMS()
+
+print "ph_peak_mean=", ph_peak_mean
+print "ph_peak_RMS=" , ph_peak_RMS
+print "CTR_sigma_mean=", CTR_sigma_mean
+print "CTR_sigma_RMS=", CTR_sigma_RMS
+print "ct_mean=", ct_mean
+print "ct_RMS=", ct_RMS
+
