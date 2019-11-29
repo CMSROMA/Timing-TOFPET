@@ -198,6 +198,7 @@ def fitSpectrum(histo,function,xmin,xmax,canvas,fitres,label,code,run,outputDIR)
     fitres[(label,"backpeak","mean","value")]=function.GetParameter(15)
     fitres[(label,"backpeak","mean","sigma")]=function.GetParError(15)
 
+
     f1_bkg = TF1("f1_bkg",function,xmin,min(peak*2.4,xmax),19)
     f1_bkg.SetLineColor(kGreen+1)
     #f1_bkg.SetLineStyle(7)
@@ -224,13 +225,13 @@ def fitSpectrum(histo,function,xmin,xmax,canvas,fitres,label,code,run,outputDIR)
     f1_bkg.Draw("same")
 
     pt1 = TPaveText(0.100223,0.915556,0.613586,0.967407,"brNDC")
-    text1 = pt1.AddText( "Run" + str(run.zfill(6)) + " " + label + str(code.zfill(6)) )
+    text1 = pt1.AddText( "Run" + str(run).zfill(6) + " " + label + str(code).zfill(6) )
     pt1.SetFillColor(0)
     pt1.Draw()
 
     canvas.Update()
-    canvas.SaveAs(outputDIR+"/"+"Run"+str(run.zfill(6))+"_BAR"+str(code.zfill(6))+"_SourceSpectrum_"+label+".pdf")
-    canvas.SaveAs(outputDIR+"/"+"Run"+str(run.zfill(6))+"_BAR"+str(code.zfill(6))+"_SourceSpectrum_"+label+".png")
+    canvas.SaveAs(outputDIR+"/"+"Run"+str(run).zfill(6)+"_BAR"+str(code).zfill(6)+"_SourceSpectrum_"+label+".pdf")
+    canvas.SaveAs(outputDIR+"/"+"Run"+str(run).zfill(6)+"_BAR"+str(code).zfill(6)+"_SourceSpectrum_"+label+".png")
     canvas.Write()
 
 def fitSpectrum_coinc(histo,function,xmin,xmax,canvas,fitres,label,code,run,outputDIR):
@@ -283,13 +284,13 @@ def fitSpectrum_coinc(histo,function,xmin,xmax,canvas,fitres,label,code,run,outp
     f1_bkg.Draw("same")
 
     pt2 = TPaveText(0.100223,0.915556,0.613586,0.967407,"brNDC")    
-    text2 = pt2.AddText( "Run" + str(run.zfill(6)) + " " + label + str(code.zfill(6)) )
+    text2 = pt2.AddText( "Run" + str(run).zfill(6) + " " + label + str(code).zfill(6) )
     pt2.SetFillColor(0)
     pt2.Draw()
 
     canvas.Update()
-    canvas.SaveAs(outputDIR+"/"+"Run"+str(run.zfill(6))+"_BAR"+str(code.zfill(6))+"_SourceSpectrum_"+label+".pdf")
-    canvas.SaveAs(outputDIR+"/"+"Run"+str(run.zfill(6))+"_BAR"+str(code.zfill(6))+"_SourceSpectrum_"+label+".png")
+    canvas.SaveAs(outputDIR+"/"+"Run"+str(run).zfill(6)+"_BAR"+str(code).zfill(6)+"_SourceSpectrum_"+label+".pdf")
+    canvas.SaveAs(outputDIR+"/"+"Run"+str(run).zfill(6)+"_BAR"+str(code).zfill(6)+"_SourceSpectrum_"+label+".png")
     canvas.Write()
 
 def fitSaturation(function,xmin,xmax,canvas,fitres,label):    
@@ -375,7 +376,7 @@ gStyle.SetStatH(0.09)
 ## 1) Find input files
 ################################################
 
-run = opt.run.zfill(6)
+run = str(opt.run).zfill(6)
 print "Run ", run
 
 input_filename_ped1 = ""
@@ -522,7 +523,8 @@ print "Pedestals analyzed"
 print "Analzying singles"
 
 gROOT.ProcessLine('o = TString(gSystem->GetMakeSharedLib()); o = o.ReplaceAll(" -c ", " -std=c++11 -c "); gSystem->SetMakeSharedLib(o.Data());')
-gROOT.ProcessLine(".L /home/cmsdaq/Workspace/TOFPET/Timing-TOFPET/analysis/singleAnalysis.C+")
+#gROOT.ProcessLine(".L /home/cmsdaq/Workspace/TOFPET/Timing-TOFPET/analysis/singleAnalysis.C+")
+gROOT.ProcessLine(".L analysis/singleAnalysis.C+")
 gROOT.ProcessLine('TFile* f = new TFile("%s");'%input_filename_singles)
 gROOT.ProcessLine('TTree* tree; f->GetObject("data",tree);')
 gROOT.ProcessLine("singleAnalysis sAnalysis(tree);")
@@ -545,10 +547,11 @@ print "Singles analyzed"
 
 print "Analyzing coincidences"
 
-gROOT.ProcessLine(".L /home/cmsdaq/Workspace/TOFPET/Timing-TOFPET/analysis/coincidenceAnalysisBar.C+")
-gROOT.ProcessLine('TFile* f = new TFile("%s");'%input_filename_coinc)
-gROOT.ProcessLine('TTree* tree; f->GetObject("data",tree);')
-gROOT.ProcessLine("coincidenceAnalysisBar cAnalysis(tree);")
+#gROOT.ProcessLine(".L /home/cmsdaq/Workspace/TOFPET/Timing-TOFPET/analysis/coincidenceAnalysisBar.C+")
+gROOT.ProcessLine(".L analysis/coincidenceAnalysisBar.C+")
+gROOT.ProcessLine('TFile* fCoinc = new TFile("%s");'%input_filename_coinc)
+gROOT.ProcessLine('TTree* treeCoinc; fCoinc->GetObject("data",treeCoinc);')
+gROOT.ProcessLine("coincidenceAnalysisBar cAnalysis(treeCoinc);")
 gROOT.ProcessLine('cAnalysis.LoadPedestals("%s");'%(opt.outputDir+"/"+"ped_Run"+run+"_BAR"+str(str(opt.barCode).zfill(6))+".root"))
 gROOT.ProcessLine('cAnalysis.outputFile="%s";'%(opt.outputDir+"/"+"histo_Run"+run+"_BAR"+str(str(opt.barCode).zfill(6))+".root"))
 gBenchmark.Start( 'coincidenceAnalysisBar' )
@@ -560,8 +563,6 @@ print "Coincidences analyzed"
 ################################################
 ## 5) Output file
 ################################################
-
-
 tfileoutput = TFile( opt.outputDir+"/"+"histo_Run"+run+"_BAR"+str(str(opt.barCode).zfill(6))+".root", "update" )
 tfileoutput.cd()
 histos=Map(tfileoutput)
@@ -569,7 +570,10 @@ histos=Map(tfileoutput)
 ################################################
 ## 6) Fit energy spectra
 ################################################
-c1_energy = TCanvas("c1_energy_pixel", "", 900, 700)
+c1_energy_pixel = TCanvas("c1_energy_pixel", "", 900, 700)
+c1_energy_pixelCoinc = TCanvas("c1_energy_pixelCoinc", "", 900, 700)
+c1_energy_bar = TCanvas("c1_energy_bar", "", 900, 700)
+c1_energy_barCoinc = TCanvas("c1_energy_barCoinc", "", 900, 700)
 
 fitResults = {}
 
@@ -586,7 +590,7 @@ histos['h1_energy_pixel'].Write()
 ## Bar
 fTot_bar = TF1("fTot_bar",totalFunction,minEnergy,maxEnergy,n_paramameters)
 fTot_bar.SetNpx(1000)
-fitSpectrum(histos['h1_energyTot_bar'],fTot_bar,minEnergy,maxEnergy,c1_energy_pixel,fitResults,"bar",opt.barCode,opt.run,opt.outputDir)
+fitSpectrum(histos['h1_energyTot_bar'],fTot_bar,minEnergy,maxEnergy,c1_energy_pixelCoinc,fitResults,"bar",opt.barCode,opt.run,opt.outputDir)
 histos['h1_energyTot_bar'].Write()
 
 ## Setup coincidences
@@ -598,7 +602,7 @@ maxEnergy_coinc = 160
 
 fTot_pixel_coinc = TF1("fTot_pixel_coinc",totalFunction_coinc,minEnergy_coinc,maxEnergy_coinc,n_paramameters_coinc)
 fTot_pixel_coinc.SetNpx(1000)
-fitSpectrum_coinc(histos['h1_energy_pixel_coinc'],fTot_pixel_coinc,minEnergy_coinc,maxEnergy_coinc,c1_energy_pixel,fitResults,"pixelCoinc","",opt.run,opt.outputDir)
+fitSpectrum_coinc(histos['h1_energy_pixel_coinc'],fTot_pixel_coinc,minEnergy_coinc,maxEnergy_coinc,c1_energy_bar,fitResults,"pixelCoinc","",opt.run,opt.outputDir)
 histos['h1_energy_pixel_coinc'].Write()
 
 ## Bar
@@ -607,7 +611,7 @@ maxEnergy_coinc = 160
 
 fTot_bar_coinc = TF1("fTot_bar_coinc",totalFunction_coinc,minEnergy_coinc,maxEnergy_coinc,n_paramameters_coinc)
 fTot_bar_coinc.SetNpx(1000)
-fitSpectrum_coinc(histos['h1_energyTot_bar_coinc'],fTot_bar_coinc,minEnergy_coinc,maxEnergy_coinc,c1_energy_pixel,fitResults,"barCoinc",opt.barCode,opt.run,opt.outputDir)
+fitSpectrum_coinc(histos['h1_energyTot_bar_coinc'],fTot_bar_coinc,minEnergy_coinc,maxEnergy_coinc,c1_energy_barCoinc,fitResults,"barCoinc",opt.barCode,opt.run,opt.outputDir)
 histos['h1_energyTot_bar_coinc'].Write()
 
 tfileoutput.Close()
@@ -640,10 +644,11 @@ print fitResults[('pixelCoinc',"peak1","mean","value")] + fitResults[('pixelCoin
 print fitResults[('barCoinc',"peak1","mean","value")] - fitResults[('barCoinc',"peak1","sigma","value")]
 print fitResults[('barCoinc',"peak1","mean","value")] + fitResults[('barCoinc',"peak1","sigma","value")]
 
-gROOT.ProcessLine(".L /home/cmsdaq/Workspace/TOFPET/Timing-TOFPET/analysis/ctrAnalysisBar.C+")
-gROOT.ProcessLine('TFile* f = new TFile("%s");'%input_filename_coinc)
-gROOT.ProcessLine('TTree* tree; f->GetObject("data",tree);')
-gROOT.ProcessLine("ctrAnalysisBar ctAnalysis(tree);")
+#gROOT.ProcessLine(".L /home/cmsdaq/Workspace/TOFPET/Timing-TOFPET/analysis/ctrAnalysisBar.C+")
+gROOT.ProcessLine(".L analysis/ctrAnalysisBar.C+")
+gROOT.ProcessLine('TFile* fCTR = new TFile("%s");'%input_filename_coinc)
+gROOT.ProcessLine('TTree* treeCTR; fCTR->GetObject("data",treeCTR);')
+gROOT.ProcessLine("ctrAnalysisBar ctAnalysis(treeCTR);")
 
 gROOT.ProcessLine('ctAnalysis.LoadPedestals("%s");'%(opt.outputDir+"/"+"ped_Run"+run+"_BAR"+str(str(opt.barCode).zfill(6))+".root"))
 gROOT.ProcessLine('ctAnalysis.outputFile="%s";'%(opt.outputDir+"/"+"histo_Run"+run+"_BAR"+str(str(opt.barCode).zfill(6))+".root"))
@@ -689,7 +694,7 @@ fitResults[("barCoinc","CTR","sigma","value")]=f_gaus.GetParameter(2)
 fitResults[("barCoinc","CTR","sigma","sigma")]=f_gaus.GetParError(2)
 
 pt3 = TPaveText(0.100223,0.915556,0.613586,0.967407,"brNDC")
-text3 = pt3.AddText( "Run" + str(opt.run.zfill(6)) + " BAR" + str(opt.barCode.zfill(6)) )
+text3 = pt3.AddText( "Run" + str(opt.run).zfill(6) + " BAR" + str(opt.barCode).zfill(6) )
 pt3.SetFillColor(0)
 pt3.Draw()
 #FIXME: check why it does not show the label on the canvas!
@@ -697,8 +702,8 @@ pt3.Draw()
 tfileoutput.cd()
 c1_CTR.cd()
 c1_CTR.Update()
-c1_CTR.SaveAs(opt.outputDir+"/"+"Run"+str(opt.run.zfill(6))+"_BAR"+str(opt.barCode.zfill(6))+"_CTR"+".pdf")
-c1_CTR.SaveAs(opt.outputDir+"/"+"Run"+str(opt.run.zfill(6))+"_BAR"+str(opt.barCode.zfill(6))+"_CTR"+".png")
+c1_CTR.SaveAs(opt.outputDir+"/"+"Run"+str(opt.run).zfill(6)+"_BAR"+str(opt.barCode).zfill(6)+"_CTR"+".pdf")
+c1_CTR.SaveAs(opt.outputDir+"/"+"Run"+str(opt.run).zfill(6)+"_BAR"+str(opt.barCode).zfill(6)+"_CTR"+".png")
 c1_CTR.Write()
 histos['h1_CTR'].Write()
 
