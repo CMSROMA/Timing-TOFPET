@@ -55,6 +55,11 @@ crystalsDB={
                 'refRuns'  : [ 'tree_Run000308_BAR000028' ]
             },
 
+            { 
+                'tag' : 'IRR20_1H_T12D', 
+                'runs' : [ 'tree_Run000434_BAR000033' ], 
+                'refRuns'  : [ 'tree_Run000395_BAR000028' , 'tree_Run000437_BAR000028' ]
+            },
 
         ]
     },
@@ -96,6 +101,12 @@ crystalsDB={
                 'refRuns'  : [ 'tree_Run000179_BAR000028' , 'tree_Run000254_BAR000028' ]
             },
 
+            { 
+                'tag' : 'IRR2K_1H_T12D', 
+                'runs' : [ 'tree_Run000428_BAR000070' ], 
+                'refRuns'  : [ 'tree_Run000395_BAR000028' , 'tree_Run000437_BAR000028' ]
+            },
+
         ]
     },
 
@@ -117,6 +128,12 @@ crystalsDB={
                 'tag' : 'IRR9K_1H_T17H', 
                 'runs' : [ 'tree_Run000326_BAR000071' ], 
                 'refRuns'  : [ 'tree_Run000308_BAR000028' ]
+            },
+
+            { 
+                'tag' : 'IRR9K_1H_T12D', 
+                'runs' : [ 'tree_Run000431_BAR000071' ], 
+                'refRuns'  : [ 'tree_Run000395_BAR000028' , 'tree_Run000437_BAR000028' ]
             },
 
         ]
@@ -354,6 +371,12 @@ crystalsDB={
                 'refRuns'  : [ 'tree_Run000179_BAR000028' , 'tree_Run000254_BAR000028' ]
             },
 
+            { 
+                'tag' : 'IRR200_1H_T29H', 
+                'runs' : [ 'tree_Run000455_BAR000056' ], 
+                'refRuns'  : [ 'tree_Run000395_BAR000028' , 'tree_Run000437_BAR000028' ]
+            },
+
         ]
     },
 
@@ -448,6 +471,12 @@ crystalsDB={
                 'refRuns'  : [ 'tree_Run000179_BAR000028' , 'tree_Run000254_BAR000028' ]
             },
 
+            { 
+                'tag' : 'IRR9K_1H_T13D', 
+                'runs' : [ 'tree_Run000452_BAR000058' ], 
+                'refRuns'  : [ 'tree_Run000395_BAR000028' , 'tree_Run000437_BAR000028' ]
+            },
+
         ]
     },
 
@@ -499,6 +528,12 @@ crystalsDB={
                 'refRuns'  : [ 'tree_Run000041_BAR000028' , 'tree_Run000119_BAR000028' ]
             },
 
+            { 
+                'tag' : 'IRR200_1H_T13D', 
+                'runs' : [ 'tree_Run000440_BAR000092' ], 
+                'refRuns'  : [ 'tree_Run000395_BAR000028' , 'tree_Run000437_BAR000028' ]
+            },
+
         ]
     },
 
@@ -514,6 +549,12 @@ crystalsDB={
                 'tag' : 'IRR0', 
                 'runs' : [ 'tree_Run000098_BAR000093' ], 
                 'refRuns'  : [ 'tree_Run000041_BAR000028' , 'tree_Run000119_BAR000028' ]
+            },
+
+            { 
+                'tag' : 'IRR2K_1H_T13D', 
+                'runs' : [ 'tree_Run000443_BAR000093' ], 
+                'refRuns'  : [ 'tree_Run000395_BAR000028' , 'tree_Run000437_BAR000028' ]
             },
 
         ]
@@ -667,6 +708,12 @@ crystalsDB={
                 'refRuns'  : [ 'tree_Run000041_BAR000028' , 'tree_Run000119_BAR000028' ]
             },
 
+            { 
+                'tag' : 'IRR200_1H_T13D', 
+                'runs' : [ 'tree_Run000422_BAR000078' ], 
+                'refRuns'  : [ 'tree_Run000395_BAR000028' , 'tree_Run000437_BAR000028' ]
+            },
+
         ]
     },
 
@@ -682,6 +729,12 @@ crystalsDB={
                 'tag' : 'IRR0', 
                 'runs' : [ 'tree_Run000113_BAR000079' ], 
                 'refRuns'  : [ 'tree_Run000041_BAR000028' , 'tree_Run000119_BAR000028' ]
+            },
+
+            { 
+                'tag' : 'IRR2K_1H_T13D', 
+                'runs' : [ 'tree_Run000425_BAR000079' ], 
+                'refRuns'  : [ 'tree_Run000395_BAR000028' , 'tree_Run000437_BAR000028' ]
             },
 
         ]
@@ -737,6 +790,12 @@ crystalsDB={
                 'tag' : 'IRR20_1H_T16H', 
                 'runs' : [ 'tree_Run000311_BAR000106' ], 
                 'refRuns'  : [ 'tree_Run000308_BAR000028' ]
+            },
+
+            { 
+                'tag' : 'IRR20_1H_T12D', 
+                'runs' : [ 'tree_Run000449_BAR000106' ], 
+                'refRuns'  : [ 'tree_Run000395_BAR000028' , 'tree_Run000437_BAR000028' ]
             },
 
         ]
@@ -808,6 +867,12 @@ crystalsDB={
                 'refRuns'  : [ 'tree_Run000308_BAR000028' ]
             },
 
+            { 
+                'tag' : 'IRR9K_1H_T12D', 
+                'runs' : [ 'tree_Run000446_BAR000109' ], 
+                'refRuns'  : [ 'tree_Run000395_BAR000028' , 'tree_Run000437_BAR000028' ]
+            },
+
         ]
     },
 
@@ -832,6 +897,12 @@ crystalsDB={
                 'tag' : 'IRR0', 
                 'runs' : [ 'tree_Run000224_BAR000160' ], 
                 'refRuns'  : [ 'tree_Run000179_BAR000028' , 'tree_Run000254_BAR000028' ]
+            },
+
+            { 
+                'tag' : 'IRR2_1H_T11D', 
+                'runs' : [ 'tree_Run000413_BAR000160' ], 
+                'refRuns'  : [ 'tree_Run000395_BAR000028' , 'tree_Run000437_BAR000028' ]
             },
 
         ]
@@ -874,6 +945,12 @@ crystalsDB={
                 'refRuns'  : [ 'tree_Run000179_BAR000028' , 'tree_Run000254_BAR000028' ]
             },
 
+            { 
+                'tag' : 'IRR200_1H_T11D', 
+                'runs' : [ 'tree_Run000416_BAR000162' ], 
+                'refRuns'  : [ 'tree_Run000395_BAR000028' , 'tree_Run000437_BAR000028' ]
+            },
+
         ]
     },
 
@@ -889,6 +966,12 @@ crystalsDB={
                 'tag' : 'IRR0', 
                 'runs' : [ 'tree_Run000233_BAR000163' ], 
                 'refRuns'  : [ 'tree_Run000179_BAR000028' , 'tree_Run000254_BAR000028' ]
+            },
+
+            { 
+                'tag' : 'IRR2K_1H_T11D', 
+                'runs' : [ 'tree_Run000419_BAR000163' ], 
+                'refRuns'  : [ 'tree_Run000395_BAR000028' , 'tree_Run000437_BAR000028' ]
             },
 
         ]
@@ -944,6 +1027,12 @@ crystalsDB={
                 'tag' : 'IRR20_1H_T17H', 
                 'runs' : [ 'tree_Run000317_BAR000121' ], 
                 'refRuns'  : [ 'tree_Run000308_BAR000028' ]
+            },
+
+            { 
+                'tag' : 'IRR20_1H_T12D', 
+                'runs' : [ 'tree_Run000401_BAR000121' ], 
+                'refRuns'  : [ 'tree_Run000395_BAR000028' , 'tree_Run000437_BAR000028' ]
             },
 
         ]
@@ -1093,6 +1182,12 @@ crystalsDB={
                 'refRuns'  : [ 'tree_Run000308_BAR000028' ]
             },
 
+            { 
+                'tag' : 'IRR9K_1H_T12D', 
+                'runs' : [ 'tree_Run000398_BAR000124' ], 
+                'refRuns'  : [ 'tree_Run000395_BAR000028' , 'tree_Run000437_BAR000028' ]
+            },
+
         ]
     },
 
@@ -1117,6 +1212,12 @@ crystalsDB={
                 'tag' : 'IRR0', 
                 'runs' : [ 'tree_Run000206_BAR000145' ], 
                 'refRuns'  : [ 'tree_Run000179_BAR000028' , 'tree_Run000254_BAR000028' ]
+            },
+
+            { 
+                'tag' : 'IRR2_1H_T11D', 
+                'runs' : [ 'tree_Run000404_BAR000145' ], 
+                'refRuns'  : [ 'tree_Run000395_BAR000028' , 'tree_Run000437_BAR000028' ]
             },
 
         ]
@@ -1159,6 +1260,12 @@ crystalsDB={
                 'refRuns'  : [ 'tree_Run000179_BAR000028' , 'tree_Run000254_BAR000028' ]
             },
 
+            { 
+                'tag' : 'IRR200_1H_T11D', 
+                'runs' : [ 'tree_Run000407_BAR000147' ], 
+                'refRuns'  : [ 'tree_Run000395_BAR000028' , 'tree_Run000437_BAR000028' ]
+            },
+
         ]
     },
 
@@ -1174,6 +1281,12 @@ crystalsDB={
                 'tag' : 'IRR0', 
                 'runs' : [ 'tree_Run000215_BAR000148' ], 
                 'refRuns'  : [ 'tree_Run000179_BAR000028' , 'tree_Run000254_BAR000028' ]
+            },
+
+            { 
+                'tag' : 'IRR2K_1H_T11D', 
+                'runs' : [ 'tree_Run000410_BAR000148' ], 
+                'refRuns'  : [ 'tree_Run000395_BAR000028' , 'tree_Run000437_BAR000028' ]
             },
 
         ]
