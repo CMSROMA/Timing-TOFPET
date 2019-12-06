@@ -54,6 +54,9 @@ parser.add_option("--enabledChannels", dest="enabledChannels", default="",
 parser.add_option("--energyThr", dest="energyThr", default="", 
                   help="List of energy thresholds for triggering. The string format is 0_10_5_3 to reduce the energy thresholds with respect to the config file by to 0, 10, 5, 3 for channels CH0, CH1, CH2, CH3. For pedestal run: ignored.")
 
+parser.add_option("--energyThrT1", dest="energyThrT1", default="", 
+                  help="List of energy thresholds for triggering. The string format is 0_10_5_3 to set the absolute value of t1 thresholds for channels CH0, CH1, CH2, CH3. For pedestal run: ignored.")
+
 (opt, args) = parser.parse_args()
 
 if not opt.configFile:   
@@ -563,6 +566,8 @@ else:
         commandRun = commandRun +" --enabledChannels " + str(opt.enabledChannels)         
         if (opt.energyThr != ""):
             commandRun = commandRun + " --energyThr " + str(opt.energyThr)
+        if (opt.energyThrT1 != ""):
+            commandRun = commandRun + " --energyThrT1 " + str(opt.energyThrT1)
           
 print commandRun
 os.system(commandRun)

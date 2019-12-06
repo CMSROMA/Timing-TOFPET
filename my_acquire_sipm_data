@@ -14,6 +14,7 @@ parser.add_argument("--enable-hw-trigger", dest="hwTrigger", action="store_true"
 parser.add_argument("--cfgChannels", type=str, dest="cfgChannels", required=True, help="Configuration file with list of channels")
 parser.add_argument("--enabledChannels", type=str, dest="enabledChannels", default="",required=False, help="List of channels with trigger enabled. The string format is 0_1_2_3 to eanble channels CH0, CH1, CH2, CH3 accordingly to configuration file. If nothing is specified all channels in configuration file can trigger.")
 parser.add_argument("--energyThr", type=str, dest="energyThr", default="", required=False, help="List of energy thresholds for enabled channels. The string format is 0_10_5_3 to reduce the energy thresholds with respect to the config file by to 0, 10, 5, 3 for channels CH0, CH1, CH2, CH3.")
+parser.add_argument("--energyThrT1", type=str, dest="energyThrT1", default="", required=False, help="List of t1 thresholds for enabled channels. The string format is 0_10_5_3 to set the absolute value of t1 thresholds for channels CH0, CH1, CH2, CH3.")
 
 args = parser.parse_args()
 
@@ -54,6 +55,7 @@ print "Channels in config file: ", channelList
 
 channelsEnabled = []
 energyThresholds = []
+energyThresholdsT1 = []
 
 if args.enabledChannels!="":
 
@@ -61,14 +63,21 @@ if args.enabledChannels!="":
 
     if args.energyThr == "":
         parser.error('Please provide the energy threshold modifiers for the channels enabled in the trigger.')                
+    if args.energyThrT1 == "":
+        parser.error('Please provide the t1 thresholds for the channels enabled in the trigger.')                
 
     if args.energyThr != "":   
         energyThresholds = args.energyThr.split("_")
         if (len (energyThresholds) != len(channelsEnabled)):
             parser.error('Number of energy thresholds differnet from number of channels enabled in the trigger.')                
+    if args.energyThrT1 != "":   
+        energyThresholdsT1 = args.energyThrT1.split("_")
+        if (len (energyThresholdsT1) != len(channelsEnabled)):
+            parser.error('Number of t1 thresholds differnet from number of channels enabled in the trigger.')                
 
     print "Channels with trigger enabled: ", channelsEnabled
     print "Modifiers to energy thresholds (reduction of value wrt to config file): ", energyThresholds
+    print "T1 thresholds: ", energyThresholdsT1
 
 ################################
 
@@ -109,8 +118,20 @@ for key, ac in asicsConfig.items():
                                         print "Enable trigger for CH", int(chEnabled), " , chip ", chip, " , channel", channel
                                         cc.setValue("trigger_mode_1", 0b00)                                        
                                         #print "before: ", cc.getValue("vth_e")
+
+                                        #change E threshold
                                         cc.setValue("vth_e", cc.getValue("vth_e")+int(energyThresholds[ich]))
                                         print "Set VTH_E: ", cc.getValue("vth_e")
+
+                                        #change t1 threshold
+                                        for channelKey in systemConfig.discCalibrationTable.keys():
+                                            if(thischip == channelKey[2] and thischannel == channelKey[3]):
+                                                print "Set t1 threshold for CH", int(chEnabled), " , chip ", chip, " , channel", channel
+                                                discCalibTable = systemConfig.discCalibrationTable[channelKey] 
+                                                #discConfigTable = systemConfig.discConfigTable[channelKey] 
+                                                #discConfigTable.vth_t1 = discCalibTable.zero_t1 - 10
+                                                cc.setValue("vth_t1", discCalibTable.zero_t1 - int(energyThresholdsT1[ich]))
+                                        print "Set VTH_T1: ", cc.getValue("vth_t1")
 
 		if not qdcMode:
 			cc.setValue("qdc_mode", 0)

@@ -42,7 +42,7 @@ os.system(commandOutputDir)
 #############################
 ## Daq setup
 #############################
-def RUN(runtype,time,ov,ovref,gate,label,enabledCh="",thresholds=""):
+def RUN(runtype,time,ov,ovref,gate,label,enabledCh="",thresholds="",thresholdsT1=""):
 
     ###############
     ## Current time
@@ -84,6 +84,8 @@ def RUN(runtype,time,ov,ovref,gate,label,enabledCh="",thresholds=""):
             commandRun = commandRun +" --enabledChannels " + str(enabledCh) 
             if (thresholds!=""):
                 commandRun = commandRun + " --energyThr " + str(thresholds)
+            if (thresholdsT1!=""):
+                commandRun = commandRun + " --energyThrT1 " + str(thresholdsT1)
 
     print commandRun
     os.system(commandRun)
@@ -114,7 +116,7 @@ name = "Na22PedAllChannels"
 n_ch = 3 #number of channels in config file (2 for 2 pixels, 3 for 1 pixel and 1 bar, ..)
 n_chip = 2 #number of active TOFPET2 chips
 t_ped = 0.3 #s
-t_phys = 300 #s
+t_phys = 150 #s
 t_tot = 320  #s this is approximate (it is 20-30% less of true value due to cpu processing time to make root files)
 #t_tot = 7200  #s this is approximate (it is 20-30% less of true value due to cpu processing time to make root files)
 ov_values = [7] #V
@@ -173,7 +175,8 @@ posPixelY = 23
 
 dict_PosScan = {
     #DEFAULT
-    0: (round(posFirstBarX,1),round(posFirstBarY,1),"0_1_2","0_0_0"),
+    0: (round(posFirstBarX,1),round(posFirstBarY,1),"0_1_2","0_0_0","20_10_10"),
+    1: (round(posFirstBarX,1),round(posFirstBarY,1),"0_1_2","0_0_0","20_50_50"),
 
     #YSCAN - BAR
     # 0: (round(posFirstBarX,1),round(posFirstBarY-3.0,1),"0_1_2","0_0_0"),
@@ -322,13 +325,12 @@ for seq in range(0,nseq):
                     print aMover.estimatedPosition()
                     print "++++ Done +++++"                    
 
-                    thisname = name+"_POS"+str(posStep)+"_X"+str(posInfo[0])+"_Y"+str(posInfo[1])+"_CH"+str(posInfo[2]).replace("_","-")+"_ETHR"+str(posInfo[3]).replace("_","-")
-
+                    thisname = name+"_POS"+str(posStep)+"_X"+str(posInfo[0])+"_Y"+str(posInfo[1])+"_CH"+str(posInfo[2]).replace("_","-")+"_ETHR"+str(posInfo[3]).replace("_","-")+"_T1THR"+str(posInfo[4]).replace("_","-")
 
                     #============================================
-                    RUN("PED",t_ped,ov,ovref,gate,thisname,posInfo[2],"")
-                    RUN("PHYS",t_phys,ov,ovref,gate,thisname,posInfo[2],posInfo[3]) 
-                    RUN("PED",t_ped,ov,ovref,gate,thisname,posInfo[2],"")
+                    RUN("PED",t_ped,ov,ovref,gate,thisname,posInfo[2],"","")
+                    RUN("PHYS",t_phys,ov,ovref,gate,thisname,posInfo[2],posInfo[3],posInfo[4]) 
+                    RUN("PED",t_ped,ov,ovref,gate,thisname,posInfo[2],"","")
                     #============================================
 
     #time.sleep(3600)
