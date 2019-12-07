@@ -112,7 +112,11 @@ for g in graphs:
     histos[g+'VsProd'].SetName(g+'VsProd')
     histos[g+'VsProd'].SetTitle(g+'VsProd')
     histos[g+'VsProd'].SetMarkerSize(1.4)
-    histos[g+'VsProd'].GetXaxis().SetTitle("Producer")
+    histos[g+'VsProd'].GetXaxis().SetTitle("     Producer")
+    histos[g+'VsProd'].GetXaxis().SetTitleSize(0.1)
+    histos[g+'VsProd'].GetXaxis().SetLabelSize(0.1)
+    histos[g+'VsProd'].GetXaxis().SetLabelOffset(0.035)
+    histos[g+'VsProd'].GetXaxis().SetTitleOffset(1.2)
 
 #Loop over producers
 for iprod,prod in enumerate(producers): 
@@ -267,11 +271,26 @@ for iprod,prod in enumerate(producers):
 
 #Draw and Save plots
 R.gStyle.SetOptTitle(0)
-c1=R.TCanvas("c1","c1",900,600)
-c1.SetGridx()
-c1.SetGridy()
+c1=R.TCanvas("c1","c1",800,800)
+c1_pad1 = R.TPad("c1_pad1", "c1_pad1", 0, 0.4, 1, 1.0)
+c1_pad1.SetBottomMargin(0.008)#Upper and lower plot are joined
+c1_pad1.SetGridx()
+c1_pad1.SetGridy()
+c1_pad1.Draw()
+c1_pad2 = R.TPad("c1_pad2", "c1_pad2", 0, 0.05, 1, 0.4)
+c1_pad2.SetTopMargin(0.05);#Upper and lower plot are joined
+c1_pad2.SetBottomMargin(0.4);
+c1_pad2.SetGridx()
+c1_pad2.SetGridy()
+c1_pad2.Draw()
+
+legend1 = R.TLegend(0.6,0.7,0.9,0.9)
+
+text=R.TLatex()
+text.SetTextSize(0.04)
 
 #ly
+c1_pad1.cd()
 histos['lyPreIRR'+'VsProd'].SetMarkerStyle(20)
 histos['lyPostIRR'+'VsProd'].SetMarkerStyle(22)
 histos['lyPreIRR'+'VsProd'].SetMarkerColor(1)
@@ -281,11 +300,27 @@ histos['lyPreIRR'+'VsProd'].GetYaxis().SetRangeUser(35.,90.)
 histos['lyPreIRR'+'VsProd'].GetYaxis().SetTitle("LO [ADC counts]")
 histos['lyPreIRR'+'VsProd'].Draw("ap")
 histos['lyPostIRR'+'VsProd'].Draw("psame")
-
+legend1.Clear()
+legend1.AddEntry(histos['lyPreIRR'+'VsProd'],"No Irrad.","pe")
+legend1.AddEntry(histos['lyPostIRR'+'VsProd'],"Irrad. 45-50 kGy","pe")
+legend1.Draw()
+text.DrawLatexNDC(0.11,0.93,"CMS Rome - TOFPET+SiPM Bench")
+c1_pad2.cd()
+histos['lyRatioIRR'+'VsProd'].SetMarkerStyle(20)
+histos['lyRatioIRR'+'VsProd'].SetMarkerColor(1)
+histos['lyRatioIRR'+'VsProd'].GetYaxis().SetLimits(0.6,1.1)
+histos['lyRatioIRR'+'VsProd'].GetYaxis().SetRangeUser(0.6,1.1)
+histos['lyRatioIRR'+'VsProd'].GetYaxis().SetTitle("LO_{Irr}/LO")
+histos['lyRatioIRR'+'VsProd'].GetYaxis().SetNdivisions(505)
+histos['lyRatioIRR'+'VsProd'].GetYaxis().SetLabelSize(0.06)
+histos['lyRatioIRR'+'VsProd'].GetYaxis().SetTitleSize(0.06)
+histos['lyRatioIRR'+'VsProd'].GetYaxis().SetTitleOffset(0.6)
+histos['lyRatioIRR'+'VsProd'].Draw("ap")
 for ext in ['.pdf','.png']:
     c1.SaveAs(outputdir+"/"+'ly'+'VsProd'+ext)
 
 #lyNorm
+c1_pad1.cd()
 histos['lyNormPreIRR'+'VsProd'].SetMarkerStyle(20)
 histos['lyNormPostIRR'+'VsProd'].SetMarkerStyle(22)
 histos['lyNormPreIRR'+'VsProd'].SetMarkerColor(1)
@@ -295,74 +330,84 @@ histos['lyNormPreIRR'+'VsProd'].GetYaxis().SetRangeUser(0.5,1.5)
 histos['lyNormPreIRR'+'VsProd'].GetYaxis().SetTitle("LO/LO_{ref}")
 histos['lyNormPreIRR'+'VsProd'].Draw("ap")
 histos['lyNormPostIRR'+'VsProd'].Draw("psame")
+legend1.Clear()
+legend1.AddEntry(histos['lyNormPreIRR'+'VsProd'],"No Irrad.","pe")
+legend1.AddEntry(histos['lyNormPostIRR'+'VsProd'],"Irrad. 45-50 kGy","pe")
+legend1.Draw()
+text.DrawLatexNDC(0.11,0.93,"CMS Rome - TOFPET+SiPM Bench")
+c1_pad2.cd()
+histos['lyNormRatioIRR'+'VsProd'].SetMarkerStyle(20)
+histos['lyNormRatioIRR'+'VsProd'].SetMarkerColor(1)
+histos['lyNormRatioIRR'+'VsProd'].GetYaxis().SetLimits(0.6,1.1)
+histos['lyNormRatioIRR'+'VsProd'].GetYaxis().SetRangeUser(0.6,1.1)
+histos['lyNormRatioIRR'+'VsProd'].GetYaxis().SetTitle("LO_{Irr}/LO normalized to reference")
+histos['lyNormRatioIRR'+'VsProd'].GetYaxis().SetNdivisions(505)
+histos['lyNormRatioIRR'+'VsProd'].GetYaxis().SetLabelSize(0.06)
+histos['lyNormRatioIRR'+'VsProd'].GetYaxis().SetTitleSize(0.06)
+histos['lyNormRatioIRR'+'VsProd'].GetYaxis().SetTitleOffset(0.6)
+histos['lyNormRatioIRR'+'VsProd'].Draw("ap")
 for ext in ['.pdf','.png']:
     c1.SaveAs(outputdir+"/"+'lyNorm'+'VsProd'+ext)
 
 #sigmat
+c1_pad1.cd()
 histos['sigmatPreIRR'+'VsProd'].SetMarkerStyle(20)
 histos['sigmatPostIRR'+'VsProd'].SetMarkerStyle(22)
 histos['sigmatPreIRR'+'VsProd'].SetMarkerColor(1)
 histos['sigmatPostIRR'+'VsProd'].SetMarkerColor(2)
-histos['sigmatPreIRR'+'VsProd'].GetYaxis().SetLimits(80.,200.)
-histos['sigmatPreIRR'+'VsProd'].GetYaxis().SetRangeUser(80.,200.)
+histos['sigmatPreIRR'+'VsProd'].GetYaxis().SetLimits(100.,200.)
+histos['sigmatPreIRR'+'VsProd'].GetYaxis().SetRangeUser(100.,200.)
 histos['sigmatPreIRR'+'VsProd'].GetYaxis().SetTitle("#sigma_{t} [ps]")
 histos['sigmatPreIRR'+'VsProd'].Draw("ap")
 histos['sigmatPostIRR'+'VsProd'].Draw("psame")
+legend1.Clear()
+legend1.AddEntry(histos['sigmatPreIRR'+'VsProd'],"No Irrad.","pe")
+legend1.AddEntry(histos['sigmatPostIRR'+'VsProd'],"Irrad. 45-50 kGy","pe")
+legend1.Draw()
+text.DrawLatexNDC(0.11,0.93,"CMS Rome - TOFPET+SiPM Bench")
+c1_pad2.cd()
+histos['sigmatRatioIRR'+'VsProd'].SetMarkerStyle(20)
+histos['sigmatRatioIRR'+'VsProd'].SetMarkerColor(1)
+histos['sigmatRatioIRR'+'VsProd'].GetYaxis().SetLimits(0.8,1.3)
+histos['sigmatRatioIRR'+'VsProd'].GetYaxis().SetRangeUser(0.8,1.3)
+histos['sigmatRatioIRR'+'VsProd'].GetYaxis().SetTitle("#sigma_{t,Irr}/#sigma_{t}")
+histos['sigmatRatioIRR'+'VsProd'].GetYaxis().SetNdivisions(505)
+histos['sigmatRatioIRR'+'VsProd'].GetYaxis().SetLabelSize(0.06)
+histos['sigmatRatioIRR'+'VsProd'].GetYaxis().SetTitleSize(0.06)
+histos['sigmatRatioIRR'+'VsProd'].GetYaxis().SetTitleOffset(0.6)
+histos['sigmatRatioIRR'+'VsProd'].Draw("ap")
 for ext in ['.pdf','.png']:
     c1.SaveAs(outputdir+"/"+'sigmat'+'VsProd'+ext)
 
 #sigmatNorm
+c1_pad1.cd()
 histos['sigmatNormPreIRR'+'VsProd'].SetMarkerStyle(20)
 histos['sigmatNormPostIRR'+'VsProd'].SetMarkerStyle(22)
 histos['sigmatNormPreIRR'+'VsProd'].SetMarkerColor(1)
 histos['sigmatNormPostIRR'+'VsProd'].SetMarkerColor(2)
-histos['sigmatNormPreIRR'+'VsProd'].GetYaxis().SetLimits(0.6,1.4)
-histos['sigmatNormPreIRR'+'VsProd'].GetYaxis().SetRangeUser(0.6,1.4)
+histos['sigmatNormPreIRR'+'VsProd'].GetYaxis().SetLimits(0.7,1.4)
+histos['sigmatNormPreIRR'+'VsProd'].GetYaxis().SetRangeUser(0.7,1.4)
 histos['sigmatNormPreIRR'+'VsProd'].GetYaxis().SetTitle("#sigma_{t}/#sigma_{t,ref}")
 histos['sigmatNormPreIRR'+'VsProd'].Draw("ap")
 histos['sigmatNormPostIRR'+'VsProd'].Draw("psame")
-for ext in ['.pdf','.png']:
-    c1.SaveAs(outputdir+"/"+'sigmatNorm'+'VsProd'+ext)
-
-#lyRatioIrr
-histos['lyRatioIRR'+'VsProd'].SetMarkerStyle(20)
-histos['lyRatioIRR'+'VsProd'].SetMarkerColor(1)
-histos['lyRatioIRR'+'VsProd'].GetYaxis().SetLimits(0.5,1.5)
-histos['lyRatioIRR'+'VsProd'].GetYaxis().SetRangeUser(0.5,1.5)
-histos['lyRatioIRR'+'VsProd'].GetYaxis().SetTitle("LO_{Irr}/LO")
-histos['lyRatioIRR'+'VsProd'].Draw("ap")
-for ext in ['.pdf','.png']:
-    c1.SaveAs(outputdir+"/"+'lyRatioIrr'+'VsProd'+ext)
-
-#lyNormRatioIrr
-histos['lyNormRatioIRR'+'VsProd'].SetMarkerStyle(20)
-histos['lyNormRatioIRR'+'VsProd'].SetMarkerColor(1)
-histos['lyNormRatioIRR'+'VsProd'].GetYaxis().SetLimits(0.5,1.5)
-histos['lyNormRatioIRR'+'VsProd'].GetYaxis().SetRangeUser(0.5,1.5)
-histos['lyNormRatioIRR'+'VsProd'].GetYaxis().SetTitle("LO_{Irr}/LO normalized to reference")
-histos['lyNormRatioIRR'+'VsProd'].Draw("ap")
-for ext in ['.pdf','.png']:
-    c1.SaveAs(outputdir+"/"+'lyNormRatioIrr'+'VsProd'+ext)
-
-#sigmat
-histos['sigmatRatioIRR'+'VsProd'].SetMarkerStyle(20)
-histos['sigmatRatioIRR'+'VsProd'].SetMarkerColor(1)
-histos['sigmatRatioIRR'+'VsProd'].GetYaxis().SetLimits(0.5,1.5)
-histos['sigmatRatioIRR'+'VsProd'].GetYaxis().SetRangeUser(0.5,1.5)
-histos['sigmatRatioIRR'+'VsProd'].GetYaxis().SetTitle("#sigma_{t,Irr}/#sigma_{t}")
-histos['sigmatRatioIRR'+'VsProd'].Draw("ap")
-for ext in ['.pdf','.png']:
-    c1.SaveAs(outputdir+"/"+'sigmatRatioIrr'+'VsProd'+ext)
-
-#sigmatNorm
+legend1.Clear()
+legend1.AddEntry(histos['sigmatNormPreIRR'+'VsProd'],"No Irrad.","pe")
+legend1.AddEntry(histos['sigmatNormPostIRR'+'VsProd'],"Irrad. 45-50 kGy","pe")
+legend1.Draw()
+text.DrawLatexNDC(0.11,0.93,"CMS Rome - TOFPET+SiPM Bench")
+c1_pad2.cd()
 histos['sigmatNormRatioIRR'+'VsProd'].SetMarkerStyle(20)
 histos['sigmatNormRatioIRR'+'VsProd'].SetMarkerColor(1)
-histos['sigmatNormRatioIRR'+'VsProd'].GetYaxis().SetLimits(0.5,1.5)
-histos['sigmatNormRatioIRR'+'VsProd'].GetYaxis().SetRangeUser(0.5,1.5)
+histos['sigmatNormRatioIRR'+'VsProd'].GetYaxis().SetLimits(0.8,1.3)
+histos['sigmatNormRatioIRR'+'VsProd'].GetYaxis().SetRangeUser(0.8,1.3)
 histos['sigmatNormRatioIRR'+'VsProd'].GetYaxis().SetTitle("#sigma_{t,Irr}/#sigma_{t} normalized to reference")
+histos['sigmatNormRatioIRR'+'VsProd'].GetYaxis().SetNdivisions(505)
+histos['sigmatNormRatioIRR'+'VsProd'].GetYaxis().SetLabelSize(0.06)
+histos['sigmatNormRatioIRR'+'VsProd'].GetYaxis().SetTitleSize(0.06)
+histos['sigmatNormRatioIRR'+'VsProd'].GetYaxis().SetTitleOffset(0.6)
 histos['sigmatNormRatioIRR'+'VsProd'].Draw("ap")
 for ext in ['.pdf','.png']:
-    c1.SaveAs(outputdir+"/"+'sigmatNormRatioIrr'+'VsProd'+ext)
+    c1.SaveAs(outputdir+"/"+'sigmatNorm'+'VsProd'+ext)
 
 out=R.TFile(outputdir+"/"+"lyArrayIrradPlots.root","RECREATE")
 for h,histo in histos.items():
