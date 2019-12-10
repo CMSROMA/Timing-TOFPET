@@ -44,9 +44,11 @@ void coincidenceAnalysisBar::Loop()
 //    fChain->GetEntry(jentry);       //read all branches
 //by  b_branchname->GetEntry(ientry); //read only this branch
 
-  channels[0]=59;
-  channels[1]=315;
-  channels[2]=291;
+  //channels[0]=59;
+  //channels[1]=315;
+  //channels[2]=291;
+
+  cout << "channels: " << channels[0] << " , " << channels[1] << " , " << channels[2] << endl;
 
   TH1F* h1_energyTot_bar;
   TH1F* h1_energy1_bar;
