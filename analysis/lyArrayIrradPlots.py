@@ -8,14 +8,24 @@ import numpy as np
 outputdir = "/afs/cern.ch/user/s/santanas/www/TOFPET2/LYSOARRAYS_Casaccia"
 pixelRes = 90 #ps
 
-#read Tgraphs from single bars file
+## Read Tgraphs from single bars file
 fileSingleBars = "LYMergedPlots.root" 
 tfileSingleBars = R.TFile(fileSingleBars)
-#
+#decay time
 dt_ByProd=R.TGraphErrors()
 dt_IRR9K_ByProd=R.TGraphErrors()
 R.gDirectory.GetObject("dt_ByProd",dt_ByProd)
 R.gDirectory.GetObject("dt_IRR9K_ByProd",dt_IRR9K_ByProd)
+#ly
+ly_ByProd=R.TGraphErrors()
+ly_IRR9K_ByProd=R.TGraphErrors()
+R.gDirectory.GetObject("lyAbs_TOFPET_ByProd",ly_ByProd)
+R.gDirectory.GetObject("lyAbs_TOFPET_IRR9K_ByProd",ly_IRR9K_ByProd)
+#sigmat
+sigmat_ByProd=R.TGraphErrors()
+sigmat_IRR9K_ByProd=R.TGraphErrors()
+R.gDirectory.GetObject("ctr_ByProd",sigmat_ByProd)
+R.gDirectory.GetObject("ctr_IRR9K_ByProd",sigmat_IRR9K_ByProd)
 #
 tfileSingleBars.Close()
 
@@ -23,15 +33,43 @@ npoints = dt_ByProd.GetN()
 print "npoints:", npoints
 x=R.Double()
 y=R.Double()
-dtPreIRR={}
-dtPostIRR={}
+dtPreIRRbar={}
+dtPostIRRbar={}
+lyPreIRRbar={}
+lyPostIRRbar={}
+sigmatPreIRRbar={}
+sigmatPostIRRbar={}
 for point in range(0,npoints):
-    dt_ByProd.GetPoint(point,x,y)
-    dtPreIRR[int(x)]=float(y)
+    #decay time
+    dt_ByProd.GetPoint(point,x,y)    
+    dtPreIRRbar[int(x)]=(float(y),dt_ByProd.GetErrorY(point))
     dt_IRR9K_ByProd.GetPoint(point,x,y)
-    dtPostIRR[int(x)]=float(y)
-print dtPreIRR
-print dtPostIRR
+    if dt_IRR9K_ByProd.GetErrorY(point)==0.:
+        dtPostIRRbar[int(x)]=(float(y),dtPreIRRbar[int(x)][1])
+    else:
+        dtPostIRRbar[int(x)]=(float(y),dt_IRR9K_ByProd.GetErrorY(point))
+    #ly
+    ly_ByProd.GetPoint(point,x,y)    
+    lyPreIRRbar[int(x)]=(float(y),ly_ByProd.GetErrorY(point))
+    ly_IRR9K_ByProd.GetPoint(point,x,y)
+    if ly_IRR9K_ByProd.GetErrorY(point)==0.:
+        lyPostIRRbar[int(x)]=(float(y),lyPreIRRbar[int(x)][1])
+    else:
+        lyPostIRRbar[int(x)]=(float(y),ly_IRR9K_ByProd.GetErrorY(point))
+    #sigmat
+    sigmat_ByProd.GetPoint(point,x,y)    
+    sigmatPreIRRbar[int(x)]=(float(y),sigmat_ByProd.GetErrorY(point))
+    sigmat_IRR9K_ByProd.GetPoint(point,x,y)
+    if sigmat_IRR9K_ByProd.GetErrorY(point)==0.:
+        sigmatPostIRRbar[int(x)]=(float(y),sigmatPreIRRbar[int(x)][1])
+    else:
+        sigmatPostIRRbar[int(x)]=(float(y),sigmat_IRR9K_ByProd.GetErrorY(point))
+print "dtPreIRRbar:", dtPreIRRbar
+print "dtPostIRRbar:", dtPostIRRbar
+print "lyPreIRRbar:", lyPreIRRbar
+print "lyPostIRRbar:", lyPostIRRbar
+print "sigmatPreIRRbar:", sigmatPreIRRbar
+print "sigmatPostIRRbar:", sigmatPostIRRbar
 
 #==============================================================================
 
@@ -122,7 +160,9 @@ for g in graphs:
     histos[g+'VsProd'].GetXaxis().SetTitleOffset(1.2)
 
 scatterPlots=['sigmatNormVsLONormPreIRR','sigmatNormVsLONormPostIRR'
-              ,'sigmatNormVsLONormOverDtPreIRR','sigmatNormVsLONormOverDtPostIRR']
+              ,'sigmatNormVsLONormOverDtPreIRR','sigmatNormVsLONormOverDtPostIRR'
+              ,'LONormBarVsArrayPreIRR','LONormBarVsArrayPostIRR'
+              ,'sigmatNormBarVsArrayPreIRR','sigmatNormBarVsArrayPostIRR']
 for g in scatterPlots:
     histos[g]=R.TGraphErrors(len(producers)) 
     histos[g].SetName(g)
@@ -133,7 +173,7 @@ for g in scatterPlots:
 for iprod,prod in enumerate(producers): 
 
     print("#### %s ####"%prod)
-    prodN = float(prod.strip('prod'))
+    prodN = int(prod.strip('prod'))
 
     #create arrays with measurements to be averaged
 
@@ -192,9 +232,11 @@ for iprod,prod in enumerate(producers):
     mean_sigmatNormPreIRR = sigmatNormPreIRR_np.mean()
     std_sigmatNormPreIRR = sigmatNormPreIRR_np.std()/mt.sqrt(len(sigmatNormPreIRR))
 
-    mean_lyNormOverDtPreIRR = ( mean_lyNormPreIRR / (dtPreIRR[int(prodN)]/dtPreIRR[1]) ) 
-    std_lyNormOverDtPreIRR = 0.
-    print "PRE: prodN, meanlyNorm, dt, dtref, dtratio, mean/dt: ", int(prodN), mean_lyNormPreIRR, dtPreIRR[int(prodN)], dtPreIRR[1], dtPreIRR[int(prodN)]/dtPreIRR[1], mean_lyNormOverDtPreIRR
+    mean_lyNormOverDtPreIRR = ( mean_lyNormPreIRR / (dtPreIRRbar[int(prodN)][0]/dtPreIRRbar[1][0]) ) 
+    stdRel_lyNormOverDtPreIRR = (std_lyNormPreIRR/mean_lyNormPreIRR)**2 + (dtPreIRRbar[int(prodN)][1]/dtPreIRRbar[int(prodN)][0])**2 + (dtPreIRRbar[1][1]/dtPreIRRbar[1][0])**2
+    stdRel_lyNormOverDtPreIRR = mt.sqrt(stdRel_lyNormOverDtPreIRR)
+    std_lyNormOverDtPreIRR = stdRel_lyNormOverDtPreIRR * mean_lyNormOverDtPreIRR
+    print "PRE: prodN, meanlyNorm, dt, dtref, dtratio, mean/dt, sigma_mean/dt: ", int(prodN), mean_lyNormPreIRR, dtPreIRRbar[int(prodN)][0], dtPreIRRbar[1][0], dtPreIRRbar[int(prodN)][0]/dtPreIRRbar[1][0], mean_lyNormOverDtPreIRR, std_lyNormOverDtPreIRR
 
     #Post
     lyPostIRR_np = np.array(lyPostIRR) 
@@ -213,9 +255,11 @@ for iprod,prod in enumerate(producers):
     mean_sigmatNormPostIRR = sigmatNormPostIRR_np.mean()
     std_sigmatNormPostIRR = sigmatNormPostIRR_np.std()/mt.sqrt(len(sigmatNormPostIRR))
 
-    mean_lyNormOverDtPostIRR = ( mean_lyNormPostIRR / (dtPostIRR[int(prodN)]/dtPostIRR[1]) ) 
-    std_lyNormOverDtPostIRR = 0.
-    print "POST: prodN, meanlyNorm, dt, dtref, dtratio, mean/dt: ", int(prodN), mean_lyNormPostIRR, dtPostIRR[int(prodN)], dtPostIRR[1], dtPostIRR[int(prodN)]/dtPostIRR[1], mean_lyNormOverDtPostIRR
+    mean_lyNormOverDtPostIRR = ( mean_lyNormPostIRR / (dtPostIRRbar[int(prodN)][0]/dtPreIRRbar[1][0]) ) 
+    stdRel_lyNormOverDtPostIRR = (std_lyNormPostIRR/mean_lyNormPostIRR)**2 + (dtPostIRRbar[int(prodN)][1]/dtPostIRRbar[int(prodN)][0])**2 + (dtPreIRRbar[1][1]/dtPreIRRbar[1][0])**2
+    stdRel_lyNormOverDtPostIRR = mt.sqrt(stdRel_lyNormOverDtPostIRR)
+    std_lyNormOverDtPostIRR = stdRel_lyNormOverDtPostIRR * mean_lyNormOverDtPostIRR
+    print "POST: prodN, meanlyNorm, dt, dtref, dtratio, mean/dt, sigma_mean/dt: ", int(prodN), mean_lyNormPostIRR, dtPostIRRbar[int(prodN)][0], dtPreIRRbar[1][0], dtPostIRRbar[int(prodN)][0]/dtPreIRRbar[1][0], mean_lyNormOverDtPostIRR, std_lyNormOverDtPostIRR
 
     #Post/Pre
     lyRatioIRR_np = np.array(lyRatioIRR) 
@@ -258,6 +302,13 @@ for iprod,prod in enumerate(producers):
     histos['sigmatNormVsLONormOverDtPreIRR'].SetPoint(iprod,mean_lyNormOverDtPreIRR,mean_sigmatNormPreIRR)
     histos['sigmatNormVsLONormOverDtPreIRR'].SetPointError(iprod,std_lyNormOverDtPreIRR,std_sigmatNormPreIRR)
 
+    histos['LONormBarVsArrayPreIRR'].SetPoint(iprod,mean_lyNormPreIRR,lyPreIRRbar[int(prodN)][0])
+    histos['LONormBarVsArrayPreIRR'].SetPointError(iprod,std_lyNormPreIRR,lyPreIRRbar[int(prodN)][1])
+
+    std_sigmatNorm_bar_pre =  mt.sqrt( (sigmatPreIRRbar[prodN][1]/sigmatPreIRRbar[prodN][0])**2 + (sigmatPreIRRbar[1][1]/sigmatPreIRRbar[1][0])**2 ) * (sigmatPreIRRbar[prodN][0]/sigmatPreIRRbar[1][0])
+    histos['sigmatNormBarVsArrayPreIRR'].SetPoint(iprod,mean_sigmatNormPreIRR,sigmatPreIRRbar[prodN][0]/sigmatPreIRRbar[1][0])
+    histos['sigmatNormBarVsArrayPreIRR'].SetPointError(iprod,std_sigmatNormPreIRR,std_sigmatNorm_bar_pre)
+
     #Post
     print lyPostIRR_np, mean_lyPostIRR, std_lyPostIRR
     print lyNormPostIRR_np, mean_lyNormPostIRR, std_lyNormPostIRR
@@ -281,6 +332,13 @@ for iprod,prod in enumerate(producers):
 
     histos['sigmatNormVsLONormOverDtPostIRR'].SetPoint(iprod,mean_lyNormOverDtPostIRR,mean_sigmatNormPostIRR)
     histos['sigmatNormVsLONormOverDtPostIRR'].SetPointError(iprod,std_lyNormOverDtPostIRR,std_sigmatNormPostIRR)
+
+    histos['LONormBarVsArrayPostIRR'].SetPoint(iprod,mean_lyNormPostIRR,lyPostIRRbar[prodN][0])
+    histos['LONormBarVsArrayPostIRR'].SetPointError(iprod,std_lyNormPostIRR,lyPostIRRbar[prodN][1])
+
+    std_sigmatNorm_bar_post =  mt.sqrt( (sigmatPostIRRbar[prodN][1]/sigmatPostIRRbar[prodN][0])**2 + (sigmatPreIRRbar[1][1]/sigmatPreIRRbar[1][0])**2 ) * (sigmatPostIRRbar[prodN][0]/sigmatPreIRRbar[1][0])
+    histos['sigmatNormBarVsArrayPostIRR'].SetPoint(iprod,mean_sigmatNormPostIRR,sigmatPostIRRbar[prodN][0]/sigmatPreIRRbar[1][0])
+    histos['sigmatNormBarVsArrayPostIRR'].SetPointError(iprod,std_sigmatNormPostIRR,std_sigmatNorm_bar_post)
 
     #Post/Pre
     print lyRatioIRR_np, mean_lyRatioIRR, std_lyRatioIRR
@@ -489,9 +547,51 @@ legend2.Clear()
 legend2.AddEntry(histos['sigmatNormVsLONormOverDtPreIRR'],"No Irrad.","pe")
 legend2.AddEntry(histos['sigmatNormVsLONormOverDtPostIRR'],"Irrad. 45-50 kGy","pe")
 legend2.Draw()
-text2.DrawLatexNDC(0.11,0.93,"CMS Rome - TOFPET+SiPM Bench")
+text2.DrawLatexNDC(0.11,0.93,"CMS Rome - TOFPET+SiPM and PMT Benches")
 for ext in ['.pdf','.png']:
     c2.SaveAs(outputdir+"/"+'sigmatNormVsLONormOverDt'+ext)
+
+#lyNorm bar vs array  
+histos['LONormBarVsArrayPreIRR'].SetMarkerStyle(20)
+histos['LONormBarVsArrayPostIRR'].SetMarkerStyle(22)
+histos['LONormBarVsArrayPreIRR'].SetMarkerColor(1)
+histos['LONormBarVsArrayPostIRR'].SetMarkerColor(2)
+histos['LONormBarVsArrayPreIRR'].GetXaxis().SetLimits(0.4,1.6)
+histos['LONormBarVsArrayPreIRR'].GetXaxis().SetRangeUser(0.4,1.6)
+histos['LONormBarVsArrayPreIRR'].GetYaxis().SetLimits(0.7,1.4)
+histos['LONormBarVsArrayPreIRR'].GetYaxis().SetRangeUser(0.7,1.4)
+histos['LONormBarVsArrayPreIRR'].GetXaxis().SetTitle("LO/LO_{ref} Array")
+histos['LONormBarVsArrayPreIRR'].GetYaxis().SetTitle("LO/LO_{ref} Bar")
+histos['LONormBarVsArrayPreIRR'].Draw("ap")
+histos['LONormBarVsArrayPostIRR'].Draw("p")
+legend2.Clear()
+legend2.AddEntry(histos['LONormBarVsArrayPreIRR'],"No Irrad.","pe")
+legend2.AddEntry(histos['LONormBarVsArrayPostIRR'],"Irrad. 45-50 kGy","pe")
+legend2.Draw()
+text2.DrawLatexNDC(0.11,0.93,"CMS Rome - TOFPET+SiPM Bench")
+for ext in ['.pdf','.png']:
+    c2.SaveAs(outputdir+"/"+'LONormBarVsArray'+ext)
+
+#sigmat bar vs array   'sigmatNormBarVsArrayPreIRR'
+histos['sigmatNormBarVsArrayPreIRR'].SetMarkerStyle(20)
+histos['sigmatNormBarVsArrayPostIRR'].SetMarkerStyle(22)
+histos['sigmatNormBarVsArrayPreIRR'].SetMarkerColor(1)
+histos['sigmatNormBarVsArrayPostIRR'].SetMarkerColor(2)
+histos['sigmatNormBarVsArrayPreIRR'].GetXaxis().SetLimits(0.7,2.0)
+histos['sigmatNormBarVsArrayPreIRR'].GetXaxis().SetRangeUser(0.7,2.0)
+histos['sigmatNormBarVsArrayPreIRR'].GetYaxis().SetLimits(0.7,2.0)
+histos['sigmatNormBarVsArrayPreIRR'].GetYaxis().SetRangeUser(0.7,2.0)
+histos['sigmatNormBarVsArrayPreIRR'].GetXaxis().SetTitle("#sigma_{t}/#sigma_{t,ref} Array")
+histos['sigmatNormBarVsArrayPreIRR'].GetYaxis().SetTitle("#sigma_{t}/#sigma_{t,ref} Bar")
+histos['sigmatNormBarVsArrayPreIRR'].Draw("ap")
+histos['sigmatNormBarVsArrayPostIRR'].Draw("p")
+legend2.Clear()
+legend2.AddEntry(histos['sigmatNormBarVsArrayPreIRR'],"No Irrad.","pe")
+legend2.AddEntry(histos['sigmatNormBarVsArrayPostIRR'],"Irrad. 45-50 kGy","pe")
+legend2.Draw()
+text2.DrawLatexNDC(0.11,0.93,"CMS Rome - TOFPET+SiPM Bench")
+for ext in ['.pdf','.png']:
+    c2.SaveAs(outputdir+"/"+'sigmatNormBarVsArray'+ext)
 
 ##################################################################
 
