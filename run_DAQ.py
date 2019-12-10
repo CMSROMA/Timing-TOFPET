@@ -116,7 +116,7 @@ name = "Na22PedAllChannels"
 n_ch = 3 #number of channels in config file (2 for 2 pixels, 3 for 1 pixel and 1 bar, ..)
 n_chip = 2 #number of active TOFPET2 chips
 t_ped = 0.3 #s
-t_phys = 150 #s
+t_phys = 300 #s
 t_tot = 320  #s this is approximate (it is 20-30% less of true value due to cpu processing time to make root files)
 #t_tot = 7200  #s this is approximate (it is 20-30% less of true value due to cpu processing time to make root files)
 ov_values = [7] #V
@@ -175,8 +175,29 @@ posPixelY = 23
 
 dict_PosScan = {
     #DEFAULT
-    0: (round(posFirstBarX,1),round(posFirstBarY,1),"0_1_2","0_0_0","20_10_10"),
-    1: (round(posFirstBarX,1),round(posFirstBarY,1),"0_1_2","0_0_0","20_50_50"),
+    #0: (round(posFirstBarX,1),round(posFirstBarY,1),"0_1_2","0_0_0","20_10_10"),
+
+    #SCAN THRESHOLD T1 - BAR
+    #0: (round(posFirstBarX,1),round(posFirstBarY,1),"0_1_2","0_0_0","20_5_5"),
+    #1: (round(posFirstBarX,1),round(posFirstBarY,1),"0_1_2","0_0_0","20_10_10"),
+    #2: (round(posFirstBarX,1),round(posFirstBarY,1),"0_1_2","0_0_0","20_15_15"),
+    #3: (round(posFirstBarX,1),round(posFirstBarY,1),"0_1_2","0_0_0","20_20_20"),
+    #4: (round(posFirstBarX,1),round(posFirstBarY,1),"0_1_2","0_0_0","20_25_25"),
+    #5: (round(posFirstBarX,1),round(posFirstBarY,1),"0_1_2","0_0_0","20_30_30"),
+    #6: (round(posFirstBarX,1),round(posFirstBarY,1),"0_1_2","0_0_0","20_35_35"),
+    #7: (round(posFirstBarX,1),round(posFirstBarY,1),"0_1_2","0_0_0","20_40_40"),
+    #8: (round(posFirstBarX,1),round(posFirstBarY,1),"0_1_2","0_0_0","20_45_45"),
+    #9: (round(posFirstBarX,1),round(posFirstBarY,1),"0_1_2","0_0_0","20_50_50"),
+    #10: (round(posFirstBarX,1),round(posFirstBarY,1),"0_1_2","0_0_0","20_55_55"),
+    #11: (round(posFirstBarX,1),round(posFirstBarY,1),"0_1_2","0_0_0","20_60_60")
+
+    #SCAN THRESHOLD T1 - BAR in ARRAY (using BAR2 X=X40.1_Y23.0)
+    0: (round(40.1,1),round(23.0,1),"0_1_2","0_0_0","20_5_5"),
+    1: (round(40.1,1),round(23.0,1),"0_1_2","0_0_0","20_10_10"),
+    2: (round(40.1,1),round(23.0,1),"0_1_2","0_0_0","20_15_15"),
+    3: (round(40.1,1),round(23.0,1),"0_1_2","0_0_0","20_20_20"),
+    4: (round(40.1,1),round(23.0,1),"0_1_2","0_0_0","20_25_25"),
+    5: (round(40.1,1),round(23.0,1),"0_1_2","0_0_0","20_30_30")
 
     #YSCAN - BAR
     # 0: (round(posFirstBarX,1),round(posFirstBarY-3.0,1),"0_1_2","0_0_0"),
@@ -240,6 +261,7 @@ dict_PosScan = {
 
 }
 print "Position scan" , dict_PosScan
+
 
 '''
 ########################
