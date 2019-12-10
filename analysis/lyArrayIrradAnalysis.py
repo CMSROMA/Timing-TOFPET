@@ -11,7 +11,8 @@ def LYAnalysis(crystal,runInfo,bar,lenght):
     files={}
 
     #test crystal
-    barN, ly, ctr, temp, posX, posY = array('d'), array('d'), array('d'), array('d'), array('d'), array('d')
+    barN, ly, lyLeft, lyRight, ctr, temp, posX, posY, xtLeft, xtRight = array('d'), array('d'), array('d'), array('d'), array('d'), array('d'), array('d'), array('d'), array('d'), array('d')
+
     for r in runInfo['runs']:
         files[r]=TFile.Open(args.data+"/"+r+".root")
         treeInput = files[r].Get("results")
@@ -28,6 +29,19 @@ def LYAnalysis(crystal,runInfo,bar,lenght):
                 temp.append(treeInput.temp_bar)
                 posX.append(treeInput.pos_X)
                 posY.append(treeInput.pos_Y)
+                if ( treeInput.err_XtalkLeft_mean_barCoinc/treeInput.XtalkLeft_mean_barCoinc < 0.4 and #cut value guessed
+                     treeInput.err_XtalkLeft_sigma_barCoinc/treeInput.XtalkLeft_sigma_barCoinc < 0.4):
+                    xtLeft.append(treeInput.XtalkLeft_mean_barCoinc)
+                if ( treeInput.err_XtalkRight_mean_barCoinc/treeInput.XtalkRight_mean_barCoinc < 0.4 and
+                     treeInput.err_XtalkRight_sigma_barCoinc/treeInput.XtalkRight_sigma_barCoinc < 0.4):
+                    xtRight.append(treeInput.XtalkRight_mean_barCoinc)
+
+            if ((int(bar)-1)>=0 and treeInput.bar == (int(bar)-1)):
+                lyLeft.append(treeInput.peak1_mean_barCoinc)
+
+            if ((int(bar)+1)<16 and treeInput.bar == (int(bar)+1)):
+                lyRight.append(treeInput.peak1_mean_barCoinc)
+
         files[r].Close()
 
     if len(barN)==0:
@@ -66,6 +80,20 @@ def LYAnalysis(crystal,runInfo,bar,lenght):
     else:
         posYAvg=sum(posY)/len(posY)
 
+    if len(lyLeft)==0 or len(xtLeft)==0:
+        print "No xt data for test crystal "+crystal
+        xtLeftAvg=-9999.
+    else:
+        lyLeftAvg=sum(lyLeft)/len(lyLeft)
+        xtLeftAvg=sum(xtLeft)/len(xtLeft)/lyLeftAvg #normalise to ly in given crystal
+
+    if len(lyRight)==0 or len(xtRight)==0:
+        print "No xt data for test crystal "+crystal
+        xtRightAvg=-9999.
+    else:
+        lyRightAvg=sum(lyRight)/len(lyRight)
+        xtRightAvg=sum(xtRight)/len(xtRight)/lyRightAvg #normalise to ly in given crystal
+
     #ref crystal
     lyRef, ctrRef = array('d'), array('d')
     for r in runInfo['refRuns']:
@@ -94,7 +122,7 @@ def LYAnalysis(crystal,runInfo,bar,lenght):
     else:
         ctrAvgRef=sum(ctrRef)/len(ctrRef)
 
-    return { 'bar': bar, 'ly':lyAvg, 'ctr':ctrAvg, 'temp':tempAvg, 'posX':posXAvg, 'posY':posYAvg, 'lyRef':lyAvgRef, 'ctrRef':ctrAvgRef }
+    return { 'bar': bar, 'ly':lyAvg, 'ctr':ctrAvg, 'temp':tempAvg, 'posX':posXAvg, 'posY':posYAvg, 'lyRef':lyAvgRef, 'ctrRef':ctrAvgRef, 'xtLeft':xtLeftAvg, 'xtRight':xtRightAvg }
 
 import argparse
 
@@ -129,7 +157,7 @@ import pandas as pd
 df=pd.DataFrame.from_dict(crystalsDB_withData,orient='index')
 #df=df.drop(columns=['runs','refRuns'])
 #df=df.drop(['runs','refRuns'],axis=1)
-df=df[['producer','type','id','geometry','tag','temp','bar','posX','posY','ly','ctr','lyRef','ctrRef']]
+df=df[['producer','type','id','geometry','tag','temp','bar','posX','posY','ly','ctr','lyRef','ctrRef','xtLeft','xtRight']]
 #df.to_csv('lyAnalysisTOFPET.csv',header=False)
 print df
 df.to_csv(args.output,header=False)
