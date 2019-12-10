@@ -1,0 +1,71 @@
+#Configuration
+CONFIG_INI_TEMPLATE /home/cmsdaq/Workspace/TOFPET/Timing-TOFPET/config_template.ini
+HV_DAC /home/cmsdaq/Workspace/TOFPET/Timing-TOFPET/data/hvdacMezz27_ad5535_cal.tsv
+SIPM_BIAS /home/cmsdaq/Workspace/TOFPET/Timing-TOFPET/data/sipm_bias_template.tsv
+DISC_SETTINGS /home/cmsdaq/Workspace/TOFPET/Timing-TOFPET/data/disc_settings_template.tsv
+CHANNEL_MAP /home/cmsdaq/Workspace/TOFPET/Timing-TOFPET/petsys_tables/febd_tofpet2tb_fake_channel_map.tsv 
+TRIGGER_MAP /home/cmsdaq/Workspace/TOFPET/Timing-TOFPET/petsys_tables/febd_gbe_trigger_map.tsv
+LSB_T1 60
+LSB_T2 60
+MIN_INTG_TIME 15
+MAX_INTG_TIME 15
+# MIN_INTG_TIME/MAX_INTG_TIME 15 = 15 x 4 x 5 ns = 300ns
+
+#Calibration
+RUN_CALIB 0
+#CALIB_DIR /home/cmsdaq/Workspace/TOFPET/Timing-TOFPET/data/calib/TestBarGood_28_03_2019
+CALIB_DIR /home/cmsdaq/Workspace/TOFPET/Timing-TOFPET/data/calib/ArrayPlusPixel__Array_S13363-8975_3025_15_12__Pixel_S13360-3025CS_10579__Temp24__CoaxialCable__21_09_2019
+#CALIB_DIR /home/cmsdaq/Workspace/TOFPET/Timing-TOFPET/data/calib/BarPlusPixel__Bar_S13360-3025_11041_11040__Pixel_S13360-3025CS_10579__Temp24__CoaxialCable__03_07_2019
+DISC_CALIB disc_calibration.tsv
+TDC_CALIB tdc_calibration.tsv
+QDC_CALIB qdc_calibration.tsv
+# Notes: 
+# use a different directory (different CALIB_DIR) for each calibration set
+# xxx_CALIB names must end with ".tsv"
+# if RUN_CALIB=1 and at least one of the xxx_CALIB already exist, the script stops (in order not to cancel an existing calibration file).
+# if RUN_CALIB=0 and at least one of the xxx_CALIB does not exist, the script stops (since there is no valid calibration)
+# if one of the two conditions above is passed, then:
+# if RUN_CALIB=1 (since none of the xxx_CALIB exists) xxx_CALIB are created [takes ~30-40 min.] and used to run daq
+# if RUN_CALIB=0 (since all the xxx_CALIB already exists) existing xxx_CALIB are used to run daq
+# - QCD_CALIB is currently not used to reconstruct energy values in qdc mode (simply, energy = raw counts)
+
+#Run settings
+#DAQSCRIPT my_acquire_sipm_data PHYS
+DAQSCRIPT my_acquire_sipm_data PHYS
+#DAQSCRIPT my_acquire_sipm_data PHYS
+CONVERTSINGLESCRIPT convert_raw_to_singles
+CONVERTCOINCIDENCESCRIPT analysis/find_coincidences.py
+#CONVERTCOINCIDENCESCRIPT convert_raw_to_coincidence
+TEMPERATUREFILE arduino/temperature/temperature_tmp.txt
+MODE qdc
+TIME 300
+#TIME 1
+OUTPUT_DIR /media/cmsdaq/ext/data/LYSOBARSINARRAY
+#OUTPUT_DIR output/Pedestal
+OUTPUT_LABEL Run000047_2019-12-10-14-23-15_ARRAY000176-POS2-SCANT1_POS2_X40.1_Y23.0_CH0-1-2_ETHR0-0-0_T1THR20-15-15
+#OUTPUT_LABEL PedestalTest13_2ch_100000delay
+
+#Channels
+
+OVERWRITE_OV_REF 7
+OVERWRITE_OV 7
+#If OVERWRITE_OV -1 (same for OVERWRITE_OV_REF), use the OV values in the table below. If OVERWRITE_OV > 0 set all channels to this OV value.
+#REF is always CH0
+
+#  ID	NHV    VBR    OV    NCHIP    NCH    VTH_1    VTH_2    VTH_E    SIPM_CODE    SIPM_TYPE     X    Y    Z    CRYSTAL	
+CH 0	11     52.25  7.00  0	     59	    20	     20	      15       10579	    S13360-3025CS 22   23   165  LYSO_3_3_5
+#3025
+CH 1	19     52.50  7.00  4	     14	    10	     20	      15       15	    S13363-8975_3025 40.1   23.0   540  LYSO_bar2	
+CH 2	8      52.50  7.00  4	     44	    10	     20	      15       12	    S13363-8975_3025 40.1   23.0   540  LYSO_bar2	
+#CH 1	29     51.57  7.00  4	     59	    10	     20	      15       11040	    S13360-3025CS 23   24.5 435  LYSO_bar	
+#CH 2	8      51.50  7.00  4	     35	    10	     20	      15       11041	    S13360-3025CS 23   24.5 435  LYSO_bar	
+#3050
+#CH 1	29     51.77  5.00  4	     59	    20	     20	      15       12380	    S13360-3050CS --   --   140  LYSO_bar	
+#CH 2	8      51.47  5.00  4	     35	    20	     20	      15       12381	    S13360-3050CS --   --   140  LYSO_bar	
+#10/06 default:
+#CH 1	29     51.77  5.00  4	     59	    20	     20	      30       12380	    S13360-3050CS --   --   140  LYSO_bar	
+#CH 2	8      51.47  5.00  4	     35	    20	     20	      30       12381	    S13360-3050CS --   --   140  LYSO_bar	
+# Note on VBR: Different CHs can be connected to the same NHV. If different values of VBR are provided only the first one is set for a given NHV. 
+
+#Note: Source position 305
+
