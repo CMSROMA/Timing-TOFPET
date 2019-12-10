@@ -72,7 +72,7 @@ h1_spectra_bar = TH1F("h1_spectra_bar", "", 1000, 0, 100)
 h1_CTR_bar = TH1F("h1_CTR_bar", "", 5000, 0, 500)
 h1_ct_bar = TH1F("h1_ct_bar", "", 1000, 0, 10)
 
-n = 5
+#n = 5
 bar_id, ph_peak, ph_peak_err,  CTR_sigma, ct, CTR_sigma_err, ct_err, bar_err = array( 'd' ), array( 'd' ), array( 'd' ), array( 'd' ), array( 'd' ), array( 'd' ), array( 'd' ), array( 'd' )
 
 for event in range (0,treeResults.GetEntries()):
@@ -102,7 +102,7 @@ mergedLabel = str(opt.outputDir)+"/"+"tree_"+"FirstRun" + str(opt.firstRun.zfill
 #pt1.Draw()
 #c1_spectra.Update()
 
-gr_phe_peak = TGraphErrors( n, bar_id, ph_peak, bar_err, ph_peak_err )
+gr_phe_peak = TGraphErrors( nFilesInScan, bar_id, ph_peak, bar_err, ph_peak_err )
 c1_spectra = TCanvas("phe_peak", "phe_peak", 900, 700)     
 
 c1_spectra.cd()  
@@ -116,7 +116,7 @@ gr_phe_peak.SetMarkerStyle( 21 )
 gr_phe_peak.Draw()
 c1_spectra.SaveAs(mergedLabel+"_"+"SUMMARY_phePeak.png")
 
-gr_CTR = TGraphErrors(n, bar_id, CTR_sigma, bar_err, CTR_sigma_err)
+gr_CTR = TGraphErrors(nFilesInScan, bar_id, CTR_sigma, bar_err, CTR_sigma_err)
 c2_CTR = TCanvas("CTR_sigma", "CTR_sigma", 900, 700)
 c2_CTR.cd()
 gStyle.SetOptStat(1111);
@@ -129,7 +129,7 @@ gr_CTR.SetMarkerStyle( 21 )
 gr_CTR.Draw()
 c2_CTR.SaveAs(mergedLabel+"_"+"SUMMARY_CTR.png")
 
-gr_ct = TGraphErrors(n, bar_id, ct, bar_err, ct_err)
+gr_ct = TGraphErrors(nFilesInScan, bar_id, ct, bar_err, ct_err)
 c3_ct = TCanvas("cross-talk", "cross-talk", 900, 700)
 c3_ct.cd()
 gStyle.SetOptStat(1111);
