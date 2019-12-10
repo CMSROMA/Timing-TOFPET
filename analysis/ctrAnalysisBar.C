@@ -45,10 +45,12 @@ void ctrAnalysisBar::Loop()
 //by  b_branchname->GetEntry(ientry); //read only this branch
    if (fChain == 0) return;
   
-   channels[0]=59;
-   channels[1]=315;
-   channels[2]=291;
+   //channels[0]=59;
+   //channels[1]=315;
+   //channels[2]=291;
  
+   cout << "channels: " << channels[0] << " , " << channels[1] << " , " << channels[2] << endl;
+
    std::vector<TObject*> objectsToStore;
    TH1F* h1_CTR = new TH1F("h1_CTR", "", 800, -10000, 10000);
    objectsToStore.push_back(h1_CTR);
@@ -80,7 +82,7 @@ void ctrAnalysisBar::Loop()
 	  double deltaT = timeBar - timePixel;
 
 	  ///CTR
-	  float NsigmaCut = 1.5;
+	  float NsigmaCut = 1;
 	  if( (fabs(energyPixel-pixel_511Peak_mean)/pixel_511Peak_sigma)<NsigmaCut
               &&  (fabs(energyBar - bar_511Peak_mean)/bar_511Peak_sigma)<NsigmaCut)
 	    { 
