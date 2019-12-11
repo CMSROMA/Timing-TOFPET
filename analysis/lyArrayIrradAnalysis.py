@@ -29,12 +29,28 @@ def LYAnalysis(crystal,runInfo,bar,lenght):
                 temp.append(treeInput.temp_bar)
                 posX.append(treeInput.pos_X)
                 posY.append(treeInput.pos_Y)
-                if ( treeInput.err_XtalkLeft_mean_barCoinc/treeInput.XtalkLeft_mean_barCoinc < 0.4 and #cut value guessed
-                     treeInput.err_XtalkLeft_sigma_barCoinc/treeInput.XtalkLeft_sigma_barCoinc < 0.4):
+
+                if ( treeInput.err_XtalkLeft_mean_barCoinc/treeInput.XtalkLeft_mean_barCoinc < 0.3 and #cut values guessed
+                     #treeInput.err_XtalkLeft_sigma_barCoinc/treeInput.XtalkLeft_sigma_barCoinc < 0.3 
+                     treeInput.XtalkLeft_mean_barCoinc>0
+                     and treeInput.XtalkLeft_sigma_barCoinc>2 and treeInput.XtalkLeft_sigma_barCoinc<5
+#                    and treeInput.XtalkLeft_sigma_barCoinc/treeInput.XtalkLeft_mean_barCoinc>0.05 and treeInput.XtalkLeft_sigma_barCoinc/treeInput.XtalkLeft_mean_barCoinc<3.
+                 ):
                     xtLeft.append(treeInput.XtalkLeft_mean_barCoinc)
-                if ( treeInput.err_XtalkRight_mean_barCoinc/treeInput.XtalkRight_mean_barCoinc < 0.4 and
-                     treeInput.err_XtalkRight_sigma_barCoinc/treeInput.XtalkRight_sigma_barCoinc < 0.4):
+                else:
+                    print 'xtLeft Fit failed. Assign default '+ crystal+ ' bar'+bar
+#                    xtLeft.append(1.) #assuming that if the fit has failed there were not enough triggers, roughly assigning the energy at threshold
+
+                if ( treeInput.err_XtalkRight_mean_barCoinc/treeInput.XtalkRight_mean_barCoinc < 0.3 and
+                     #treeInput.err_XtalkRight_sigma_barCoinc/treeInput.XtalkRight_sigma_barCoinc < 0.3 
+                     treeInput.XtalkRight_mean_barCoinc>0
+                     and treeInput.XtalkRight_sigma_barCoinc>2 and treeInput.XtalkRight_sigma_barCoinc<5
+#                    and treeInput.XtalkRight_sigma_barCoinc/treeInput.XtalkRight_mean_barCoinc>0.05 and treeInput.XtalkRight_sigma_barCoinc/treeInput.XtalkRight_mean_barCoinc<3.
+                 ):
                     xtRight.append(treeInput.XtalkRight_mean_barCoinc)
+                else:
+                    print 'xtRight fit failed. Assign default'+ crystal+ ' bar'+bar
+#                    xtRight.append(1.)
 
             if ((int(bar)-1)>=0 and treeInput.bar == (int(bar)-1)):
                 lyLeft.append(treeInput.peak1_mean_barCoinc)
@@ -81,14 +97,14 @@ def LYAnalysis(crystal,runInfo,bar,lenght):
         posYAvg=sum(posY)/len(posY)
 
     if len(lyLeft)==0 or len(xtLeft)==0:
-        print "No xt data for test crystal "+crystal
+        print "No xt data for array "+crystal+ " bar "+bar
         xtLeftAvg=-9999.
     else:
         lyLeftAvg=sum(lyLeft)/len(lyLeft)
         xtLeftAvg=sum(xtLeft)/len(xtLeft)/lyLeftAvg #normalise to ly in given crystal
 
     if len(lyRight)==0 or len(xtRight)==0:
-        print "No xt data for test crystal "+crystal
+        print "No xt data for array "+crystal+ " bar "+bar
         xtRightAvg=-9999.
     else:
         lyRightAvg=sum(lyRight)/len(lyRight)
@@ -159,5 +175,6 @@ df=pd.DataFrame.from_dict(crystalsDB_withData,orient='index')
 #df=df.drop(['runs','refRuns'],axis=1)
 df=df[['producer','type','id','geometry','tag','temp','bar','posX','posY','ly','ctr','lyRef','ctrRef','xtLeft','xtRight']]
 #df.to_csv('lyAnalysisTOFPET.csv',header=False)
+#print(df.head())
 print df
 df.to_csv(args.output,header=False)

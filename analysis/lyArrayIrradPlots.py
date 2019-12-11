@@ -5,7 +5,7 @@ from array import array
 import math as mt
 import numpy as np
 
-outputdir = "/afs/cern.ch/user/s/santanas/www/TOFPET2/LYSOARRAYS_Casaccia"
+outputdir = "LYSOArrays"
 pixelRes = 90 #ps
 
 ## Read Tgraphs from single bars file
@@ -19,8 +19,8 @@ R.gDirectory.GetObject("dt_IRR9K_ByProd",dt_IRR9K_ByProd)
 #ly
 ly_ByProd=R.TGraphErrors()
 ly_IRR9K_ByProd=R.TGraphErrors()
-R.gDirectory.GetObject("lyAbs_TOFPET_ByProd",ly_ByProd)
-R.gDirectory.GetObject("lyAbs_TOFPET_IRR9K_ByProd",ly_IRR9K_ByProd)
+R.gDirectory.GetObject("lyNormAbs_TOFPET_ByProd",ly_ByProd)
+R.gDirectory.GetObject("lyNormAbs_TOFPET_IRR9K_ByProd",ly_IRR9K_ByProd)
 #sigmat
 sigmat_ByProd=R.TGraphErrors()
 sigmat_IRR9K_ByProd=R.TGraphErrors()
@@ -74,7 +74,8 @@ print "sigmatPostIRRbar:", sigmatPostIRRbar
 #==============================================================================
 
 crystalsData = R.TTree("crystalsData","crystalsData")
-crystalsData.ReadFile("arraysDB_Casaccia_Nov2019.csv","key/C:prod/C:type/C:ID/I:geo/C:tag/C:temp/F:bar/I:posX/F:posY/F:ly/F:ctr/F:lyRef/F:ctrRef/F")
+#producer   type   id geometry          tag       temp bar  posX  posY         ly         ctr      lyRef      ctrRef       xtLeft      xtRight
+crystalsData.ReadFile("arraysDB_Casaccia_Nov2019.csv","key/C:prod/C:type/C:ID/I:geo/C:tag/C:temp/F:bar/I:posX/F:posY/F:ly/F:ctr/F:lyRef/F:ctrRef/F:xtLeft/F:xtRight/F")
 
 producers = [ 'prod'+str(i) for i in range(1,10) ]
 #geoms = [ 'geo'+str(i) for i in range(1,4) ]
@@ -102,7 +103,9 @@ for crys in crystalsData:
 
     if("IRR0" in tag):
         dataPreIRR[barID] = {'lyPreIRR': crys.ly, 'lyNormPreIRR': crys.ly/crys.lyRef
-                             , 'sigmatPreIRR': mt.sqrt(crys.ctr**2-pixelRes**2), 'sigmatNormPreIRR': mt.sqrt(crys.ctr**2-pixelRes**2)/mt.sqrt(crys.ctrRef**2-pixelRes**2)}
+                             , 'sigmatPreIRR': mt.sqrt(crys.ctr**2-pixelRes**2), 'sigmatNormPreIRR': mt.sqrt(crys.ctr**2-pixelRes**2)/mt.sqrt(crys.ctrRef**2-pixelRes**2)
+                             , 'xtLeftPreIRR': crys.xtLeft, 'xtRightPreIRR': crys.xtRight 
+        }
         
 #Create dictionary with final data 
 data = {}
@@ -128,15 +131,22 @@ for crys in crystalsData:
     lyNormPreIRR = dataPreIRR[barID]['lyNormPreIRR']
     sigmatPreIRR = dataPreIRR[barID]['sigmatPreIRR']
     sigmatNormPreIRR = dataPreIRR[barID]['sigmatNormPreIRR']
+    
     lyPostIRR = crys.ly 
     lyNormPostIRR = (crys.ly/crys.lyRef) 
     sigmatPostIRR = mt.sqrt(crys.ctr**2-pixelRes**2)
     sigmatNormPostIRR = mt.sqrt(crys.ctr**2-pixelRes**2)/mt.sqrt(crys.ctrRef**2-pixelRes**2)
+    xtLeftPostIRR = crys.xtLeft
+    xtRightPostIRR = crys.xtRight
+    
     myDose = dose[doseTag]
     #print doseTag, myDose
     data[prod].append({'barID':barID,'dose':myDose
                        ,'lyPreIRR':lyPreIRR,'lyNormPreIRR':lyNormPreIRR,'sigmatPreIRR':sigmatPreIRR,'sigmatNormPreIRR':sigmatNormPreIRR
-                       ,'lyPostIRR':lyPostIRR,'lyNormPostIRR':lyNormPostIRR,'sigmatPostIRR':sigmatPostIRR,'sigmatNormPostIRR':sigmatNormPostIRR})
+                       ,'lyPostIRR':lyPostIRR,'lyNormPostIRR':lyNormPostIRR,'sigmatPostIRR':sigmatPostIRR,'sigmatNormPostIRR':sigmatNormPostIRR
+                       , 'xtLeftPreIRR':dataPreIRR[barID]['xtLeftPreIRR'], 'xtLeftPostIRR':xtLeftPostIRR
+                       , 'xtRightPreIRR':dataPreIRR[barID]['xtRightPreIRR'], 'xtRightPostIRR':xtRightPostIRR
+                   })
 
 #print data
 
@@ -147,7 +157,10 @@ for crys in crystalsData:
 #Create graphs
 graphs=['lyPreIRR','lyNormPreIRR','sigmatPreIRR','sigmatNormPreIRR'
         ,'lyPostIRR','lyNormPostIRR','sigmatPostIRR','sigmatNormPostIRR'
-        ,'lyRatioIRR','lyNormRatioIRR','sigmatRatioIRR','sigmatNormRatioIRR']
+        ,'lyRatioIRR','lyNormRatioIRR','sigmatRatioIRR','sigmatNormRatioIRR'
+        ,'xtPreIRR','xtPostIRR','xtRatioIRR'
+]
+
 for g in graphs:
     histos[g+'VsProd']=R.TGraphErrors(len(producers)) 
     histos[g+'VsProd'].SetName(g+'VsProd')
@@ -182,19 +195,25 @@ for iprod,prod in enumerate(producers):
     lyNormPreIRR=array('d')    
     sigmatPreIRR=array('d')    
     sigmatNormPreIRR=array('d')    
+    xtLeftPreIRR=array('d')
+    xtRightPreIRR=array('d')
 
     #Post
     lyPostIRR=array('d')    
     lyNormPostIRR=array('d')    
     sigmatPostIRR=array('d')    
     sigmatNormPostIRR=array('d')    
+    xtLeftPostIRR=array('d')
+    xtRightPostIRR=array('d')
 
     #Post/Pre
     lyRatioIRR=array('d')    
     lyNormRatioIRR=array('d')    
     sigmatRatioIRR=array('d')    
     sigmatNormRatioIRR=array('d')    
-
+    xtLeftRatioIRR=array('d')
+    xtRightRatioIRR=array('d')
+    
     for i,meas in enumerate(data[prod]):
 
         #Pre
@@ -202,18 +221,31 @@ for iprod,prod in enumerate(producers):
         lyNormPreIRR.append(meas['lyNormPreIRR'])
         sigmatPreIRR.append(meas['sigmatPreIRR'])
         sigmatNormPreIRR.append(meas['sigmatNormPreIRR'])
-
+        if (meas['xtLeftPreIRR']>0):
+            xtLeftPreIRR.append(meas['xtLeftPreIRR'])
+        if (meas['xtRightPreIRR']>0):
+            xtRightPreIRR.append(meas['xtRightPreIRR'])
+        
         #Post
         lyPostIRR.append(meas['lyPostIRR'])
         lyNormPostIRR.append(meas['lyNormPostIRR'])
         sigmatPostIRR.append(meas['sigmatPostIRR'])
         sigmatNormPostIRR.append(meas['sigmatNormPostIRR'])
+        if (meas['xtLeftPostIRR']>0):
+            xtLeftPostIRR.append(meas['xtLeftPostIRR'])
+        if (meas['xtRightPostIRR']>0):
+            xtRightPostIRR.append(meas['xtRightPostIRR'])
 
         #Post/Pre
         lyRatioIRR.append(meas['lyPostIRR']/meas['lyPreIRR'])
         lyNormRatioIRR.append(meas['lyNormPostIRR']/meas['lyNormPreIRR'])
         sigmatRatioIRR.append(meas['sigmatPostIRR']/meas['sigmatPreIRR'])
         sigmatNormRatioIRR.append(meas['sigmatNormPostIRR']/meas['sigmatNormPreIRR'])
+        if (meas['xtLeftPostIRR']>0 and meas['xtLeftPreIRR']>0 ):
+            xtLeftRatioIRR.append(meas['xtLeftPostIRR']/meas['xtLeftPreIRR'])
+        if (meas['xtRightPostIRR']>0 and meas['xtRightPreIRR']>0 ):
+            xtRightRatioIRR.append(meas['xtRightPostIRR']/meas['xtRightPreIRR'])
+
 
     #Pre
     lyPreIRR_np = np.array(lyPreIRR)
@@ -231,6 +263,17 @@ for iprod,prod in enumerate(producers):
     sigmatNormPreIRR_np = np.array(sigmatNormPreIRR)
     mean_sigmatNormPreIRR = sigmatNormPreIRR_np.mean()
     std_sigmatNormPreIRR = sigmatNormPreIRR_np.std()/mt.sqrt(len(sigmatNormPreIRR))
+
+    xtLeftPreIRR_np = np.array(xtLeftPreIRR)
+    mean_xtLeftPreIRR = xtLeftPreIRR_np.mean()
+    std_xtLeftPreIRR = xtLeftPreIRR_np.std()/mt.sqrt(len(xtLeftPreIRR))
+
+    xtRightPreIRR_np = np.array(xtRightPreIRR)
+    mean_xtRightPreIRR = xtRightPreIRR_np.mean()
+    std_xtRightPreIRR = xtRightPreIRR_np.std()/mt.sqrt(len(xtRightPreIRR))
+
+    mean_xtPreIRR = mean_xtLeftPreIRR + mean_xtRightPreIRR
+    std_xtPreIRR = mt.sqrt(std_xtLeftPreIRR**2 +std_xtRightPreIRR**2)
 
     mean_lyNormOverDtPreIRR = ( mean_lyNormPreIRR / (dtPreIRRbar[int(prodN)][0]/dtPreIRRbar[1][0]) ) 
     stdRel_lyNormOverDtPreIRR = (std_lyNormPreIRR/mean_lyNormPreIRR)**2 + (dtPreIRRbar[int(prodN)][1]/dtPreIRRbar[int(prodN)][0])**2 + (dtPreIRRbar[1][1]/dtPreIRRbar[1][0])**2
@@ -255,6 +298,17 @@ for iprod,prod in enumerate(producers):
     mean_sigmatNormPostIRR = sigmatNormPostIRR_np.mean()
     std_sigmatNormPostIRR = sigmatNormPostIRR_np.std()/mt.sqrt(len(sigmatNormPostIRR))
 
+    xtLeftPostIRR_np = np.array(xtLeftPostIRR)
+    mean_xtLeftPostIRR = xtLeftPostIRR_np.mean()
+    std_xtLeftPostIRR = xtLeftPostIRR_np.std()/mt.sqrt(len(xtLeftPostIRR))
+
+    xtRightPostIRR_np = np.array(xtRightPostIRR)
+    mean_xtRightPostIRR = xtRightPostIRR_np.mean()
+    std_xtRightPostIRR = xtRightPostIRR_np.std()/mt.sqrt(len(xtRightPostIRR))
+
+    mean_xtPostIRR = mean_xtLeftPostIRR + mean_xtRightPostIRR
+    std_xtPostIRR = mt.sqrt(std_xtLeftPostIRR**2 +std_xtRightPostIRR**2)
+
     mean_lyNormOverDtPostIRR = ( mean_lyNormPostIRR / (dtPostIRRbar[int(prodN)][0]/dtPreIRRbar[1][0]) ) 
     stdRel_lyNormOverDtPostIRR = (std_lyNormPostIRR/mean_lyNormPostIRR)**2 + (dtPostIRRbar[int(prodN)][1]/dtPostIRRbar[int(prodN)][0])**2 + (dtPreIRRbar[1][1]/dtPreIRRbar[1][0])**2
     stdRel_lyNormOverDtPostIRR = mt.sqrt(stdRel_lyNormOverDtPostIRR)
@@ -278,11 +332,25 @@ for iprod,prod in enumerate(producers):
     mean_sigmatNormRatioIRR = sigmatNormRatioIRR_np.mean()
     std_sigmatNormRatioIRR = sigmatNormRatioIRR_np.std()/mt.sqrt(len(sigmatNormRatioIRR))
 
+    xtLeftRatioIRR_np = np.array(xtLeftRatioIRR)
+    mean_xtLeftRatioIRR = xtLeftRatioIRR_np.mean()
+    std_xtLeftRatioIRR = xtLeftRatioIRR_np.std()/mt.sqrt(len(xtLeftRatioIRR))
+
+    xtRightRatioIRR_np = np.array(xtRightRatioIRR)
+    mean_xtRightRatioIRR = xtRightRatioIRR_np.mean()
+    std_xtRightRatioIRR = xtRightRatioIRR_np.std()/mt.sqrt(len(xtRightRatioIRR))
+
+    mean_xtRatioIRR = (mean_xtLeftRatioIRR + mean_xtRightRatioIRR)/2.
+    std_xtRatioIRR = 0.5*mt.sqrt(std_xtLeftRatioIRR**2 +std_xtRightRatioIRR**2)
+
     #Pre
     print lyPreIRR_np, mean_lyPreIRR, std_lyPreIRR
     print lyNormPreIRR_np, mean_lyNormPreIRR, std_lyNormPreIRR
     print sigmatPreIRR_np, mean_sigmatPreIRR, std_sigmatPreIRR
     print sigmatNormPreIRR_np, mean_sigmatNormPreIRR, std_sigmatNormPreIRR
+    print xtLeftPreIRR_np, mean_xtLeftPreIRR, std_xtLeftPreIRR
+    print xtRightPreIRR_np, mean_xtRightPreIRR, std_xtRightPreIRR
+    print mean_xtPreIRR, std_xtPreIRR
 
     histos['lyPreIRR'+'VsProd'].SetPoint(iprod,prodN,mean_lyPreIRR)
     histos['lyPreIRR'+'VsProd'].SetPointError(iprod,0.,std_lyPreIRR)
@@ -295,6 +363,9 @@ for iprod,prod in enumerate(producers):
 
     histos['sigmatNormPreIRR'+'VsProd'].SetPoint(iprod,prodN,mean_sigmatNormPreIRR)
     histos['sigmatNormPreIRR'+'VsProd'].SetPointError(iprod,0.,std_sigmatNormPreIRR)
+
+    histos['xtPreIRR'+'VsProd'].SetPoint(iprod,prodN,mean_xtPreIRR)
+    histos['xtPreIRR'+'VsProd'].SetPointError(iprod,0.,std_xtPreIRR)
 
     histos['sigmatNormVsLONormPreIRR'].SetPoint(iprod,mean_lyNormPreIRR,mean_sigmatNormPreIRR)
     histos['sigmatNormVsLONormPreIRR'].SetPointError(iprod,std_lyNormPreIRR,std_sigmatNormPreIRR)
@@ -314,6 +385,10 @@ for iprod,prod in enumerate(producers):
     print lyNormPostIRR_np, mean_lyNormPostIRR, std_lyNormPostIRR
     print sigmatPostIRR_np, mean_sigmatPostIRR, std_sigmatPostIRR
     print sigmatNormPostIRR_np, mean_sigmatNormPostIRR, std_sigmatNormPostIRR
+    print xtLeftPostIRR_np, mean_xtLeftPostIRR, std_xtLeftPostIRR
+    print xtRightPostIRR_np, mean_xtRightPostIRR, std_xtRightPostIRR
+    print mean_xtPostIRR, std_xtPostIRR
+
 
     histos['lyPostIRR'+'VsProd'].SetPoint(iprod,prodN,mean_lyPostIRR)
     histos['lyPostIRR'+'VsProd'].SetPointError(iprod,0.,std_lyPostIRR)
@@ -326,6 +401,9 @@ for iprod,prod in enumerate(producers):
 
     histos['sigmatNormPostIRR'+'VsProd'].SetPoint(iprod,prodN,mean_sigmatNormPostIRR)
     histos['sigmatNormPostIRR'+'VsProd'].SetPointError(iprod,0.,std_sigmatNormPostIRR)
+
+    histos['xtPostIRR'+'VsProd'].SetPoint(iprod,prodN,mean_xtPostIRR)
+    histos['xtPostIRR'+'VsProd'].SetPointError(iprod,0.,std_xtPostIRR)
 
     histos['sigmatNormVsLONormPostIRR'].SetPoint(iprod,mean_lyNormPostIRR,mean_sigmatNormPostIRR)
     histos['sigmatNormVsLONormPostIRR'].SetPointError(iprod,std_lyNormPostIRR,std_sigmatNormPostIRR)
@@ -345,6 +423,10 @@ for iprod,prod in enumerate(producers):
     print lyNormRatioIRR_np, mean_lyNormRatioIRR, std_lyNormRatioIRR
     print sigmatRatioIRR_np, mean_sigmatRatioIRR, std_sigmatRatioIRR
     print sigmatNormRatioIRR_np, mean_sigmatNormRatioIRR, std_sigmatNormRatioIRR
+    print xtLeftRatioIRR_np, mean_xtLeftRatioIRR, std_xtLeftRatioIRR
+    print xtRightRatioIRR_np, mean_xtRightRatioIRR, std_xtRightRatioIRR
+    print mean_xtRatioIRR, std_xtRatioIRR
+
 
     histos['lyRatioIRR'+'VsProd'].SetPoint(iprod,prodN,mean_lyRatioIRR)
     histos['lyRatioIRR'+'VsProd'].SetPointError(iprod,0.,std_lyRatioIRR)
@@ -357,6 +439,9 @@ for iprod,prod in enumerate(producers):
 
     histos['sigmatNormRatioIRR'+'VsProd'].SetPoint(iprod,prodN,mean_sigmatNormRatioIRR)
     histos['sigmatNormRatioIRR'+'VsProd'].SetPointError(iprod,0.,std_sigmatNormRatioIRR)
+
+    histos['xtRatioIRR'+'VsProd'].SetPoint(iprod,prodN,mean_xtRatioIRR)
+    histos['xtRatioIRR'+'VsProd'].SetPointError(iprod,0.,std_xtRatioIRR)
 
 #Draw and Save plots
 R.gStyle.SetOptTitle(0)
@@ -497,6 +582,36 @@ histos['sigmatNormRatioIRR'+'VsProd'].GetYaxis().SetTitleOffset(0.6)
 histos['sigmatNormRatioIRR'+'VsProd'].Draw("ap")
 for ext in ['.pdf','.png']:
     c1.SaveAs(outputdir+"/"+'sigmatNorm'+'VsProd'+ext)
+
+#xt
+c1_pad1.cd()
+histos['xtPreIRR'+'VsProd'].SetMarkerStyle(20)
+histos['xtPostIRR'+'VsProd'].SetMarkerStyle(22)
+histos['xtPreIRR'+'VsProd'].SetMarkerColor(1)
+histos['xtPostIRR'+'VsProd'].SetMarkerColor(2)
+histos['xtPreIRR'+'VsProd'].GetYaxis().SetLimits(0.,0.5)
+histos['xtPreIRR'+'VsProd'].GetYaxis().SetRangeUser(0.,0.5)
+histos['xtPreIRR'+'VsProd'].GetYaxis().SetTitle("XT (Left+Right)")
+histos['xtPreIRR'+'VsProd'].Draw("ap")
+histos['xtPostIRR'+'VsProd'].Draw("psame")
+legend1.Clear()
+legend1.AddEntry(histos['xtPreIRR'+'VsProd'],"No Irrad.","pe")
+legend1.AddEntry(histos['xtPostIRR'+'VsProd'],"Irrad. 45-50 kGy","pe")
+legend1.Draw()
+text1.DrawLatexNDC(0.11,0.93,"CMS Rome - TOFPET+SiPM Bench")
+c1_pad2.cd()
+histos['xtRatioIRR'+'VsProd'].SetMarkerStyle(20)
+histos['xtRatioIRR'+'VsProd'].SetMarkerColor(1)
+histos['xtRatioIRR'+'VsProd'].GetYaxis().SetLimits(0.,2.)
+histos['xtRatioIRR'+'VsProd'].GetYaxis().SetRangeUser(0.,2.)
+histos['xtRatioIRR'+'VsProd'].GetYaxis().SetTitle("XT_{Irr}/XT")
+histos['xtRatioIRR'+'VsProd'].GetYaxis().SetNdivisions(505)
+histos['xtRatioIRR'+'VsProd'].GetYaxis().SetLabelSize(0.06)
+histos['xtRatioIRR'+'VsProd'].GetYaxis().SetTitleSize(0.06)
+histos['xtRatioIRR'+'VsProd'].GetYaxis().SetTitleOffset(0.6)
+histos['xtRatioIRR'+'VsProd'].Draw("ap")
+for ext in ['.pdf','.png']:
+    c1.SaveAs(outputdir+"/"+'xt'+'VsProd'+ext)
 
 #-----------------------------------------------------------
 
