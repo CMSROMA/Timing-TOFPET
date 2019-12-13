@@ -73,6 +73,25 @@ print "lyPostIRRbar:", lyPostIRRbar
 print "sigmatPreIRRbar:", sigmatPreIRRbar
 print "sigmatPostIRRbar:", sigmatPostIRRbar
 
+'''
+## Read Tgraphs from t1 threshold scans (dV/dT by prod)
+fileT1ScanPreIRR = "slopeByProd_ArrayPreIRR.root" 
+fileT1ScanPostIRR = "slopeByProd_ArrayPostIRR.root" 
+#PreIRR
+tfileT1ScanPreIRR = R.TFile(fileT1ScanPreIRR)
+slope_ByProd_PreIRR=R.TGraphErrors()
+R.gDirectory.GetObject("slopeByProd",slope_ByProd_PreIRR)
+tfileT1ScanPreIRR.Close()
+#PostIRR
+tfileT1ScanPostIRR = R.TFile(fileT1ScanPostIRR)
+slope_ByProd_PostIRR=R.TGraphErrors()
+R.gDirectory.GetObject("slopeByProd",slope_ByProd_PostIRR)
+tfileT1ScanPostIRR.Close()
+#
+print "slope_ByProd_PreIRR:", slope_ByProd_PreIRR
+print "slope_ByProd_PostIRR:", slope_ByProd_PostIRR
+'''
+
 #==============================================================================
 
 crystalsData = R.TTree("crystalsData","crystalsData")
