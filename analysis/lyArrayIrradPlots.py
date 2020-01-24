@@ -664,13 +664,13 @@ R.gStyle.SetOptTitle(0)
 c1=R.TCanvas("c1","c1",800,800)
 c1_pad1 = R.TPad("c1_pad1", "c1_pad1", 0, 0.4, 1, 1.0)
 c1_pad1.SetBottomMargin(0.008)#Upper and lower plot are joined
-c1_pad1.SetGridx()
+#c1_pad1.SetGridx()
 c1_pad1.SetGridy()
 c1_pad1.Draw()
 c1_pad2 = R.TPad("c1_pad2", "c1_pad2", 0, 0.05, 1, 0.4)
 c1_pad2.SetTopMargin(0.05);#Upper and lower plot are joined
 c1_pad2.SetBottomMargin(0.4);
-c1_pad2.SetGridx()
+#c1_pad2.SetGridx()
 c1_pad2.SetGridy()
 c1_pad2.Draw()
 
