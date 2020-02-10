@@ -73,7 +73,6 @@ print "lyPostIRRbar:", lyPostIRRbar
 print "sigmatPreIRRbar:", sigmatPreIRRbar
 print "sigmatPostIRRbar:", sigmatPostIRRbar
 
-'''
 ## Read Tgraphs from t1 threshold scans (dV/dT by prod)
 fileT1ScanPreIRR = "slopeByProd_ArrayPreIRR.root" 
 fileT1ScanPostIRR = "slopeByProd_ArrayPostIRR.root" 
@@ -88,9 +87,25 @@ slope_ByProd_PostIRR=R.TGraphErrors()
 R.gDirectory.GetObject("slopeByProd",slope_ByProd_PostIRR)
 tfileT1ScanPostIRR.Close()
 #
-print "slope_ByProd_PreIRR:", slope_ByProd_PreIRR
-print "slope_ByProd_PostIRR:", slope_ByProd_PostIRR
-'''
+
+npoints2 = slope_ByProd_PreIRR.GetN() 
+if (npoints2 != npoints):
+    print "Different number of producers for the two input files"
+    exit(0)
+print "npoints2:", npoints2
+x=R.Double()
+y=R.Double()
+dVdTPreIRR={}
+dVdTPostIRR={}
+for point in range(0,npoints2):
+    #PreIRR
+    slope_ByProd_PreIRR.GetPoint(point,x,y)    
+    dVdTPreIRR[int(x)]=(float(y),slope_ByProd_PreIRR.GetErrorY(point))
+    #PostIRR
+    slope_ByProd_PostIRR.GetPoint(point,x,y)    
+    dVdTPostIRR[int(x)]=(float(y),slope_ByProd_PostIRR.GetErrorY(point))
+print "dVdTPreIRR:", dVdTPreIRR
+print "dVdTPostIRR:", dVdTPostIRR
 
 #==============================================================================
 
@@ -183,6 +198,9 @@ graphs=['lyPreIRR','lyNormPreIRR','sigmatPreIRR','sigmatNormPreIRR'
         ,'lyNormBarOverArrayPreIRR','sigmatNormBarOverArrayPreIRR'
         ,'lyNormBarOverArrayPostIRR','sigmatNormBarOverArrayPostIRR'
         ,'lyNormBarOverArrayRatioIRR','sigmatNormBarOverArrayRatioIRR'
+        #,'sigmatNormOverLONormOverDtPreIRR','sigmatNormOverdVdTNormPreIRR'
+        #,'sigmatNormOverLONormOverDtPostIRR','sigmatNormOverdVdTNormPostIRR'
+        #,'sigmatNormOverLONormOverDtRatioIRR','sigmatNormOverdVdTNormRatioIRR'
 ]
 for g in graphs:
     histos[g+'VsProd']=R.TGraphErrors(len(producers)) 
@@ -198,12 +216,19 @@ for g in graphs:
 scatterPlots=['sigmatNormVsLONormPreIRR','sigmatNormVsLONormPostIRR'
               ,'sigmatNormVsLONormOverDtPreIRR','sigmatNormVsLONormOverDtPostIRR'
               ,'LONormBarVsArrayPreIRR','LONormBarVsArrayPostIRR'
-              ,'sigmatNormBarVsArrayPreIRR','sigmatNormBarVsArrayPostIRR']
+              ,'sigmatNormBarVsArrayPreIRR','sigmatNormBarVsArrayPostIRR'
+              ,'sigmatNormVsdVdTNormPreIRR','sigmatNormVsdVdTNormPostIRR'
+]                                            
 for g in scatterPlots:
     histos[g]=R.TGraphErrors(len(producers)) 
     histos[g].SetName(g)
     histos[g].SetTitle(g)
     histos[g].SetMarkerSize(1.4)
+
+g_sigmatNormVsLONormOverDtPreIRR = []
+g_sigmatNormVsLONormOverDtPostIRR = []
+g_sigmatNormVsdVdTNormPreIRR = []
+g_sigmatNormVsdVdTNormPostIRR = []
 
 #Loop over producers
 for iprod,prod in enumerate(producers): 
@@ -322,6 +347,21 @@ for iprod,prod in enumerate(producers):
     stdRel_sigmatNormBarOverArrayPreIRR = mt.sqrt(stdRel_sigmatNormBarOverArrayPreIRR)
     std_sigmatNormBarOverArrayPreIRR = stdRel_sigmatNormBarOverArrayPreIRR * mean_sigmatNormBarOverArrayPreIRR
 
+    mean_dVdTNormPreIRR = dVdTPreIRR[int(prodN)][0]/dVdTPreIRR[1][0]
+    stdRel_dVdTNormPreIRR = ( dVdTPreIRR[int(prodN)][1]/dVdTPreIRR[int(prodN)][0] )**2 + ( dVdTPreIRR[1][1]/dVdTPreIRR[1][0] )**2
+    stdRel_dVdTNormPreIRR = mt.sqrt(stdRel_dVdTNormPreIRR)
+    std_dVdTNormPreIRR = stdRel_dVdTNormPreIRR * mean_dVdTNormPreIRR
+
+    #mean_sigmatNormOverLONormOverDtPreIRR = mean_sigmatNormPreIRR / mean_lyNormOverDtPreIRR
+    #stdRel_sigmatNormOverLONormOverDtPreIRR = (std_sigmatNormPreIRR/mean_sigmatNormPreIRR)**2 + (std_lyNormOverDtPreIRR/mean_lyNormOverDtPreIRR)**2
+    #stdRel_sigmatNormOverLONormOverDtPreIRR = mt.sqrt(stdRel_sigmatNormOverLONormOverDtPreIRR)
+    #std_sigmatNormOverLONormOverDtPreIRR = stdRel_sigmatNormOverLONormOverDtPreIRR * mean_sigmatNormOverLONormOverDtPreIRR
+
+    #mean_sigmatNormOverdVdTNormPreIRR = mean_sigmatNormPreIRR / mean_dVdTNormPreIRR
+    #stdRel_sigmatNormOverdVdTNormPreIRR = (std_sigmatNormPreIRR/mean_sigmatNormPreIRR)**2 + (std_dVdTNormPreIRR/mean_dVdTNormPreIRR)**2
+    #stdRel_sigmatNormOverdVdTNormPreIRR = mt.sqrt(stdRel_sigmatNormOverdVdTNormPreIRR)
+    #std_sigmatNormOverdVdTNormPreIRR = stdRel_sigmatNormOverdVdTNormPreIRR * mean_sigmatNormOverdVdTNormPreIRR
+
     #Post
     lyPostIRR_np = np.array(lyPostIRR) 
     mean_lyPostIRR = lyPostIRR_np.mean()
@@ -374,6 +414,21 @@ for iprod,prod in enumerate(producers):
     stdRel_sigmatNormBarOverArrayPostIRR = mt.sqrt(stdRel_sigmatNormBarOverArrayPostIRR)
     std_sigmatNormBarOverArrayPostIRR = stdRel_sigmatNormBarOverArrayPostIRR * mean_sigmatNormBarOverArrayPostIRR
 
+    mean_dVdTNormPostIRR = dVdTPostIRR[int(prodN)][0]/dVdTPreIRR[1][0]
+    stdRel_dVdTNormPostIRR = ( dVdTPostIRR[int(prodN)][1]/dVdTPostIRR[int(prodN)][0] )**2 + ( dVdTPreIRR[1][1]/dVdTPreIRR[1][0] )**2
+    stdRel_dVdTNormPostIRR = mt.sqrt(stdRel_dVdTNormPostIRR)
+    std_dVdTNormPostIRR = stdRel_dVdTNormPostIRR * mean_dVdTNormPostIRR
+
+    #mean_sigmatNormOverLONormOverDtPostIRR = mean_sigmatNormPostIRR / mean_lyNormOverDtPostIRR
+    #stdRel_sigmatNormOverLONormOverDtPostIRR = (std_sigmatNormPostIRR/mean_sigmatNormPostIRR)**2 + (std_lyNormOverDtPostIRR/mean_lyNormOverDtPostIRR)**2
+    #stdRel_sigmatNormOverLONormOverDtPostIRR = mt.sqrt(stdRel_sigmatNormOverLONormOverDtPostIRR)
+    #std_sigmatNormOverLONormOverDtPostIRR = stdRel_sigmatNormOverLONormOverDtPostIRR * mean_sigmatNormOverLONormOverDtPostIRR
+
+    #mean_sigmatNormOverdVdTNormPostIRR = mean_sigmatNormPostIRR / mean_dVdTNormPostIRR
+    #stdRel_sigmatNormOverdVdTNormPostIRR = (std_sigmatNormPostIRR/mean_sigmatNormPostIRR)**2 + (std_dVdTNormPostIRR/mean_dVdTNormPostIRR)**2
+    #stdRel_sigmatNormOverdVdTNormPostIRR = mt.sqrt(stdRel_sigmatNormOverdVdTNormPostIRR)
+    #std_sigmatNormOverdVdTNormPostIRR = stdRel_sigmatNormOverdVdTNormPostIRR * mean_sigmatNormOverdVdTNormPostIRR
+
     #Post/Pre
     lyRatioIRR_np = np.array(lyRatioIRR) 
     mean_lyRatioIRR = lyRatioIRR_np.mean()
@@ -412,6 +467,17 @@ for iprod,prod in enumerate(producers):
     stdRel_sigmatNormBarOverArrayRatioIRR = mt.sqrt(stdRel_sigmatNormBarOverArrayRatioIRR)
     std_sigmatNormBarOverArrayRatioIRR = stdRel_sigmatNormBarOverArrayRatioIRR * mean_sigmatNormBarOverArrayRatioIRR
 
+    #mean_sigmatNormOverLONormOverDtRatioIRR = mean_sigmatNormOverLONormOverDtPostIRR / mean_sigmatNormOverLONormOverDtPreIRR 
+    #stdRel_sigmatNormOverLONormOverDtRatioIRR = (std_sigmatNormOverLONormOverDtPostIRR/mean_sigmatNormOverLONormOverDtPostIRR)**2 +(std_sigmatNormOverLONormOverDtPreIRR/mean_sigmatNormOverLONormOverDtPreIRR)**2
+    #stdRel_sigmatNormOverLONormOverDtRatioIRR = mt.sqrt(stdRel_sigmatNormOverLONormOverDtRatioIRR)
+    #std_sigmatNormOverLONormOverDtRatioIRR = stdRel_sigmatNormOverLONormOverDtRatioIRR * mean_sigmatNormOverLONormOverDtRatioIRR
+
+    #mean_sigmatNormOverdVdTNormRatioIRR = mean_sigmatNormOverdVdTNormPostIRR / mean_sigmatNormOverdVdTNormPreIRR
+    #stdRel_sigmatNormOverdVdTNormRatioIRR = (std_sigmatNormOverdVdTNormPostIRR/mean_sigmatNormOverdVdTNormPostIRR)**2 + (std_sigmatNormOverdVdTNormPreIRR/mean_sigmatNormOverdVdTNormPreIRR)**2
+    #stdRel_sigmatNormOverdVdTNormRatioIRR = mt.sqrt(stdRel_sigmatNormOverdVdTNormRatioIRR)
+    #std_sigmatNormOverdVdTNormRatioIRR = stdRel_sigmatNormOverdVdTNormRatioIRR * mean_sigmatNormOverdVdTNormRatioIRR
+
+
     #Pre
     print lyPreIRR_np, mean_lyPreIRR, std_lyPreIRR
     print lyNormPreIRR_np, mean_lyNormPreIRR, std_lyNormPreIRR
@@ -442,11 +508,40 @@ for iprod,prod in enumerate(producers):
     histos['sigmatNormBarOverArrayPreIRR'+'VsProd'].SetPoint(iprod,prodN,mean_sigmatNormBarOverArrayPreIRR)
     histos['sigmatNormBarOverArrayPreIRR'+'VsProd'].SetPointError(iprod,0.,std_sigmatNormBarOverArrayPreIRR)
 
+    #histos['sigmatNormOverLONormOverDtPreIRR'+'VsProd'].SetPoint(iprod,prodN,mean_sigmatNormOverLONormOverDtPreIRR)
+    #histos['sigmatNormOverLONormOverDtPreIRR'+'VsProd'].SetPointError(iprod,0.,std_sigmatNormOverLONormOverDtPreIRR)
+
+    #histos['sigmatNormOverdVdTNormPreIRR'+'VsProd'].SetPoint(iprod,prodN,mean_sigmatNormOverdVdTNormPreIRR)
+    #histos['sigmatNormOverdVdTNormPreIRR'+'VsProd'].SetPointError(iprod,0.,std_sigmatNormOverdVdTNormPreIRR)
+
     histos['sigmatNormVsLONormPreIRR'].SetPoint(iprod,mean_lyNormPreIRR,mean_sigmatNormPreIRR)
     histos['sigmatNormVsLONormPreIRR'].SetPointError(iprod,std_lyNormPreIRR,std_sigmatNormPreIRR)
 
     histos['sigmatNormVsLONormOverDtPreIRR'].SetPoint(iprod,mean_lyNormOverDtPreIRR,mean_sigmatNormPreIRR)
     histos['sigmatNormVsLONormOverDtPreIRR'].SetPointError(iprod,std_lyNormOverDtPreIRR,std_sigmatNormPreIRR)
+    # one point per producer
+    g_sigmatNormVsLONormOverDtPreIRR.append(R.TGraphErrors(1))
+    g_sigmatNormVsLONormOverDtPreIRR[iprod].SetName('g_sigmatNormVsLONormOverDtPreIRR_prod%d'%int(iprod+1))
+    g_sigmatNormVsLONormOverDtPreIRR[iprod].SetTitle('g_sigmatNormVsLONormOverDtPreIRR_prod%d'%int(iprod+1))
+    g_sigmatNormVsLONormOverDtPreIRR[iprod].SetPoint(iprod,mean_lyNormOverDtPreIRR,mean_sigmatNormPreIRR)
+    g_sigmatNormVsLONormOverDtPreIRR[iprod].SetPointError(iprod,std_lyNormOverDtPreIRR,std_sigmatNormPreIRR)
+    g_sigmatNormVsLONormOverDtPreIRR[iprod].SetMarkerStyle(20+iprod)
+    g_sigmatNormVsLONormOverDtPreIRR[iprod].SetMarkerColor(R.kBlack)
+    g_sigmatNormVsLONormOverDtPreIRR[iprod].SetMarkerSize(1.6)
+    g_sigmatNormVsLONormOverDtPreIRR[iprod].SetLineColor(R.kBlack)
+
+    histos['sigmatNormVsdVdTNormPreIRR'].SetPoint(iprod,mean_dVdTNormPreIRR,mean_sigmatNormPreIRR)
+    histos['sigmatNormVsdVdTNormPreIRR'].SetPointError(iprod,std_dVdTNormPreIRR,std_sigmatNormPreIRR)
+    # one point per producer
+    g_sigmatNormVsdVdTNormPreIRR.append(R.TGraphErrors(1))
+    g_sigmatNormVsdVdTNormPreIRR[iprod].SetName('g_sigmatNormVsdVdTNormPreIRR_prod%d'%int(iprod+1))
+    g_sigmatNormVsdVdTNormPreIRR[iprod].SetTitle('g_sigmatNormVsdVdTNormPreIRR_prod%d'%int(iprod+1))
+    g_sigmatNormVsdVdTNormPreIRR[iprod].SetPoint(iprod,mean_dVdTNormPreIRR,mean_sigmatNormPreIRR)
+    g_sigmatNormVsdVdTNormPreIRR[iprod].SetPointError(iprod,std_dVdTNormPreIRR,std_sigmatNormPreIRR)
+    g_sigmatNormVsdVdTNormPreIRR[iprod].SetMarkerStyle(20+iprod)
+    g_sigmatNormVsdVdTNormPreIRR[iprod].SetMarkerColor(R.kBlack)
+    g_sigmatNormVsdVdTNormPreIRR[iprod].SetMarkerSize(1.6)
+    g_sigmatNormVsdVdTNormPreIRR[iprod].SetLineColor(R.kBlack)
 
     histos['LONormBarVsArrayPreIRR'].SetPoint(iprod,mean_lyNormPreIRR,mean_lyNormPreIRRbar)
     histos['LONormBarVsArrayPreIRR'].SetPointError(iprod,std_lyNormPreIRR,std_lyNormPreIRRbar)
@@ -484,11 +579,40 @@ for iprod,prod in enumerate(producers):
     histos['sigmatNormBarOverArrayPostIRR'+'VsProd'].SetPoint(iprod,prodN,mean_sigmatNormBarOverArrayPostIRR)
     histos['sigmatNormBarOverArrayPostIRR'+'VsProd'].SetPointError(iprod,0.,std_sigmatNormBarOverArrayPostIRR)
 
+    #histos['sigmatNormOverLONormOverDtPostIRR'+'VsProd'].SetPoint(iprod,prodN,mean_sigmatNormOverLONormOverDtPostIRR)
+    #histos['sigmatNormOverLONormOverDtPostIRR'+'VsProd'].SetPointError(iprod,0.,std_sigmatNormOverLONormOverDtPostIRR)
+
+    #histos['sigmatNormOverdVdTNormPostIRR'+'VsProd'].SetPoint(iprod,prodN,mean_sigmatNormOverdVdTNormPostIRR)
+    #histos['sigmatNormOverdVdTNormPostIRR'+'VsProd'].SetPointError(iprod,0.,std_sigmatNormOverdVdTNormPostIRR)
+
     histos['sigmatNormVsLONormPostIRR'].SetPoint(iprod,mean_lyNormPostIRR,mean_sigmatNormPostIRR)
     histos['sigmatNormVsLONormPostIRR'].SetPointError(iprod,std_lyNormPostIRR,std_sigmatNormPostIRR)
 
     histos['sigmatNormVsLONormOverDtPostIRR'].SetPoint(iprod,mean_lyNormOverDtPostIRR,mean_sigmatNormPostIRR)
     histos['sigmatNormVsLONormOverDtPostIRR'].SetPointError(iprod,std_lyNormOverDtPostIRR,std_sigmatNormPostIRR)
+    # one point per producer
+    g_sigmatNormVsLONormOverDtPostIRR.append(R.TGraphErrors(1))
+    g_sigmatNormVsLONormOverDtPostIRR[iprod].SetName('g_sigmatNormVsLONormOverDtPostIRR_prod%d'%int(iprod+1))
+    g_sigmatNormVsLONormOverDtPostIRR[iprod].SetTitle('g_sigmatNormVsLONormOverDtPostIRR_prod%d'%int(iprod+1))
+    g_sigmatNormVsLONormOverDtPostIRR[iprod].SetPoint(iprod,mean_lyNormOverDtPostIRR,mean_sigmatNormPostIRR)
+    g_sigmatNormVsLONormOverDtPostIRR[iprod].SetPointError(iprod,std_lyNormOverDtPostIRR,std_sigmatNormPostIRR)
+    g_sigmatNormVsLONormOverDtPostIRR[iprod].SetMarkerStyle(20+iprod)
+    g_sigmatNormVsLONormOverDtPostIRR[iprod].SetMarkerColor(R.kRed)
+    g_sigmatNormVsLONormOverDtPostIRR[iprod].SetMarkerSize(1.6)
+    g_sigmatNormVsLONormOverDtPostIRR[iprod].SetLineColor(R.kRed)
+
+    histos['sigmatNormVsdVdTNormPostIRR'].SetPoint(iprod,mean_dVdTNormPostIRR,mean_sigmatNormPostIRR)
+    histos['sigmatNormVsdVdTNormPostIRR'].SetPointError(iprod,std_dVdTNormPostIRR,std_sigmatNormPostIRR)
+    # one point per producer
+    g_sigmatNormVsdVdTNormPostIRR.append(R.TGraphErrors(1))
+    g_sigmatNormVsdVdTNormPostIRR[iprod].SetName('g_sigmatNormVsdVdTNormPostIRR_prod%d'%int(iprod+1))
+    g_sigmatNormVsdVdTNormPostIRR[iprod].SetTitle('g_sigmatNormVsdVdTNormPostIRR_prod%d'%int(iprod+1))
+    g_sigmatNormVsdVdTNormPostIRR[iprod].SetPoint(iprod,mean_dVdTNormPostIRR,mean_sigmatNormPostIRR)
+    g_sigmatNormVsdVdTNormPostIRR[iprod].SetPointError(iprod,std_dVdTNormPostIRR,std_sigmatNormPostIRR)
+    g_sigmatNormVsdVdTNormPostIRR[iprod].SetMarkerStyle(20+iprod)
+    g_sigmatNormVsdVdTNormPostIRR[iprod].SetMarkerColor(R.kRed)
+    g_sigmatNormVsdVdTNormPostIRR[iprod].SetMarkerSize(1.6)
+    g_sigmatNormVsdVdTNormPostIRR[iprod].SetLineColor(R.kRed)
 
     histos['LONormBarVsArrayPostIRR'].SetPoint(iprod,mean_lyNormPostIRR,mean_lyNormPostIRRbar)
     histos['LONormBarVsArrayPostIRR'].SetPointError(iprod,std_lyNormPostIRR,std_lyNormPostIRRbar)
@@ -527,18 +651,26 @@ for iprod,prod in enumerate(producers):
     histos['sigmatNormBarOverArrayRatioIRR'+'VsProd'].SetPoint(iprod,prodN,mean_sigmatNormBarOverArrayRatioIRR)
     histos['sigmatNormBarOverArrayRatioIRR'+'VsProd'].SetPointError(iprod,0.,std_sigmatNormBarOverArrayRatioIRR)
 
+    #histos['sigmatNormOverLONormOverDtRatioIRR'+'VsProd'].SetPoint(iprod,prodN,mean_sigmatNormOverLONormOverDtRatioIRR)
+    #histos['sigmatNormOverLONormOverDtRatioIRR'+'VsProd'].SetPointError(iprod,0.,std_sigmatNormOverLONormOverDtRatioIRR)
+
+    #histos['sigmatNormOverdVdTNormRatioIRR'+'VsProd'].SetPoint(iprod,prodN,mean_sigmatNormOverdVdTNormRatioIRR)
+    #histos['sigmatNormOverdVdTNormRatioIRR'+'VsProd'].SetPointError(iprod,0.,std_sigmatNormOverdVdTNormRatioIRR)
+
+
+
 #Draw and Save plots
 R.gStyle.SetOptTitle(0)
 c1=R.TCanvas("c1","c1",800,800)
 c1_pad1 = R.TPad("c1_pad1", "c1_pad1", 0, 0.4, 1, 1.0)
 c1_pad1.SetBottomMargin(0.008)#Upper and lower plot are joined
-c1_pad1.SetGridx()
+#c1_pad1.SetGridx()
 c1_pad1.SetGridy()
 c1_pad1.Draw()
 c1_pad2 = R.TPad("c1_pad2", "c1_pad2", 0, 0.05, 1, 0.4)
 c1_pad2.SetTopMargin(0.05);#Upper and lower plot are joined
 c1_pad2.SetBottomMargin(0.4);
-c1_pad2.SetGridx()
+#c1_pad2.SetGridx()
 c1_pad2.SetGridy()
 c1_pad2.Draw()
 
@@ -765,6 +897,76 @@ histos['sigmatNormBarOverArrayRatioIRR'+'VsProd'].Draw("ap")
 for ext in ['.pdf','.png']:
     c1.SaveAs(outputdir+"/"+'sigmatNormBarOverArray'+'VsProd'+ext)
 
+'''
+#sigmatNormOverLONormOverDt
+c1_pad1.cd()
+histos['sigmatNormOverLONormOverDtPreIRR'+'VsProd'].SetMarkerStyle(20)
+histos['sigmatNormOverLONormOverDtPostIRR'+'VsProd'].SetMarkerStyle(22)
+histos['sigmatNormOverLONormOverDtPreIRR'+'VsProd'].SetMarkerColor(1)
+histos['sigmatNormOverLONormOverDtPostIRR'+'VsProd'].SetMarkerColor(2)
+histos['sigmatNormOverLONormOverDtPreIRR'+'VsProd'].GetYaxis().SetLimits(0.,2.)
+histos['sigmatNormOverLONormOverDtPreIRR'+'VsProd'].GetYaxis().SetRangeUser(0.,2.)
+histos['sigmatNormOverLONormOverDtPreIRR'+'VsProd'].GetYaxis().SetTitle("(#sigma_{t}/#sigma_{t,ref})/[(LO/LO_{ref})/(#tau_{decay}/#tau_{ref})]") 
+histos['sigmatNormOverLONormOverDtPreIRR'+'VsProd'].Draw("ap") 
+histos['sigmatNormOverLONormOverDtPostIRR'+'VsProd'].Draw("psame")
+legend1.Clear()
+legend1.SetX1NDC(0.6)
+legend1.SetX2NDC(0.9)
+legend1.SetY1NDC(0.7)
+legend1.SetY2NDC(0.9)
+legend1.AddEntry(histos['sigmatNormOverLONormOverDtPreIRR'+'VsProd'],"No Irrad.","pe")
+legend1.AddEntry(histos['sigmatNormOverLONormOverDtPostIRR'+'VsProd'],"Irrad. 45-50 kGy","pe")
+legend1.Draw()
+text1.DrawLatexNDC(0.11,0.93,"CMS Rome - TOFPET+SiPM Bench")
+c1_pad2.cd()
+histos['sigmatNormOverLONormOverDtRatioIRR'+'VsProd'].SetMarkerStyle(20)
+histos['sigmatNormOverLONormOverDtRatioIRR'+'VsProd'].SetMarkerColor(1)
+histos['sigmatNormOverLONormOverDtRatioIRR'+'VsProd'].GetYaxis().SetLimits(0.5,1.5)
+histos['sigmatNormOverLONormOverDtRatioIRR'+'VsProd'].GetYaxis().SetRangeUser(0.5,1.5)
+histos['sigmatNormOverLONormOverDtRatioIRR'+'VsProd'].GetYaxis().SetTitle("Ratio Post/Pre Irr.")
+histos['sigmatNormOverLONormOverDtRatioIRR'+'VsProd'].GetYaxis().SetNdivisions(505)
+histos['sigmatNormOverLONormOverDtRatioIRR'+'VsProd'].GetYaxis().SetLabelSize(0.06)
+histos['sigmatNormOverLONormOverDtRatioIRR'+'VsProd'].GetYaxis().SetTitleSize(0.06)
+histos['sigmatNormOverLONormOverDtRatioIRR'+'VsProd'].GetYaxis().SetTitleOffset(0.6)
+histos['sigmatNormOverLONormOverDtRatioIRR'+'VsProd'].Draw("ap")
+for ext in ['.pdf','.png']:
+    c1.SaveAs(outputdir+"/"+'sigmatNormOverLONormOverDt'+'VsProd'+ext)
+
+#sigmatNormOverdVdTNorm
+c1_pad1.cd()
+histos['sigmatNormOverdVdTNormPreIRR'+'VsProd'].SetMarkerStyle(20)
+histos['sigmatNormOverdVdTNormPostIRR'+'VsProd'].SetMarkerStyle(22)
+histos['sigmatNormOverdVdTNormPreIRR'+'VsProd'].SetMarkerColor(1)
+histos['sigmatNormOverdVdTNormPostIRR'+'VsProd'].SetMarkerColor(2)
+histos['sigmatNormOverdVdTNormPreIRR'+'VsProd'].GetYaxis().SetLimits(0.,2.)
+histos['sigmatNormOverdVdTNormPreIRR'+'VsProd'].GetYaxis().SetRangeUser(0.,2.)
+histos['sigmatNormOverdVdTNormPreIRR'+'VsProd'].GetYaxis().SetTitle("(#sigma_{t}/#sigma_{t,ref}) / [(dV/dT)/(dV/dT)_{ref}]") 
+histos['sigmatNormOverdVdTNormPreIRR'+'VsProd'].Draw("ap") 
+histos['sigmatNormOverdVdTNormPostIRR'+'VsProd'].Draw("psame")
+legend1.Clear()
+legend1.SetX1NDC(0.6)
+legend1.SetX2NDC(0.9)
+legend1.SetY1NDC(0.7)
+legend1.SetY2NDC(0.9)
+legend1.AddEntry(histos['sigmatNormOverdVdTNormPreIRR'+'VsProd'],"No Irrad.","pe")
+legend1.AddEntry(histos['sigmatNormOverdVdTNormPostIRR'+'VsProd'],"Irrad. 45-50 kGy","pe")
+legend1.Draw()
+text1.DrawLatexNDC(0.11,0.93,"CMS Rome - TOFPET+SiPM Bench")
+c1_pad2.cd()
+histos['sigmatNormOverdVdTNormRatioIRR'+'VsProd'].SetMarkerStyle(20)
+histos['sigmatNormOverdVdTNormRatioIRR'+'VsProd'].SetMarkerColor(1)
+histos['sigmatNormOverdVdTNormRatioIRR'+'VsProd'].GetYaxis().SetLimits(0.5,1.5)
+histos['sigmatNormOverdVdTNormRatioIRR'+'VsProd'].GetYaxis().SetRangeUser(0.5,1.5)
+histos['sigmatNormOverdVdTNormRatioIRR'+'VsProd'].GetYaxis().SetTitle("Ratio Post/Pre Irr.")
+histos['sigmatNormOverdVdTNormRatioIRR'+'VsProd'].GetYaxis().SetNdivisions(505)
+histos['sigmatNormOverdVdTNormRatioIRR'+'VsProd'].GetYaxis().SetLabelSize(0.06)
+histos['sigmatNormOverdVdTNormRatioIRR'+'VsProd'].GetYaxis().SetTitleSize(0.06)
+histos['sigmatNormOverdVdTNormRatioIRR'+'VsProd'].GetYaxis().SetTitleOffset(0.6)
+histos['sigmatNormOverdVdTNormRatioIRR'+'VsProd'].Draw("ap")
+for ext in ['.pdf','.png']:
+    c1.SaveAs(outputdir+"/"+'sigmatNormOverdVdTNorm'+'VsProd'+ext)
+'''
+
 #-----------------------------------------------------------
 
 c2=R.TCanvas("c2","c2",800,800)
@@ -798,18 +1000,28 @@ for ext in ['.pdf','.png']:
     c2.SaveAs(outputdir+"/"+'sigmatNormVsLONorm'+ext)
 
 #sigmatNorm vs lyNorm/Dt  
-histos['sigmatNormVsLONormOverDtPreIRR'].SetMarkerStyle(20)
-histos['sigmatNormVsLONormOverDtPostIRR'].SetMarkerStyle(22)
+histos['sigmatNormVsLONormOverDtPreIRR'].SetMarkerStyle(1)
+histos['sigmatNormVsLONormOverDtPostIRR'].SetMarkerStyle(1)
 histos['sigmatNormVsLONormOverDtPreIRR'].SetMarkerColor(1)
 histos['sigmatNormVsLONormOverDtPostIRR'].SetMarkerColor(2)
+histos['sigmatNormVsLONormOverDtPreIRR'].SetLineColor(1)
+histos['sigmatNormVsLONormOverDtPostIRR'].SetLineColor(2)
 histos['sigmatNormVsLONormOverDtPreIRR'].GetXaxis().SetLimits(0.4,1.6)
 histos['sigmatNormVsLONormOverDtPreIRR'].GetXaxis().SetRangeUser(0.4,1.6)
 histos['sigmatNormVsLONormOverDtPreIRR'].GetYaxis().SetLimits(0.7,1.4)
 histos['sigmatNormVsLONormOverDtPreIRR'].GetYaxis().SetRangeUser(0.7,1.4)
-histos['sigmatNormVsLONormOverDtPreIRR'].GetXaxis().SetTitle("(LO/LO_{ref})/(#tau_{decay}/#tau_{ref}) ")
+histos['sigmatNormVsLONormOverDtPreIRR'].GetXaxis().SetTitle("(LO/LO_{ref})/(#tau_{decay}/#tau_{ref})")
 histos['sigmatNormVsLONormOverDtPreIRR'].GetYaxis().SetTitle("#sigma_{t}/#sigma_{t,ref}")
 histos['sigmatNormVsLONormOverDtPreIRR'].Draw("ap")
 histos['sigmatNormVsLONormOverDtPostIRR'].Draw("p")
+# one point per producer
+legend22 = R.TLegend(0.1,0.1,0.25,0.5)
+legend22.Clear()
+for iprod,prod in enumerate(producers): 
+    g_sigmatNormVsLONormOverDtPreIRR[iprod].Draw("p")
+    g_sigmatNormVsLONormOverDtPostIRR[iprod].Draw("p")
+    legend22.AddEntry(g_sigmatNormVsLONormOverDtPreIRR[iprod],"Prod.%d"%int(iprod+1),"p")
+legend22.Draw()
 legend2.Clear()
 legend2.AddEntry(histos['sigmatNormVsLONormOverDtPreIRR'],"No Irrad.","pe")
 legend2.AddEntry(histos['sigmatNormVsLONormOverDtPostIRR'],"Irrad. 45-50 kGy","pe")
@@ -817,6 +1029,36 @@ legend2.Draw()
 text2.DrawLatexNDC(0.11,0.93,"CMS Rome - TOFPET+SiPM and PMT Benches")
 for ext in ['.pdf','.png']:
     c2.SaveAs(outputdir+"/"+'sigmatNormVsLONormOverDt'+ext)
+
+#sigmatNorm vs dV/dT
+histos['sigmatNormVsdVdTNormPreIRR'].SetMarkerStyle(1)
+histos['sigmatNormVsdVdTNormPostIRR'].SetMarkerStyle(1)
+histos['sigmatNormVsdVdTNormPreIRR'].SetMarkerColor(1)
+histos['sigmatNormVsdVdTNormPostIRR'].SetMarkerColor(2)
+histos['sigmatNormVsdVdTNormPreIRR'].SetLineColor(1)
+histos['sigmatNormVsdVdTNormPostIRR'].SetLineColor(2)
+histos['sigmatNormVsdVdTNormPreIRR'].GetXaxis().SetLimits(0.4,1.6)
+histos['sigmatNormVsdVdTNormPreIRR'].GetXaxis().SetRangeUser(0.4,1.6)
+histos['sigmatNormVsdVdTNormPreIRR'].GetYaxis().SetLimits(0.7,1.4)
+histos['sigmatNormVsdVdTNormPreIRR'].GetYaxis().SetRangeUser(0.7,1.4)
+histos['sigmatNormVsdVdTNormPreIRR'].GetXaxis().SetTitle("(dV/dT) / (dV/dT)_{ref}")
+histos['sigmatNormVsdVdTNormPreIRR'].GetYaxis().SetTitle("#sigma_{t}/#sigma_{t,ref}")
+histos['sigmatNormVsdVdTNormPreIRR'].Draw("ap")
+histos['sigmatNormVsdVdTNormPostIRR'].Draw("p")
+# one point per producer
+legend22.Clear()
+for iprod,prod in enumerate(producers): 
+    g_sigmatNormVsdVdTNormPreIRR[iprod].Draw("p")
+    g_sigmatNormVsdVdTNormPostIRR[iprod].Draw("p")
+    legend22.AddEntry(g_sigmatNormVsdVdTNormPreIRR[iprod],"Prod.%d"%int(iprod+1),"p")
+legend22.Draw()
+legend2.Clear()
+legend2.AddEntry(histos['sigmatNormVsdVdTNormPreIRR'],"No Irrad.","pe")
+legend2.AddEntry(histos['sigmatNormVsdVdTNormPostIRR'],"Irrad. 45-50 kGy","pe")
+legend2.Draw()
+text2.DrawLatexNDC(0.11,0.93,"CMS Rome - TOFPET+SiPM Bench")
+for ext in ['.pdf','.png']:
+    c2.SaveAs(outputdir+"/"+'sigmatNormVsdVdTNorm'+ext)
 
 legend3 = R.TLegend(0.4,0.7,0.9,0.9)
 
