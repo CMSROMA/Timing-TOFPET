@@ -37,18 +37,18 @@ QDC_CALIB qdc_calibration.tsv
 
 #Run settings
 #DAQSCRIPT my_acquire_sipm_data PHYS
-DAQSCRIPT acquire_pedestal_data PED
+DAQSCRIPT my_acquire_sipm_data PHYS
 #DAQSCRIPT my_acquire_sipm_data PHYS
 CONVERTSINGLESCRIPT convert_raw_to_singles
 CONVERTCOINCIDENCESCRIPT analysis/find_coincidences.py
 #CONVERTCOINCIDENCESCRIPT convert_raw_to_coincidence
 TEMPERATUREFILE arduino/temperature/temperature_tmp.txt
 MODE qdc
-TIME 0.3
+TIME 10
 #TIME 1
-OUTPUT_DIR /media/cmsdaq/ext/data/LYSOARRAYS
+OUTPUT_DIR /media/cmsdaq/ext/data/ALIGNMENT/ALIGNPIXELREF_11_02_2020
 #OUTPUT_DIR output/Pedestal
-OUTPUT_LABEL Run000945_2019-11-25-18-26-19_ARRAY000176_POS5_X30.5_Y23.0_CH0-5-6-7-21-22-23_ETHR0-10-0-10-10-0-10
+OUTPUT_LABEL Run000030_2020-02-11-19-05-37_ALIGNPIXELREF_POS29_X30.6_Y25.0_CH0_ETHR0_T1THR20
 #OUTPUT_LABEL PedestalTest13_2ch_100000delay
 
 #Channels
@@ -60,7 +60,7 @@ OVERWRITE_OV 7
 
 # Source Position 305
 #  ID	NHV    VBR    OV    NCHIP    NCH    VTH_1    VTH_2    VTH_E    SIPM_CODE    SIPM_TYPE     X    Y    Z    CRYSTAL	
-CH 0	11     52.25  7.00  0	     59	    20	     20	      15       10579	    S13360-3025CS 22   25   165  LYSO_3_3_5
+CH 0	11     52.25  7.00  0	     59	    20	     20	      15       10579	    S13360-3025CS 22.8   25.2   170  LYSO_3_3_5
 #array 3025
 # SiPM channels connected to the same bar in the array: CH1-CH17 , CH2-CH18, CH3-CH19, ... , CH16-CH32
 # Connector 1

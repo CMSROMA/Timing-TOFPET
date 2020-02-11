@@ -41,7 +41,7 @@ TIME 0.3
 #TIME 1
 OUTPUT_DIR /media/cmsdaq/ext/data/LYSOBARS
 #OUTPUT_DIR output/Pedestal
-OUTPUT_LABEL Run000393_2019-11-27-18-39-10_BAR000028_POS0_X23.0_Y24.5_CH0-1-2_ETHR0-0-0
+OUTPUT_LABEL Run000942_2019-12-09-17-43-29_BAR000150_POS11_X23.0_Y24.5_CH0-1-2_ETHR0-0-0_T1THR20-60-60
 #OUTPUT_LABEL PedestalTest13_2ch_100000delay
 
 #Channels
@@ -52,7 +52,7 @@ OVERWRITE_OV 7
 #REF is always CH0
 
 #  ID	NHV    VBR    OV    NCHIP    NCH    VTH_1    VTH_2    VTH_E    SIPM_CODE    SIPM_TYPE     X    Y    Z    CRYSTAL	
-CH 0	11     52.25  7.00  0	     59	    20	     20	      15       10579	    S13360-3025CS 22   23   165  LYSO_3_3_5
+CH 0	11     52.25  7.00  0	     59	    20	     20	      15       10579	    S13360-3025CS 22.8   25.2   170  LYSO_3_3_5
 #3025
 CH 1	29     51.57  7.00  4	     59	    10	     20	      15       11040	    S13360-3025CS 23   24.5 435  LYSO_bar	
 CH 2	8      51.50  7.00  4	     35	    10	     20	      15       11041	    S13360-3025CS 23   24.5 435  LYSO_bar	
