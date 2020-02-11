@@ -2,6 +2,15 @@ import npyscreen
 from xyMover import XYMover
 import csv
 import time
+import optparse
+
+
+parser = optparse.OptionParser("usage: xyShell.py --port 8820")
+parser.add_option("--port", dest="myport", default=8820,
+                  help="port")
+(opt, args) = parser.parse_args()
+print opt.myport
+
 
 class App(npyscreen.StandardApp):
     def onStart(self):
@@ -15,7 +24,7 @@ class XYControlPanel(npyscreen.ActionForm):
         self.__class__.CANCEL_BUTTON_BR_OFFSET = (2, 15)
 
         # Add the TitleText widget to the form
-        self.port = self.add(npyscreen.TitleFilename, name="PORT     :", value="8820", editable=True)
+        self.port = self.add(npyscreen.TitleFilename, name="PORT     :", value=opt.myport, editable=True)
         self.xyMover = XYMover(int(self.port.value))
         xHome=round(float(self.xyMover.estimatedPosition().split(" ")[0]),1)
         yHome=round(float(self.xyMover.estimatedPosition().split(" ")[1]),1)
@@ -62,6 +71,8 @@ class XYControlPanel(npyscreen.ActionForm):
 
     def on_cancel(self):
         self.parentApp.setNextForm(None)
+
+
 
 MyApp = App()
 MyApp.run()
