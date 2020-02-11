@@ -172,8 +172,8 @@ nseq = 1
 #Reference Bar 
 posPixelTestX = 30
 posPixelTestY = 23
-posPixelX = 22
-posPixelY = 23
+posPixelX = 22.8
+posPixelY = 25.2
 
 dict_PosScan = {
     #DEFAULT
@@ -220,8 +220,8 @@ dict_PosScan = {
 #Reference Bar 
 posFirstBarX = 23
 posFirstBarY = 24.5
-posPixelX = 22
-posPixelY = 23
+posPixelX = 22.8
+posPixelY = 25.2
 
 dict_PosScan = {
     #DEFAULT
@@ -380,7 +380,6 @@ print "Position scan" , dict_PosScan
 ###################################################################
 
 aMover=XYMover(8820)
-#aMover=XYMover(8821)
 print (aMover.estimatedPosition())
 
 for seq in range(0,nseq):
