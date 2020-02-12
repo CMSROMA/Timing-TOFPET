@@ -68,7 +68,6 @@ for file in list_allfiles:
         nhits_coinc = 0 
         for event in range (0,tree.GetEntries()):
             tree.GetEntry(event)
-            #print tree.energy
                     
             if(tree.energy[6]>-9 and tree.energy[22]>-9):
                 nhits_bar = nhits_bar + 1
@@ -79,19 +78,24 @@ for file in list_allfiles:
         print nhits_bar, nhits_coinc
 
         #scan X
-        if (POS >= 0 and POS <= 12):
+        if (POS >= 0 and POS <= 20):
             histoX.SetBinContent(histoX.GetXaxis().FindBin(X),nhits_coinc)
             histoX.SetBinError(histoX.GetXaxis().FindBin(X),sqrt(nhits_coinc))
 
         #scan Y
-        if (POS >= 13 and POS <= 21):
+        if (POS >= 21 and POS <= 33):
             histoY.SetBinContent(histoY.GetXaxis().FindBin(Y),nhits_bar)
             histoY.SetBinError(histoY.GetXaxis().FindBin(Y),sqrt(nhits_bar))
 
-
 #fit
-fitx = histoX.Fit("gaus","S")
-func_fitx = histoX.GetFunction("gaus")
+binxmax = histoX.GetBinCenter(histoX.GetMaximumBin()) 
+print "binxmax: ", binxmax
+
+func_fitx = TF1("func_fitx","gaus",binxmax-3,binxmax+3)
+#fitx = histoX.Fit("gaus(0)+gaus(3)","S")
+fitx = histoX.Fit("func_fitx","SR")
+#func_fitx = histoX.GetFunction("gaus")
+
 fity = histoY.Fit("pol2","S")
 func_fity = histoY.GetFunction("pol2")
 
@@ -105,9 +109,16 @@ print "================================="
 #style
 histoX.GetXaxis().SetTitle("X [mm]")
 histoX.GetYaxis().SetTitle("Number of pixel+bar coincidence hits")
+histoX.SetMarkerStyle(20)
+histoX.SetMarkerSize(0.7)
 
 histoY.GetXaxis().SetTitle("Y [mm]")
 histoY.GetYaxis().SetTitle("Number of bar hits")
+histoY.SetMarkerStyle(20)
+histoY.SetMarkerSize(0.7)
+
+text1=TLatex()
+text1.SetTextSize(0.04)
 
 #plots
 c1 = TCanvas("c2","",500,500)
@@ -116,6 +127,7 @@ histoY.GetYaxis().SetLimits(histoY.GetMinimum()*0.8,histoY.GetMaximum()*1.2)
 histoY.GetYaxis().SetRangeUser(histoY.GetMinimum()*0.8,histoY.GetMaximum()*1.2)
 c1.SetGridx()
 c1.SetGridy()
+text1.DrawLatexNDC(0.11,0.93,"Y_{max} = %.1f mm" % max_Y)
 
 c2 = TCanvas("c3","",500,500)
 histoX.Draw("pe")
@@ -123,6 +135,9 @@ histoX.GetYaxis().SetLimits(histoX.GetMinimum()*0.8,histoX.GetMaximum()*1.2)
 histoX.GetYaxis().SetRangeUser(histoX.GetMinimum()*0.8,histoX.GetMaximum()*1.2)
 c2.SetGridx()
 c2.SetGridy()
+text1.DrawLatexNDC(0.11,0.93,"X_{max} = %.1f mm" % max_X)
 
 c1.SaveAs(opt.outputDir+"/"+"alignArray_Y.png")
+c1.SaveAs(opt.outputDir+"/"+"alignArray_Y.root")
 c2.SaveAs(opt.outputDir+"/"+"alignArray_X.png")
+c2.SaveAs(opt.outputDir+"/"+"alignArray_X.root")

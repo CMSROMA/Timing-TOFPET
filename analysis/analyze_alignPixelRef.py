@@ -14,7 +14,7 @@ from ROOT import *
 
 #--------------------------------------------------------
 
-usage = "usage: python analysis/analyze_alignPixelRef.py -i /data/TOFPET/ALIGNPIXELREF -o /data/TOFPET/ALIGNPIXELREF"
+usage = "usage: python analysis/analyze_alignPixelRef.py -i /media/cmsdaq/ext/data/ALIGNMENT/ALIGNPIXELREF_11_02_2020 -o /media/cmsdaq/ext/data/ALIGNMENT/ALIGNPIXELREF_11_02_2020"
 
 parser = optparse.OptionParser(usage)
 
@@ -104,9 +104,16 @@ print "================================="
 #style
 histoX.GetXaxis().SetTitle("X [mm]")
 histoX.GetYaxis().SetTitle("Number of hits")
+histoX.SetMarkerStyle(20)
+histoX.SetMarkerSize(0.7)
 
 histoY.GetXaxis().SetTitle("Y [mm]")
 histoY.GetYaxis().SetTitle("Number of hits")
+histoY.SetMarkerStyle(20)
+histoY.SetMarkerSize(0.7)
+
+text1=TLatex()
+text1.SetTextSize(0.04)
 
 #plots
 c1 = TCanvas("c1","",500,500)
@@ -115,11 +122,15 @@ c2 = TCanvas("c2","",500,500)
 histoY.Draw("pe")
 c2.SetGridx()
 c2.SetGridy()
+text1.DrawLatexNDC(0.11,0.93,"Y_{max} = %.1f mm" % max_Y)
 c3 = TCanvas("c3","",500,500)
 histoX.Draw("pe")
 c3.SetGridx()
 c3.SetGridy()
+text1.DrawLatexNDC(0.11,0.93,"X_{max} = %.1f mm" % max_X)
 
 c1.SaveAs(opt.outputDir+"/"+"alignPixelRef_XY.png")
 c2.SaveAs(opt.outputDir+"/"+"alignPixelRef_Y.png")
+c2.SaveAs(opt.outputDir+"/"+"alignPixelRef_Y.root")
 c3.SaveAs(opt.outputDir+"/"+"alignPixelRef_X.png")
+c3.SaveAs(opt.outputDir+"/"+"alignPixelRef_X.root")

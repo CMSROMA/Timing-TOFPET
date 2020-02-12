@@ -112,44 +112,48 @@ nseq = 1
 
 #Reference Bar 
 refBar = 5 #REF BAR N. = 5 (start counting from 0) so it's the sixth bar
-posRefX = 33.0 
-posRefY = 20.7
+posRefX = 32.7 
+posRefY = 20.3
 
 dict_PosScan = {
 
     ##ALIGN BAR X
-    0: (round(posRefX-4.0,1),round(posRefY,1),"0_6_22","0_0_0","20_10_10"),
-    1: (round(posRefX-3.5,1),round(posRefY,1),"0_6_22","0_0_0","20_10_10"),
-    2: (round(posRefX-3.0,1),round(posRefY,1),"0_6_22","0_0_0","20_10_10"),
-    3: (round(posRefX-2.5,1),round(posRefY,1),"0_6_22","0_0_0","20_10_10"),
-    4: (round(posRefX-2.0,1),round(posRefY,1),"0_6_22","0_0_0","20_10_10"),
-    5: (round(posRefX-1.5,1),round(posRefY,1),"0_6_22","0_0_0","20_10_10"),
-    6: (round(posRefX-1.0,1),round(posRefY,1),"0_6_22","0_0_0","20_10_10"),
-    7: (round(posRefX-0.5,1),round(posRefY,1),"0_6_22","0_0_0","20_10_10"),
-    8: (round(posRefX,1),round(posRefY,1),"0_6_22","0_0_0","20_10_10"),
-    9: (round(posRefX+0.5,1),round(posRefY,1),"0_6_22","0_0_0","20_10_10"),
-    10: (round(posRefX+1.0,1),round(posRefY,1),"0_6_22","0_0_0","20_10_10"),
-    11: (round(posRefX+1.5,1),round(posRefY,1),"0_6_22","0_0_0","20_10_10"),
-    12: (round(posRefX+2.0,1),round(posRefY,1),"0_6_22","0_0_0","20_10_10"),
-    13: (round(posRefX+2.5,1),round(posRefY,1),"0_6_22","0_0_0","20_10_10"),
-    14: (round(posRefX+3.0,1),round(posRefY,1),"0_6_22","0_0_0","20_10_10"),
-    15: (round(posRefX+3.5,1),round(posRefY,1),"0_6_22","0_0_0","20_10_10"),
-    16: (round(posRefX+4.0,1),round(posRefY,1),"0_6_22","0_0_0","20_10_10"),
+    0: (round(posRefX-12.0,1),round(posRefY,1),"0_6_22","0_0_0","20_10_10"),
+    1: (round(posRefX-8.0,1),round(posRefY,1),"0_6_22","0_0_0","20_10_10"),
+    2: (round(posRefX-4.0,1),round(posRefY,1),"0_6_22","0_0_0","20_10_10"),
+    3: (round(posRefX-3.5,1),round(posRefY,1),"0_6_22","0_0_0","20_10_10"),
+    4: (round(posRefX-3.0,1),round(posRefY,1),"0_6_22","0_0_0","20_10_10"),
+    5: (round(posRefX-2.5,1),round(posRefY,1),"0_6_22","0_0_0","20_10_10"),
+    6: (round(posRefX-2.0,1),round(posRefY,1),"0_6_22","0_0_0","20_10_10"),
+    7: (round(posRefX-1.5,1),round(posRefY,1),"0_6_22","0_0_0","20_10_10"),
+    8: (round(posRefX-1.0,1),round(posRefY,1),"0_6_22","0_0_0","20_10_10"),
+    9: (round(posRefX-0.5,1),round(posRefY,1),"0_6_22","0_0_0","20_10_10"),
+    10: (round(posRefX,1),round(posRefY,1),"0_6_22","0_0_0","20_10_10"),
+    11: (round(posRefX+0.5,1),round(posRefY,1),"0_6_22","0_0_0","20_10_10"),
+    12: (round(posRefX+1.0,1),round(posRefY,1),"0_6_22","0_0_0","20_10_10"),
+    13: (round(posRefX+1.5,1),round(posRefY,1),"0_6_22","0_0_0","20_10_10"),
+    14: (round(posRefX+2.0,1),round(posRefY,1),"0_6_22","0_0_0","20_10_10"),
+    15: (round(posRefX+2.5,1),round(posRefY,1),"0_6_22","0_0_0","20_10_10"),
+    16: (round(posRefX+3.0,1),round(posRefY,1),"0_6_22","0_0_0","20_10_10"),
+    17: (round(posRefX+3.5,1),round(posRefY,1),"0_6_22","0_0_0","20_10_10"),
+    18: (round(posRefX+4.0,1),round(posRefY,1),"0_6_22","0_0_0","20_10_10"),
+    19: (round(posRefX+8.0,1),round(posRefY,1),"0_6_22","0_0_0","20_10_10"),
+    20: (round(posRefX+12.0,1),round(posRefY,1),"0_6_22","0_0_0","20_10_10"),
 
     ##ALIGN BAR Y
-    17: (round(posRefX,1),round(posRefY-15.0,1),"0_6_22","0_0_0","20_10_10"),
-    18: (round(posRefX,1),round(posRefY-12.0,1),"0_6_22","0_0_0","20_10_10"),
-    19: (round(posRefX,1),round(posRefY-9.0,1),"0_6_22","0_0_0","20_10_10"),
-    20: (round(posRefX,1),round(posRefY-6.0,1),"0_6_22","0_0_0","20_10_10"),
-    21: (round(posRefX,1),round(posRefY-4.0,1),"0_6_22","0_0_0","20_10_10"),
-    22: (round(posRefX,1),round(posRefY-2.0,1),"0_6_22","0_0_0","20_10_10"),
-    23: (round(posRefX,1),round(posRefY,1),"0_6_22","0_0_0","20_10_10"),
-    24: (round(posRefX,1),round(posRefY+2.0,1),"0_6_22","0_0_0","20_10_10"),
-    25: (round(posRefX,1),round(posRefY+4.0,1),"0_6_22","0_0_0","20_10_10"),
-    26: (round(posRefX,1),round(posRefY+6.0,1),"0_6_22","0_0_0","20_10_10"),
-    27: (round(posRefX,1),round(posRefY+9.0,1),"0_6_22","0_0_0","20_10_10")
-    28: (round(posRefX,1),round(posRefY+12.0,1),"0_6_22","0_0_0","20_10_10")
-    29: (round(posRefX,1),round(posRefY+15.0,1),"0_6_22","0_0_0","20_10_10")
+    21: (round(posRefX,1),round(posRefY-15.0,1),"0_6_22","0_0_0","20_10_10"),
+    22: (round(posRefX,1),round(posRefY-12.0,1),"0_6_22","0_0_0","20_10_10"),
+    23: (round(posRefX,1),round(posRefY-9.0,1),"0_6_22","0_0_0","20_10_10"),
+    24: (round(posRefX,1),round(posRefY-6.0,1),"0_6_22","0_0_0","20_10_10"),
+    25: (round(posRefX,1),round(posRefY-4.0,1),"0_6_22","0_0_0","20_10_10"),
+    26: (round(posRefX,1),round(posRefY-2.0,1),"0_6_22","0_0_0","20_10_10"),
+    27: (round(posRefX,1),round(posRefY,1),"0_6_22","0_0_0","20_10_10"),
+    28: (round(posRefX,1),round(posRefY+2.0,1),"0_6_22","0_0_0","20_10_10"),
+    29: (round(posRefX,1),round(posRefY+4.0,1),"0_6_22","0_0_0","20_10_10"),
+    30: (round(posRefX,1),round(posRefY+6.0,1),"0_6_22","0_0_0","20_10_10"),
+    31: (round(posRefX,1),round(posRefY+9.0,1),"0_6_22","0_0_0","20_10_10"),
+    32: (round(posRefX,1),round(posRefY+12.0,1),"0_6_22","0_0_0","20_10_10"),
+    33: (round(posRefX,1),round(posRefY+15.0,1),"0_6_22","0_0_0","20_10_10")
 
 }
 

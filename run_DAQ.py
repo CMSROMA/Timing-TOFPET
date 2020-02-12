@@ -320,8 +320,8 @@ print "Position scan" , dict_PosScan
 
 #Reference Bar 
 refBar = 5 #REF BAR N. = 5 (start counting from 0) so it's the sixth bar
-posRefX = 30.5 
-posRefY = 23.0
+posRefX = 32.7 
+posRefY = 20.3
 stepX = 3.2 #3.2mm step from one crystal center to another in X direction
 posFirstBarX = posRefX + stepX*refBar 
 posFirstBarY = posRefY
