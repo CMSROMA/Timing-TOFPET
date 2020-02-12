@@ -647,7 +647,8 @@ histos['h1_energy_pixel_coinc%d'%alignedBar].Write()
 #minEnergy_coinc = 4
 #maxEnergy_coinc = 45
 minEnergy_coinc = 7
-maxEnergy_coinc = 100
+maxEnergy_coinc = 100 #no optical grease
+#maxEnergy_coinc = 160 #with optical grease
 
 fTot_bar_coinc = TF1("fTot_bar_coinc",totalFunction_coinc,minEnergy_coinc,maxEnergy_coinc,n_paramameters_coinc)
 fTot_bar_coinc.SetNpx(1000)
@@ -762,6 +763,16 @@ fitResults[("barCoinc","Xtalk","mean","value")]=f_cb.GetParameter(1)
 fitResults[("barCoinc","Xtalk","mean","sigma")]=f_cb.GetParError(1)
 fitResults[("barCoinc","Xtalk","sigma","value")]=f_cb.GetParameter(2)
 fitResults[("barCoinc","Xtalk","sigma","sigma")]=f_cb.GetParError(2)
+fitResults[("barCoinc","Xtalk","ChiSquareOverNdf","value")]=f_cb.GetChisquare()/f_cb.GetNDF()
+fitResults[("barCoinc","Xtalk","probChiSquare","value")]=f_cb.GetProb()
+
+fitResults[("barCoinc","Xtalk","average","value")]=histos['h1_energySum_Xtalk'].GetMean()
+fitResults[("barCoinc","Xtalk","RMS","value")]=histos['h1_energySum_Xtalk'].GetRMS()
+
+fitResults[("barCoinc","XtalkNhits","average","value")]=histos['h1_nhits_Xtalk'].GetMean()
+fitResults[("barCoinc","XtalkNhits","RMS","value")]=histos['h1_nhits_Xtalk'].GetRMS()
+fitResults[("barCoinc","XtalkNbars","average","value")]=histos['h1_nbars_Xtalk'].GetMean()
+fitResults[("barCoinc","XtalkNbars","RMS","value")]=histos['h1_nbars_Xtalk'].GetRMS()
 
 pt3.Draw()
 
@@ -791,6 +802,11 @@ if (alignedBar-1>=0):
     fitResults[("barCoinc","XtalkLeft","mean","sigma")]=f_cb_Left.GetParError(1)
     fitResults[("barCoinc","XtalkLeft","sigma","value")]=f_cb_Left.GetParameter(2)
     fitResults[("barCoinc","XtalkLeft","sigma","sigma")]=f_cb_Left.GetParError(2)
+    fitResults[("barCoinc","XtalkLeft","ChiSquareOverNdf","value")]=f_cb_Left.GetChisquare()/f_cb_Left.GetNDF()
+    fitResults[("barCoinc","XtalkLeft","probChiSquare","value")]=f_cb_Left.GetProb()
+
+    fitResults[("barCoinc","XtalkLeft","average","value")]=histos['h1_energyTot_bar_Xtalk%d'%(alignedBar-1)].GetMean()
+    fitResults[("barCoinc","XtalkLeft","RMS","value")]=histos['h1_energyTot_bar_Xtalk%d'%(alignedBar-1)].GetRMS()
 
     pt3.Draw()
 
@@ -805,6 +821,11 @@ else:
     fitResults[("barCoinc","XtalkLeft","mean","sigma")]=-1
     fitResults[("barCoinc","XtalkLeft","sigma","value")]=-1
     fitResults[("barCoinc","XtalkLeft","sigma","sigma")]=-1
+    fitResults[("barCoinc","XtalkLeft","ChiSquareOverNdf","value")]=-1
+    fitResults[("barCoinc","XtalkLeft","probChiSquare","value")]=-1
+
+    fitResults[("barCoinc","XtalkLeft","average","value")]=-1
+    fitResults[("barCoinc","XtalkLeft","RMS","value")]=-1
     
 if (alignedBar+1<16):
     histos['h1_energyTot_bar_Xtalk%d'%(alignedBar+1)].Draw("PE") 
@@ -825,6 +846,11 @@ if (alignedBar+1<16):
     fitResults[("barCoinc","XtalkRight","mean","sigma")]=f_cb_Right.GetParError(1)
     fitResults[("barCoinc","XtalkRight","sigma","value")]=f_cb_Right.GetParameter(2)
     fitResults[("barCoinc","XtalkRight","sigma","sigma")]=f_cb_Right.GetParError(2)
+    fitResults[("barCoinc","XtalkRight","ChiSquareOverNdf","value")]=f_cb_Right.GetChisquare()/f_cb_Right.GetNDF()
+    fitResults[("barCoinc","XtalkRight","probChiSquare","value")]=f_cb_Right.GetProb()
+
+    fitResults[("barCoinc","XtalkRight","average","value")]=histos['h1_energyTot_bar_Xtalk%d'%(alignedBar+1)].GetMean()
+    fitResults[("barCoinc","XtalkRight","RMS","value")]=histos['h1_energyTot_bar_Xtalk%d'%(alignedBar+1)].GetRMS()
 
     pt3.Draw()
 
@@ -839,6 +865,11 @@ else:
     fitResults[("barCoinc","XtalkRight","mean","sigma")]=-1
     fitResults[("barCoinc","XtalkRight","sigma","value")]=-1
     fitResults[("barCoinc","XtalkRight","sigma","sigma")]=-1
+    fitResults[("barCoinc","XtalkRight","ChiSquareOverNdf","value")]=-1
+    fitResults[("barCoinc","XtalkRight","probChiSquare","value")]=-1
+
+    fitResults[("barCoinc","XtalkRight","average","value")]=-1
+    fitResults[("barCoinc","XtalkRight","RMS","value")]=-1
 
 ###XTALK 
 #if(alignedBar>0 and alignedBar<7):
@@ -892,14 +923,22 @@ print "CTR sigma: "+str(fitResults[('barCoinc',"CTR","sigma","value")])+" +/- "+
 print "--- Xtalk ---"
 print "Xtalk mean: "+str(fitResults[('barCoinc',"Xtalk","mean","value")])+" +/- "+str(fitResults[('barCoinc',"Xtalk","mean","sigma")]) 
 print "Xtalk sigma: "+str(fitResults[('barCoinc',"Xtalk","sigma","value")])+" +/- "+str(fitResults[('barCoinc',"Xtalk","sigma","sigma")]) 
+print "Xtalk ChiSquareOverNdf / probChiSquare: "+str(fitResults[('barCoinc',"Xtalk","ChiSquareOverNdf","value")])+" / "+str(fitResults[('barCoinc',"Xtalk","probChiSquare","value")]) 
+print "Xtalk average / RMS: "+str(fitResults[('barCoinc',"Xtalk","average","value")])+" / "+str(fitResults[('barCoinc',"Xtalk","RMS","value")]) 
+print "XtalkNhits average / RMS: "+str(fitResults[('barCoinc',"XtalkNhits","average","value")])+" / "+str(fitResults[('barCoinc',"XtalkNhits","RMS","value")]) 
+print "XtalkNbars average / RMS: "+str(fitResults[('barCoinc',"XtalkNbars","average","value")])+" / "+str(fitResults[('barCoinc',"XtalkNbars","RMS","value")]) 
 
 print "--- Xtalk Left ---"
 print "XtalkLeft mean: "+str(fitResults[('barCoinc',"XtalkLeft","mean","value")])+" +/- "+str(fitResults[('barCoinc',"XtalkLeft","mean","sigma")]) 
 print "XtalkLeft sigma: "+str(fitResults[('barCoinc',"XtalkLeft","sigma","value")])+" +/- "+str(fitResults[('barCoinc',"XtalkLeft","sigma","sigma")]) 
+print "XtalkLeft ChiSquareOverNdf / probChiSquare: "+str(fitResults[('barCoinc',"XtalkLeft","ChiSquareOverNdf","value")])+" / "+str(fitResults[('barCoinc',"XtalkLeft","probChiSquare","value")]) 
+print "XtalkLeft average / RMS: "+str(fitResults[('barCoinc',"XtalkLeft","average","value")])+" / "+str(fitResults[('barCoinc',"XtalkLeft","RMS","value")]) 
 
 print "--- Xtalk Right ---"
 print "XtalkRight mean: "+str(fitResults[('barCoinc',"XtalkRight","mean","value")])+" +/- "+str(fitResults[('barCoinc',"XtalkRight","mean","sigma")]) 
 print "XtalkRight sigma: "+str(fitResults[('barCoinc',"XtalkRight","sigma","value")])+" +/- "+str(fitResults[('barCoinc',"XtalkRight","sigma","sigma")]) 
+print "XtalkRight ChiSquareOverNdf / probChiSquare: "+str(fitResults[('barCoinc',"XtalkRight","ChiSquareOverNdf","value")])+" / "+str(fitResults[('barCoinc',"XtalkRight","probChiSquare","value")]) 
+print "XtalkRight average / RMS: "+str(fitResults[('barCoinc',"XtalkRight","average","value")])+" / "+str(fitResults[('barCoinc',"XtalkRight","RMS","value")]) 
 
 Temp_pixel = histos['h1_temp_pixel'].GetMean()
 Temp_bar = histos['h1_temp_bar'].GetMean()
@@ -963,16 +1002,33 @@ Xtalk_mean_barCoinc = array( 'd', [ -999. ] )
 err_Xtalk_mean_barCoinc = array( 'd', [ -999. ] )
 Xtalk_sigma_barCoinc = array( 'd', [ -999. ] )
 err_Xtalk_sigma_barCoinc = array( 'd', [ -999. ] )
+Xtalk_ChiSquareOverNdf_barCoinc = array( 'd', [ -999. ] )
+Xtalk_probChiSquare_barCoinc = array( 'd', [ -999. ] )
+Xtalk_average_barCoinc = array( 'd', [ -999. ] )
+Xtalk_RMS_barCoinc = array( 'd', [ -999. ] )
+#
+XtalkNhits_average_barCoinc = array( 'd', [ -999. ] )
+XtalkNhits_RMS_barCoinc = array( 'd', [ -999. ] )
+XtalkNbars_average_barCoinc = array( 'd', [ -999. ] )
+XtalkNbars_RMS_barCoinc = array( 'd', [ -999. ] )
 #
 XtalkLeft_mean_barCoinc = array( 'd', [ -999. ] )
 err_XtalkLeft_mean_barCoinc = array( 'd', [ -999. ] )
 XtalkLeft_sigma_barCoinc = array( 'd', [ -999. ] )
 err_XtalkLeft_sigma_barCoinc = array( 'd', [ -999. ] )
+XtalkLeft_ChiSquareOverNdf_barCoinc = array( 'd', [ -999. ] )
+XtalkLeft_probChiSquare_barCoinc = array( 'd', [ -999. ] )
+XtalkLeft_average_barCoinc = array( 'd', [ -999. ] )
+XtalkLeft_RMS_barCoinc = array( 'd', [ -999. ] )
 #
 XtalkRight_mean_barCoinc = array( 'd', [ -999. ] )
 err_XtalkRight_mean_barCoinc = array( 'd', [ -999. ] )
 XtalkRight_sigma_barCoinc = array( 'd', [ -999. ] )
 err_XtalkRight_sigma_barCoinc = array( 'd', [ -999. ] )
+XtalkRight_ChiSquareOverNdf_barCoinc = array( 'd', [ -999. ] )
+XtalkRight_probChiSquare_barCoinc = array( 'd', [ -999. ] )
+XtalkRight_average_barCoinc = array( 'd', [ -999. ] )
+XtalkRight_RMS_barCoinc = array( 'd', [ -999. ] )
 #
 temp_pixel = array( 'd', [ -999. ] )
 temp_bar = array( 'd', [ -999. ] )
@@ -1027,16 +1083,33 @@ treeOutput.Branch( 'Xtalk_mean_barCoinc', Xtalk_mean_barCoinc, 'Xtalk_mean_barCo
 treeOutput.Branch( 'err_Xtalk_mean_barCoinc', err_Xtalk_mean_barCoinc, 'err_Xtalk_mean_barCoinc/D' )
 treeOutput.Branch( 'Xtalk_sigma_barCoinc', Xtalk_sigma_barCoinc, 'Xtalk_sigma_barCoinc/D' )
 treeOutput.Branch( 'err_Xtalk_sigma_barCoinc', err_Xtalk_sigma_barCoinc, 'err_Xtalk_sigma_barCoinc/D' )
+treeOutput.Branch( 'Xtalk_ChiSquareOverNdf_barCoinc', Xtalk_ChiSquareOverNdf_barCoinc, 'Xtalk_ChiSquareOverNdf_barCoinc/D' )
+treeOutput.Branch( 'Xtalk_probChiSquare_barCoinc', Xtalk_probChiSquare_barCoinc, 'Xtalk_probChiSquare_barCoinc/D' )
+treeOutput.Branch( 'Xtalk_average_barCoinc', Xtalk_average_barCoinc, 'Xtalk_average_barCoinc/D' )
+treeOutput.Branch( 'Xtalk_RMS_barCoinc', Xtalk_RMS_barCoinc, 'Xtalk_RMS_barCoinc/D' )
+#
+treeOutput.Branch( 'XtalkNhits_average_barCoinc', XtalkNhits_average_barCoinc, 'XtalkNhits_average_barCoinc/D' )
+treeOutput.Branch( 'XtalkNhits_RMS_barCoinc', XtalkNhits_RMS_barCoinc, 'XtalkNhits_RMS_barCoinc/D' )
+treeOutput.Branch( 'XtalkNbars_average_barCoinc', XtalkNbars_average_barCoinc, 'XtalkNbars_average_barCoinc/D' )
+treeOutput.Branch( 'XtalkNbars_RMS_barCoinc', XtalkNbars_RMS_barCoinc, 'XtalkNbars_RMS_barCoinc/D' )
 #
 treeOutput.Branch( 'XtalkLeft_mean_barCoinc', XtalkLeft_mean_barCoinc, 'XtalkLeft_mean_barCoinc/D' )
 treeOutput.Branch( 'err_XtalkLeft_mean_barCoinc', err_XtalkLeft_mean_barCoinc, 'err_XtalkLeft_mean_barCoinc/D' )
 treeOutput.Branch( 'XtalkLeft_sigma_barCoinc', XtalkLeft_sigma_barCoinc, 'XtalkLeft_sigma_barCoinc/D' )
 treeOutput.Branch( 'err_XtalkLeft_sigma_barCoinc', err_XtalkLeft_sigma_barCoinc, 'err_XtalkLeft_sigma_barCoinc/D' )
+treeOutput.Branch( 'XtalkLeft_ChiSquareOverNdf_barCoinc', XtalkLeft_ChiSquareOverNdf_barCoinc, 'XtalkLeft_ChiSquareOverNdf_barCoinc/D' )
+treeOutput.Branch( 'XtalkLeft_probChiSquare_barCoinc', XtalkLeft_probChiSquare_barCoinc, 'XtalkLeft_probChiSquare_barCoinc/D' )
+treeOutput.Branch( 'XtalkLeft_average_barCoinc', XtalkLeft_average_barCoinc, 'XtalkLeft_average_barCoinc/D' )
+treeOutput.Branch( 'XtalkLeft_RMS_barCoinc', XtalkLeft_RMS_barCoinc, 'XtalkLeft_RMS_barCoinc/D' )
 #
 treeOutput.Branch( 'XtalkRight_mean_barCoinc', XtalkRight_mean_barCoinc, 'XtalkRight_mean_barCoinc/D' )
 treeOutput.Branch( 'err_XtalkRight_mean_barCoinc', err_XtalkRight_mean_barCoinc, 'err_XtalkRight_mean_barCoinc/D' )
 treeOutput.Branch( 'XtalkRight_sigma_barCoinc', XtalkRight_sigma_barCoinc, 'XtalkRight_sigma_barCoinc/D' )
 treeOutput.Branch( 'err_XtalkRight_sigma_barCoinc', err_XtalkRight_sigma_barCoinc, 'err_XtalkRight_sigma_barCoinc/D' )
+treeOutput.Branch( 'XtalkRight_ChiSquareOverNdf_barCoinc', XtalkRight_ChiSquareOverNdf_barCoinc, 'XtalkRight_ChiSquareOverNdf_barCoinc/D' )
+treeOutput.Branch( 'XtalkRight_probChiSquare_barCoinc', XtalkRight_probChiSquare_barCoinc, 'XtalkRight_probChiSquare_barCoinc/D' )
+treeOutput.Branch( 'XtalkRight_average_barCoinc', XtalkRight_average_barCoinc, 'XtalkRight_average_barCoinc/D' )
+treeOutput.Branch( 'XtalkRight_RMS_barCoinc', XtalkRight_RMS_barCoinc, 'XtalkRight_RMS_barCoinc/D' )
 #
 treeOutput.Branch( 'temp_pixel', temp_pixel, 'temp_pixel/D' )
 treeOutput.Branch( 'temp_bar', temp_bar, 'temp_bar/D' )
@@ -1091,16 +1164,33 @@ Xtalk_mean_barCoinc[0] = fitResults[('barCoinc',"Xtalk","mean","value")]
 err_Xtalk_mean_barCoinc[0] = fitResults[('barCoinc',"Xtalk","mean","sigma")]
 Xtalk_sigma_barCoinc[0] = fitResults[('barCoinc',"Xtalk","sigma","value")]
 err_Xtalk_sigma_barCoinc[0] = fitResults[('barCoinc',"Xtalk","sigma","sigma")]
+Xtalk_ChiSquareOverNdf_barCoinc[0] = fitResults[('barCoinc',"Xtalk","ChiSquareOverNdf","value")]
+Xtalk_probChiSquare_barCoinc[0] = fitResults[('barCoinc',"Xtalk","probChiSquare","value")]
+Xtalk_average_barCoinc[0] = fitResults[('barCoinc',"Xtalk","average","value")]
+Xtalk_RMS_barCoinc[0] = fitResults[('barCoinc',"Xtalk","RMS","value")]
+#
+XtalkNhits_average_barCoinc[0] = fitResults[('barCoinc',"XtalkNhits","average","value")]
+XtalkNhits_RMS_barCoinc[0] = fitResults[('barCoinc',"XtalkNhits","RMS","value")]
+XtalkNbars_average_barCoinc[0] = fitResults[('barCoinc',"XtalkNbars","average","value")]
+XtalkNbars_RMS_barCoinc[0] = fitResults[('barCoinc',"XtalkNbars","RMS","value")]
 #
 XtalkLeft_mean_barCoinc[0] = fitResults[('barCoinc',"XtalkLeft","mean","value")]
 err_XtalkLeft_mean_barCoinc[0] = fitResults[('barCoinc',"XtalkLeft","mean","sigma")]
 XtalkLeft_sigma_barCoinc[0] = fitResults[('barCoinc',"XtalkLeft","sigma","value")]
 err_XtalkLeft_sigma_barCoinc[0] = fitResults[('barCoinc',"XtalkLeft","sigma","sigma")]
+XtalkLeft_ChiSquareOverNdf_barCoinc[0] = fitResults[('barCoinc',"XtalkLeft","ChiSquareOverNdf","value")]
+XtalkLeft_probChiSquare_barCoinc[0] = fitResults[('barCoinc',"XtalkLeft","probChiSquare","value")]
+XtalkLeft_average_barCoinc[0] = fitResults[('barCoinc',"XtalkLeft","average","value")]
+XtalkLeft_RMS_barCoinc[0] = fitResults[('barCoinc',"XtalkLeft","RMS","value")]
 #
 XtalkRight_mean_barCoinc[0] = fitResults[('barCoinc',"XtalkRight","mean","value")]
 err_XtalkRight_mean_barCoinc[0] = fitResults[('barCoinc',"XtalkRight","mean","sigma")]
 XtalkRight_sigma_barCoinc[0] = fitResults[('barCoinc',"XtalkRight","sigma","value")]
 err_XtalkRight_sigma_barCoinc[0] = fitResults[('barCoinc',"XtalkRight","sigma","sigma")]
+XtalkRight_ChiSquareOverNdf_barCoinc[0] = fitResults[('barCoinc',"XtalkRight","ChiSquareOverNdf","value")]
+XtalkRight_probChiSquare_barCoinc[0] = fitResults[('barCoinc',"XtalkRight","probChiSquare","value")]
+XtalkRight_average_barCoinc[0] = fitResults[('barCoinc',"XtalkRight","average","value")]
+XtalkRight_RMS_barCoinc[0] = fitResults[('barCoinc',"XtalkRight","RMS","value")]
 #
 temp_pixel[0] = Temp_pixel
 temp_bar[0] = Temp_bar

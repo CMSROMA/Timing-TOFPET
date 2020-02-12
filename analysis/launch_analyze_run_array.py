@@ -79,17 +79,21 @@ for event in range (0,treeResults.GetEntries()):
     treeResults.GetEntry(event)
     h1_spectra_bar.Fill(treeResults.peak1_mean_barCoinc)
     h1_CTR_bar.Fill(treeResults.CTR_sigma_barCoinc)
-    h1_ct_bar.Fill(treeResults.Xtalk_mean_barCoinc/treeResults.peak1_mean_barCoinc)
+    #h1_ct_bar.Fill(treeResults.Xtalk_mean_barCoinc/treeResults.peak1_mean_barCoinc) # only for Casaccia
+    h1_ct_bar.Fill(treeResults.Xtalk_average_barCoinc/treeResults.peak1_mean_barCoinc) # average introduced on 12/02/2020 
     bar_id.append(treeResults.bar)
     bar_err.append(0)
     CTR_sigma.append(treeResults.CTR_sigma_barCoinc)
     CTR_sigma_err.append(treeResults.err_CTR_sigma_barCoinc)
     ph_peak.append(treeResults.peak1_mean_barCoinc)
     ph_peak_err.append(treeResults.err_peak1_mean_barCoinc)
-    ct.append((treeResults.Xtalk_mean_barCoinc)/(treeResults.peak1_mean_barCoinc))
-    xtalk_err_value=treeResults.err_Xtalk_mean_barCoinc
+    #ct.append((treeResults.Xtalk_mean_barCoinc)/(treeResults.peak1_mean_barCoinc))
+    ct.append((treeResults.Xtalk_average_barCoinc)/(treeResults.peak1_mean_barCoinc))
+    #xtalk_err_value=treeResults.err_Xtalk_mean_barCoinc
+    xtalk_err_value=0.
     peak_err_value=treeResults.err_peak1_mean_barCoinc
-    ct_err_value=sqrt((xtalk_err_value**2)/((treeResults.peak1_mean_barCoinc)**2)+(peak_err_value**2*((treeResults.Xtalk_mean_barCoinc)**2)/((treeResults.peak1_mean_barCoinc)**4)))    
+    #ct_err_value=sqrt((xtalk_err_value**2)/((treeResults.peak1_mean_barCoinc)**2)+(peak_err_value**2*((treeResults.Xtalk_mean_barCoinc)**2)/((treeResults.peak1_mean_barCoinc)**4)))    
+    ct_err_value=sqrt((xtalk_err_value**2)/((treeResults.peak1_mean_barCoinc)**2)+(peak_err_value**2*((treeResults.Xtalk_average_barCoinc)**2)/((treeResults.peak1_mean_barCoinc)**4)))    
     ct_err.append(ct_err_value)
 
 ##########################################
