@@ -4,6 +4,8 @@ import csv
 import time
 import optparse
 
+#8820 MOTOR_0
+#8821 MOTOR_1
 
 parser = optparse.OptionParser("usage: xyShell.py --port 8820")
 parser.add_option("--port", dest="myport", default=8820,
