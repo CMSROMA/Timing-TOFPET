@@ -759,6 +759,25 @@ print "--- CTR ---"
 print "CTR mean: "+str(fitResults[('barCoinc',"CTR","mean","value")])+" +/- "+str(fitResults[('barCoinc',"CTR","mean","sigma")]) 
 print "CTR sigma: "+str(fitResults[('barCoinc',"CTR","sigma","value")])+" +/- "+str(fitResults[('barCoinc',"CTR","sigma","sigma")]) 
 
+#Elog 
+print 
+print "--- COPY AND PASTE IN THE ELOG ---"
+print 
+#print "----"
+print "xtal:{0} RUN:{1} ly_bar:{2:.2f} Eres_bar:{3:.1f}% ctr_sigma:({4:.2f}+/-{5:.2f})ps ctr_mean:{6:.2f}ps -- ly_pixel:{7:.2f} Eres_pixel:{8:.1f}%".format(
+    opt.barCode,
+    opt.run,
+    fitResults[('barCoinc',"peak1","mean","value")],
+    100*fitResults[('barCoinc',"peak1","sigma","value")]/fitResults[('barCoinc',"peak1","mean","value")],
+    fitResults[('barCoinc',"CTR","sigma","value")],
+    fitResults[('barCoinc',"CTR","sigma","sigma")],
+    fitResults[('barCoinc',"CTR","mean","value")],
+    fitResults[('pixelCoinc',"peak1","mean","value")],
+    100*fitResults[('pixelCoinc',"peak1","sigma","value")]/fitResults[('pixelCoinc',"peak1","mean","value")]   
+)
+#print "setup info: ", input_filename_coinc
+#print "----"
+
 Temp_pixel = histos['h1_temp_pixel'].GetMean()
 Temp_bar = histos['h1_temp_bar'].GetMean()
 Temp_internal = histos['h1_temp_int'].GetMean()
