@@ -113,7 +113,7 @@ gate_values = [15] # DeltaT[ns]/20: gate=15 -> DeltaT=300 ns
 name = opt.nameLabel
 '''
 
-'''
+
 #Main sequence (pixel+bar)
 n_ch = 3 #number of channels in config file (2 for 2 pixels, 3 for 1 pixel and 1 bar, ..)
 n_chip = 2 #number of active TOFPET2 chips
@@ -130,9 +130,8 @@ gate_values = [15] # DeltaT[ns]/20: gate=15 -> DeltaT=300 ns
 #name = "PEDESTAL_WS1_NW_NC_GATESCAN_1"
 #name = "BAR000028_WS1_NW_NC"
 name = opt.nameLabel
+
 '''
-
-
 #Main sequence (pixel+array)
 n_ch = 33 #number of channels in config file (2 for 2 pixels, 3 for 1 pixel and 1 bar, ..)
 n_chip = 2 #number of active TOFPET2 chips
@@ -149,7 +148,7 @@ gate_values = [15] # DeltaT[ns]/20: gate=15 -> DeltaT=300 ns
 #name = "PEDESTAL_WS1_NW_NC_GATESCAN_1"
 #name = "BAR000028_WS1_NW_NC"
 name = opt.nameLabel
-
+'''
 
 #--------------------------------------------------------------------
 
@@ -164,68 +163,20 @@ nseq = 1
 
 #--------------------------------------------------------------------
 
-'''
-########################
-#Position scan for pixels
-########################
 
-#Reference Bar 
-posPixelTestX = 30
-posPixelTestY = 23
-posPixelX = 22.8
-posPixelY = 25.2
-
-dict_PosScan = {
-    #DEFAULT
-    0: (round(posPixelTestX,1),round(posPixelTestY,1),"0_1","0_0","20_20")
-
-    #YSCAN - PIXEL
-    # 0: (round(posPixelTestX,1),round(posPixelTestY-3.0,1),"0_1","0_0","20_20"),
-    # 1: (round(posPixelTestX,1),round(posPixelTestY-2.5,1),"0_1","0_0","20_20"),
-    # 2: (round(posPixelTestX,1),round(posPixelTestY-2.0,1),"0_1","0_0","20_20"),
-    # 3: (round(posPixelTestX,1),round(posPixelTestY-1.5,1),"0_1","0_0","20_20"),
-    # 4: (round(posPixelTestX,1),round(posPixelTestY-1.0,1),"0_1","0_0","20_20"),
-    # 5: (round(posPixelTestX,1),round(posPixelTestY-0.5,1),"0_1","0_0","20_20"),
-    # 6: (round(posPixelTestX,1),round(posPixelTestY,1),"0_1","0_0","20_20"),
-    # 7: (round(posPixelTestX,1),round(posPixelTestY+0.5,1),"0_1","0_0","20_20"),
-    # 8: (round(posPixelTestX,1),round(posPixelTestY+1.0,1),"0_1","0_0","20_20"),
-    # 9: (round(posPixelTestX,1),round(posPixelTestY+1.5,1),"0_1","0_0","20_20"),
-    # 10: (round(posPixelTestX,1),round(posPixelTestY+2.0,1),"0_1","0_0","20_20"),
-    # 11: (round(posPixelTestX,1),round(posPixelTestY+2.5,1),"0_1","0_0","20_20"),
-    # 12: (round(posPixelTestX,1),round(posPixelTestY+3.0,1),"0_1","0_0","20_20")
-
-    #XSCAN - PIXEL
-    # 0: (round(posPixelTestX-3.0,1),round(posPixelTestY,1),"0_1","0_0","20_20"),
-    # 1: (round(posPixelTestX-2.5,1),round(posPixelTestY,1),"0_1","0_0","20_20"),
-    # 2: (round(posPixelTestX-2.0,1),round(posPixelTestY,1),"0_1","0_0","20_20"),
-    # 3: (round(posPixelTestX-1.5,1),round(posPixelTestY,1),"0_1","0_0","20_20"),
-    # 4: (round(posPixelTestX-1.0,1),round(posPixelTestY,1),"0_1","0_0","20_20"),
-    # 5: (round(posPixelTestX-0.5,1),round(posPixelTestY,1),"0_1","0_0","20_20"),
-    # 6: (round(posPixelTestX,1),round(posPixelTestY,1),"0_1","0_0","20_20"),
-    # 7: (round(posPixelTestX+0.5,1),round(posPixelTestY,1),"0_1","0_0","20_20"),
-    # 8: (round(posPixelTestX+1.0,1),round(posPixelTestY,1),"0_1","0_0","20_20"),
-    # 9: (round(posPixelTestX+1.5,1),round(posPixelTestY,1),"0_1","0_0","20_20"),
-    # 10: (round(posPixelTestX+2.0,1),round(posPixelTestY,1),"0_1","0_0","20_20"),
-    # 11: (round(posPixelTestX+2.5,1),round(posPixelTestY,1),"0_1","0_0","20_20"),
-    # 12: (round(posPixelTestX+3.0,1),round(posPixelTestY,1),"0_1","0_0","20_20")
-
-}
-'''
-
-'''
 ########################
 #Scan for bar
 ########################
 
 #Reference Bar 
-posFirstBarX = 23
-posFirstBarY = 24.5
-posPixelX = 22.8
-posPixelY = 25.2
+posFirstBarX = 24.0
+posFirstBarY = 24.3
+posPixelX = 23.1
+posPixelY = 24.3
 
 dict_PosScan = {
     #DEFAULT
-    #0: (round(posFirstBarX,1),round(posFirstBarY,1),"0_1_2","0_0_0","20_10_10"),
+    0: (round(posFirstBarX,1),round(posFirstBarY,1),"0_1_2","0_0_0","20_10_10"),
 
     #SCAN THRESHOLD T1 - BAR
     #0: (round(posFirstBarX,1),round(posFirstBarY,1),"0_1_2","0_0_0","20_5_5"),
@@ -249,71 +200,11 @@ dict_PosScan = {
     #4: (round(40.1,1),round(23.0,1),"0_1_2","0_0_0","20_25_25"),
     #5: (round(40.1,1),round(23.0,1),"0_1_2","0_0_0","20_30_30")
 
-    #YSCAN - BAR
-    # 0: (round(posFirstBarX,1),round(posFirstBarY-3.0,1),"0_1_2","0_0_0"),
-    # 1: (round(posFirstBarX,1),round(posFirstBarY-2.5,1),"0_1_2","0_0_0"),
-    # 2: (round(posFirstBarX,1),round(posFirstBarY-2.0,1),"0_1_2","0_0_0"),
-    # 3: (round(posFirstBarX,1),round(posFirstBarY-1.5,1),"0_1_2","0_0_0"),
-    # 4: (round(posFirstBarX,1),round(posFirstBarY-1.0,1),"0_1_2","0_0_0"),
-    # 5: (round(posFirstBarX,1),round(posFirstBarY-0.5,1),"0_1_2","0_0_0"),
-    # 6: (round(posFirstBarX,1),round(posFirstBarY,1),"0_1_2","0_0_0"),
-    # 7: (round(posFirstBarX,1),round(posFirstBarY+0.5,1),"0_1_2","0_0_0"),
-    # 8: (round(posFirstBarX,1),round(posFirstBarY+1.0,1),"0_1_2","0_0_0"),
-    # 9: (round(posFirstBarX,1),round(posFirstBarY+1.5,1),"0_1_2","0_0_0"),
-    # 10: (round(posFirstBarX,1),round(posFirstBarY+2.0,1),"0_1_2","0_0_0"),
-    # 11: (round(posFirstBarX,1),round(posFirstBarY+2.5,1),"0_1_2","0_0_0"),
-    # 12: (round(posFirstBarX,1),round(posFirstBarY+3.0,1),"0_1_2","0_0_0")
-
-    #XSCAN - BAR
-   # 0: (round(posFirstBarX-15.0,1),round(posFirstBarY,1),"0_1_2","0_0_0"),
-   # 1: (round(posFirstBarX-12.0,1),round(posFirstBarY,1),"0_1_2","0_0_0"),
-   # 2: (round(posFirstBarX-9.0,1),round(posFirstBarY,1),"0_1_2","0_0_0"),
-   # 3: (round(posFirstBarX-6.0,1),round(posFirstBarY,1),"0_1_2","0_0_0"),
-   # 4: (round(posFirstBarX-4.0,1),round(posFirstBarY,1),"0_1_2","0_0_0"),
-   # 5: (round(posFirstBarX-2.0,1),round(posFirstBarY,1),"0_1_2","0_0_0"),
-   # 6: (round(posFirstBarX,1),round(posFirstBarY,1),"0_1_2","0_0_0"),
-   # 7: (round(posFirstBarX+2.0,1),round(posFirstBarY,1),"0_1_2","0_0_0"),
-   # 8: (round(posFirstBarX+4.0,1),round(posFirstBarY,1),"0_1_2","0_0_0"),
-   # 9: (round(posFirstBarX+6.0,1),round(posFirstBarY,1),"0_1_2","0_0_0"),
-   # 10: (round(posFirstBarX+9.0,1),round(posFirstBarY,1),"0_1_2","0_0_0"),
-   # 11: (round(posFirstBarX+12.0,1),round(posFirstBarY,1),"0_1_2","0_0_0"),
-   # 12: (round(posFirstBarX+15.0,1),round(posFirstBarY,1),"0_1_2","0_0_0")
-
-    #YSCAN - PIXEL
-   # 0: (round(posPixelX,1),round(posPixelY-15.0,1),"0_1_2","0_0_0"),
-   # 1: (round(posPixelX,1),round(posPixelY-12.0,1),"0_1_2","0_0_0"),
-   # 2: (round(posPixelX,1),round(posPixelY-9.0,1),"0_1_2","0_0_0"),
-   # 3: (round(posPixelX,1),round(posPixelY-6.0,1),"0_1_2","0_0_0"),
-   # 4: (round(posPixelX,1),round(posPixelY-4.0,1),"0_1_2","0_0_0"),
-   # 5: (round(posPixelX,1),round(posPixelY-2.0,1),"0_1_2","0_0_0"),
-   # 6: (round(posPixelX,1),round(posPixelY,1),"0_1_2","0_0_0"),
-   # 7: (round(posPixelX,1),round(posPixelY+2.,1),"0_1_2","0_0_0"),
-   # 8: (round(posPixelX,1),round(posPixelY+4.0,1),"0_1_2","0_0_0"),
-   # 9: (round(posPixelX,1),round(posPixelY+6.0,1),"0_1_2","0_0_0"),
-   # 10: (round(posPixelX,1),round(posPixelY+9.0,1),"0_1_2","0_0_0"),
-   # 11: (round(posPixelX,1),round(posPixelY+12.0,1),"0_1_2","0_0_0"),
-   # 12: (round(posPixelX,1),round(posPixelY+15.0,1),"0_1_2","0_0_0")
-
-    #XSCAN - PIXEL
-    #0: (round(posPixelX-15.0,1),round(posPixelY,1),"0_1_2","0_0_0"),
-    #1: (round(posPixelX-12.0,1),round(posPixelY,1),"0_1_2","0_0_0"),
-    #2: (round(posPixelX-9.0,1),round(posPixelY,1),"0_1_2","0_0_0"),
-    #3: (round(posPixelX-6.5,1),round(posPixelY,1),"0_1_2","0_0_0"),
-    #4: (round(posPixelX-4.0,1),round(posPixelY,1),"0_1_2","0_0_0"),
-    #5: (round(posPixelX-2,1),round(posPixelY,1),"0_1_2","0_0_0"),
-    #6: (round(posPixelX,1),round(posPixelY,1),"0_1_2","0_0_0"),
-    #7: (round(posPixelX+2.0,1),round(posPixelY,1),"0_1_2","0_0_0"),
-    #8: (round(posPixelX+4.0,1),round(posPixelY,1),"0_1_2","0_0_0"),
-    #9: (round(posPixelX+6.0,1),round(posPixelY,1),"0_1_2","0_0_0"),
-    #10: (round(posPixelX+9.0,1),round(posPixelY,1),"0_1_2","0_0_0"),
-    #11: (round(posPixelX+12.0,1),round(posPixelY,1),"0_1_2","0_0_0"),
-    #12: (round(posPixelX+15.0,1),round(posPixelY,1),"0_1_2","0_0_0")
-
 }
 print "Position scan" , dict_PosScan
+
+
 '''
-
-
 ########################
 #Scan for array
 ########################
@@ -346,34 +237,9 @@ dict_PosScan = {
     #14: (round(posFirstBarX-14*stepX,1),round(posFirstBarY,1),"0_14_15_16_30_31_32","0_10_0_10_10_0_10","20_10_10_10_10_10_10"),
 ##    15: (round(posFirstBarX-15*stepX,1),round(posFirstBarY,1),"0_15_16_31_32","0_10_0_10_0","20_10_10_10_10_10_10")
 
-    ##ALIGN BAR X
-#    0: (round(posRefX-3.0,1),round(posRefY,1),"0_5_6_7_21_22_23","0_10_0_10_10_0_10"),
-#    1: (round(posRefX-2.5,1),round(posRefY,1),"0_5_6_7_21_22_23","0_10_0_10_10_0_10"),
-#    2: (round(posRefX-2.0,1),round(posRefY,1),"0_5_6_7_21_22_23","0_10_0_10_10_0_10"),
-#    3: (round(posRefX-1.5,1),round(posRefY,1),"0_5_6_7_21_22_23","0_10_0_10_10_0_10"),
-#    4: (round(posRefX-1.0,1),round(posRefY,1),"0_5_6_7_21_22_23","0_10_0_10_10_0_10"),
-#    5: (round(posRefX-0.5,1),round(posRefY,1),"0_5_6_7_21_22_23","0_10_0_10_10_0_10"),
-#    6: (round(posRefX,1),round(posRefY,1),"0_5_6_7_21_22_23","0_10_0_10_10_0_10"),
-#    7: (round(posRefX+0.5,1),round(posRefY,1),"0_5_6_7_21_22_23","0_10_0_10_10_0_10"),
-#    8: (round(posRefX+1.0,1),round(posRefY,1),"0_5_6_7_21_22_23","0_10_0_10_10_0_10"),
-#    9: (round(posRefX+1.5,1),round(posRefY,1),"0_5_6_7_21_22_23","0_10_0_10_10_0_10"),
-#    10: (round(posRefX+2.0,1),round(posRefY,1),"0_5_6_7_21_22_23","0_10_0_10_10_0_10"),
-#    11: (round(posRefX+2.5,1),round(posRefY,1),"0_5_6_7_21_22_23","0_10_0_10_10_0_10"),
-#    12: (round(posRefX+3.0,1),round(posRefY,1),"0_5_6_7_21_22_23","0_10_0_10_10_0_10"),
-
-    ##ALIGN BAR Y
-#    0: (round(posRefX,1),round(posRefY-9.0,1),"0_5_6_7_21_22_23","0_10_0_10_10_0_10"),
-#    1: (round(posRefX,1),round(posRefY-6.0,1),"0_5_6_7_21_22_23","0_10_0_10_10_0_10"),
-#    2: (round(posRefX,1),round(posRefY-4.0,1),"0_5_6_7_21_22_23","0_10_0_10_10_0_10"),
-#    3: (round(posRefX,1),round(posRefY-2.0,1),"0_5_6_7_21_22_23","0_10_0_10_10_0_10"),
-#    4: (round(posRefX,1),round(posRefY,1),"0_5_6_7_21_22_23","0_10_0_10_10_0_10"),
-#    5: (round(posRefX,1),round(posRefY+2.0,1),"0_5_6_7_21_22_23","0_10_0_10_10_0_10"),
-#    6: (round(posRefX,1),round(posRefY+4.0,1),"0_5_6_7_21_22_23","0_10_0_10_10_0_10"),
-#    7: (round(posRefX,1),round(posRefY+6.0,1),"0_5_6_7_21_22_23","0_10_0_10_10_0_10"),
-#    8: (round(posRefX,1),round(posRefY+9.0,1),"0_5_6_7_21_22_23","0_10_0_10_10_0_10"),
 }
 print "Position scan" , dict_PosScan
-
+'''
 
 ###################################################################
 ########################### Run DAQ ############################### 
