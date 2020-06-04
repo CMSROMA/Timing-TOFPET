@@ -1,0 +1,316 @@
+
+**** READ CAREFULLY BEFORE START ***:
+
+a) do not close the laptop screen when pc is on (do not touch also when it is sleeping)
+
+b) do not unplug any of the USB cables either on the laptop or the switch on the table
+
+c) do not move/touch/damage the pixel crystal when plugging or unplugging the crystal bar support. The space available in the box is small and one has to be very careful.
+
+d) sometimes the GUI of the cooling system may crash (the cooling should continue to work anyway if it was already on). If this happens repeat the steps of point 1) to open again the cooling control. You don't need to press START again since the cooling system should still be running.
+
+e) follow carefully the sequence of operations (in particular for the cooling regulator and the TOFPET electronics). Otherwise you risk to damage the system.
+*************************************************
+ 
+====================================
+ 
+##################
+1) Turn on cooling system 
+##################
+ 
+- Read temperature sensors:
+OPEN NEW TERMINAL
+cd  /home/cmsdaq/Workspace/TOFPET/Timing-TOFPET/arduino/temperature/
+python3 read_temp.py -o temperature_tmp.txt -p /dev/tempmon_0 -r 9600
+Note: keep this terminal always open.
+Temperatures are saved in the temporary file "temperature_tmp.txt" and then automatically attached after each run at the end of the file "temperature_all.txt". The temporary file is then automatically cleared after each run.
+ 
+Cooling control:
+- Make sure the cooling system is connected to the power (check black cable with "cooling" label)
+- Double click on the "LT_Interface" icon on the laptop desktop --> a GUI opens.
+- Click on File -> Open -> Select /home/cmsdaq/.wine/drive_c/users/cmsdaq/PR59TempController/StandardPIDConfig_withHeating.sc (The file should be visible in the window by default) -> Click Open
+- Click on Regulator -> Connect
+- Click on START on the "Regulator control" (default temperature should be set to 24 degrees Celsius, Sp1 value in the "Regulator information" box): the Peltier cell inside the box and the fans will start working.
+- Check on "Runtime" to see the variation in time of the temperature inside the box (see either T1 line on the graph or Tr1 value in the "Regulator Information" box)
+ 
+##################
+2) Turn on xy tables 
+##################
+
+- Make sure the xy table system is connected to the power (check black cable with "guida mobile" label)
+
+- Start MOTOR_0 (connected to test board)
+OPEN NEW TERMINAL
+cd  /home/cmsdaq/Workspace/TOFPET/Timing-TOFPET/arduino/tablexy
+python3 grblServer.py --usb /dev/motor_0 -l /tmp/test.log --port=8820
+Note: keep this terminal always open.
+
+- Start MOTOR_1 (connected to ref board)
+OPEN NEW TERMINAL
+cd  /home/cmsdaq/Workspace/TOFPET/Timing-TOFPET/arduino/tablexy
+python3 grblServer.py --usb /dev/motor_1 -l /tmp/test.log --port=8821
+Note: keep this terminal always open.
+
+- To test the motors:
+OPEN NEW TERMINAL 
+ENLARGE THE TERMINAL TO ABOUTR HALF OF THE SCREEN
+cd  /home/cmsdaq/Workspace/TOFPET/Timing-TOFPET/arduino/tablexy
+For MOTOR_0:
+python xyShell.py --port 8820 
+For MOTOR_1:
+python xyShell.py --port 8821 
+
+A GUI will open.
+At first, the "homing" procedure will be run (the guide moves to reach 0,0 position). Then you can test the movement of the table by changing x/y positions.
+
+IMPORTANT: 
+
+- IN CASE THE XY STOPS AND MAKES A STRANGE NOISE, IMMEDIATELY UNPLUG THE POWER (CABLE WITH "GUIDA MOBILE" LABEL). STOP THE GRBLSERVERS, PLUG THE POWER CABLE BACK AND RESTART FROM THE BEGINNING. 
+
+- IN CASE, THE XY TABLE DOES NOT WORK DURING A RUN (NO RESPONSE, BUT WITHOUT MAKING NOISE) SIMPLY STOP AND RESTART THE SERVER AND TRY AGAIN.
+
+##################
+3) Turn on TOFPET
+##################
+ 
+- Switch on the TOFPET power: press the green "POWER" button in the white power unit inside the rack; the voltage is set by default to 12V.
+- Wait about 30 seconds for the system to warm up, until the current measured by the power unit is 1A.
+- Connect TOFPET to pc:
+OPEN NEW TERMINAL
+cd /home/cmsdaq/Workspace/TOFPET/Timing-TOFPET
+./connect_TOFPET.sh
+Note: keep this terminal always open.
+- Wait 60 min. for termal stability inside the box (within about 1/10 of degree).
+NOTE: Wait 1 hour only the first time you turn on the system from scratch.
+ 
+##################
+4) Data acquisition
+##################
+ 
+- Turn off TOFPET:
+   * stop the program "./connect_TOFPET.sh" (CTRL-C in the terminal)
+   * turn-on the power (press green button)
+
+- Remove the Na22 radioactive source in its support from the box
+
+- Unplug / plug the crystal support in the TOFPET board:
+   * In order to unplug the support first remove the support of the Na22 radioactive source (and then plug it back at the end)
+   * Ask Francesco for instructions and recommendations on how to do unplug / plug the crystal in the support properly
+   * Plug the crystal bar support in the TOFPET board using the slot at the bottom. (BE VERY CAREFUL with the connector since the pins are very small and delicate!!!)
+   * Note: The reference crystal pixel should be already mounted on the other TOFPET board.
+ 
+- !!! REMEMBER TO CLOSE THE BOX BEFORE STARTING ANY RUN !!!!
+ 
+-  Turn on TOFPET (as in point 2):
+   * turn-on the power
+   * wait 30 seconds to warm up, until the measured current is about 1A
+   * start the program "./connect_TOFPET.sh"
+- Wait 10 min. for system stability
+ 
+
+- Put back the Na22 source back in its support inside the box
+
+- Start the TOFPET daq:
+OPEN NEW TERMINAL (can use the same for following runs)
+cd /home/cmsdaq/Workspace/TOFPET/Timing-TOFPET
+
+- Single bars:
+python run_DAQ.py -c config_main_bar.txt -o /media/cmsdaq/ext/data/LYSOBARS/ -n BAR000028_WS1_NW_NC
+
+- Arrays:
+
+NOTES:
+- typically you should only change the bar code (always keep 6 digits in the name). The run number will be automatically updated for every acquisition and used as label in the output file names.
+- the standard run sequence is:
+   * PEDESTAL run (few seconds)
+   * PHYSICS RUN (300 s)
+   * PEDESTAL run (few seconds)
+   The run numbers will be sequential.
+ 
+##################
+4.5) Alignment
+##################
+
+At the beginning of a data acquisition period it is good to perform a check of the alingment of the pixel, the single bar and the arrays with the source. This doesn't need to be performed for every run but just at the beginning of a measurement campaign (or if you suspect that the system got mis-aligned).
+
+----------------------
+ALIGN REFERENCE PIXEL:
+----------------------
+
+* Put the radioactive source in the box.
+
+* Collect raw data (pixel position scan):
+python run_DAQ_alignPixelRef.py -c config_main_bar.txt -o /media/cmsdaq/ext/data/ALIGNMENT/ALIGNPIXELREF_04_06_2020 -n ALIGNPIXELREF
+
+* Process data (30 runs by default):
+python process_runs.py -r 1-30 -d /media/cmsdaq/ext/data/ALIGNMENT/ALIGNPIXELREF_04_06_2020
+
+* Analyze data:
+python analysis/analyze_alignPixelRef.py -i /media/cmsdaq/ext/data/ALIGNMENT/ALIGNPIXELREF_04_06_2020 -o /media/cmsdaq/ext/data/ALIGNMENT/ALIGNPIXELREF_04_06_2020
+
+* Display results:
+display /media/cmsdaq/ext/data/ALIGNMENT/ALIGNPIXELREF_04_06_2020/*.png
+The x and y of the pixel alinged with the radioactive source are printed on the screen and on the plots: 
+==== maxX, maxY:  23.1270245257 24.3393049147
+
+* Update the configuration files:
+Update the new maxX and maxY positions (23.1 and 24.3 in this example) 
+in the following files:
+
+run_DAQ.py:
+########################
+#Scan for bar
+########################
+....
+....
+posPixelX = 23.1
+posPixelY = 24.3
+
+config_main_bar.txt:
+........... X   Y  ......
+CH 0 .....  23.1 24.3 ...
+.........................
+
+config_main_array.txt:
+........... X   Y  ......
+CH 0 .....  23.1 24.3 ...
+.........................
+
+* Move manually the reference pixel in the optimal position
+cd  /home/cmsdaq/Workspace/TOFPET/Timing-TOFPET/arduino/tablexy
+For MOTOR_1: 
+python xyShell.py --port 8821 
+Move the pixel in the desired position (x=23.1 y=24.3 in this example)
+
+----------------------
+ALIGN SINGLE BAR:
+----------------------
+
+* Put the radioactive source in the box.
+
+* Align the reference pixel (see previous step).
+
+* Collect raw data (bar position scan):
+python run_DAQ_alignSingleBar.py -c config_main_bar.txt -o /media/cmsdaq/ext/data/ALIGNMENT/ALIGNBAR_04_06_2020 -n ALIGNBAR
+
+* Process data (34 runs by default):
+python process_runs.py -r 1-34 -d /media/cmsdaq/ext/data/ALIGNMENT/ALIGNBAR_04_06_2020
+
+* Analyze data:
+python analysis/analyze_alignSingleBar.py -i /media/cmsdaq/ext/data/ALIGNMENT/ALIGNBAR_04_06_2020 -o /media/cmsdaq/ext/data/ALIGNMENT/ALIGNBAR_04_06_2020
+
+* Display results:
+display /media/cmsdaq/ext/data/ALIGNMENT/ALIGNBAR_04_06_2020/*.png
+The x and y of the pixel alinged with the radioactive source are printed on the screen and on the plots: 
+==== maxX, maxY:  24.0491034849 24.3067589871
+
+* Update the configuration files:
+Update the new maxX and maxY positions (24.0 and 24.3 in this example) 
+in the following files:
+
+run_DAQ.py:
+########################
+#Scan for bar
+########################
+....
+....
+posFirstBarX = 24.0
+posFirstBarY = 24.3
+....
+....
+
+config_main_bar.txt:
+........... X   Y  ......
+CH 1 .....  24.0 24.3 ...
+CH 2 .....  24.0 24.3 ...
+.........................
+
+
+##################
+5) Process data
+##################
+
+OPEN NEW TERMINAL (can use the same for following runs)
+ 
+- Process data:
+python process_runs.py -r 949-951 -d /media/cmsdaq/ext/data/LYSOBARS
+
+NOTES:
+- indicate the range of all runs (pedestals and physics)
+
+##################
+6) Data analysis
+##################
+ 
+====== SINGLE BARS ======
+
+- Run analysis code:
+python analysis/analyze_run_bar.py --run 950 --barCode 28 -i /media/cmsdaq/ext/data/LYSOBARS -o /media/cmsdaq/ext/data/LYSOBARS/RESULTS
+
+NOTES: 
+- indicate the PHYSICS run number (it is one minus the last run processed which should be a pedestal run) and the bar code.
+- the program will also analyze the corresponding PEDESTAL runs associated to the PHYSICS run.
+ 
+- Output:
+  * stored in /media/cmsdaq/ext/data/LYSOBARS/RESULTS
+  * histo_RunXXXXXX_BARYYYYYY.root : histograms and canvases
+  * tree_RunXXXXXX_BARYYYYYY.root : measurements of light output and CTR stored in a root tree
+  * pdf and png files:
+     - pixel or bar : trigger on single hit on the pixel or the bar
+     - pixelCoinc or barCoinc : require time coincidence between pixel and bar
+  * tree_RunXXXXXX_BARYYYYYY.root : measurements of light output and CTR stored in a root tree.
+  * the measurements with uncertainties are also printed out on screen at the end of the processing
+ 
+- Check fits
+  * display /media/cmsdaq/ext/data/LYSOBARS/RESULTS/*XXX*.png   (substitute XXX with run number)
+ 
+
+====== ARRAYS ======
+
+
+##################
+7) Update the e-log (tofpetbench)
+##################
+
+====== SINGLE BARS ======
+ 
+- Post a message on the tofpetbench e-log:
+  * run number (physics run), run type, bar code, configuration string
+  * Light output measurements (at 511 keV peak): barCoinc peak 1
+  * CTR (time resolution using pixel as reference): gaussian mean and sigma
+  * Example of elog entry:
+
+Output dir: /media/cmsdaq/ext/data/LYSOBARS/RESULTS/
+
+xtal:28 (ref) RUN:464 pixel:99.4 bar:86.5 ctr:894.3/135.0 setup:WS1_NW_NC_POS0_X24.9_Y24.0_CH0-1-2_ETHR0-0-0_T1THR20-10-10_PED_qdc_Time0.3_Gate15_OvRef7_Ov7
+
+##################
+8) Measure a new crystal bar
+##################
+ 
+- Repeat steps 4), 5), 6), 7) for every crystal or array.
+ 
+##################
+9) End of the day
+##################
+
+- Turn off TOFPET:
+   * stop the program "./connect_TOFPET.sh" (CTRL-C in the terminal)
+   * turn-on the power (press green button)
+ 
+- Turn off the cooling:
+   * click "STOP" button in the LT_Interface GUI (inside "Regulator control" box)
+   * click Regulator -> Disconnect
+   * close the LT_Interface GUI
+ 
+- Stop the temperature reading program:
+  * CTRL-C from the terminal.
+
+- Stop the xy table control program:
+  * CTRL-C from the terminal.
+ 
+- Put the Na22 radioactive source inside the safe
+ 
+- Close the box
+ 
+- Leave the linux terminals used open for the next data taking
