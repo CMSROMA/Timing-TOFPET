@@ -73,11 +73,11 @@ def RUN(runtype,time,ov,ovref,gate,label,enabledCh="",thresholds="",thresholdsT1
     #################
     newlabel = "Run"+str(currentRun).zfill(6)+"_"+simpletimeMarker+"_"+label
 
+    
     if(runtype == "PED"):
         commandRun = "python run_TOFPET.py -c "+ opt.configFile+" --runType PED -d acquire_pedestal_data " + "-t "+ str(time)+" -v "+str(ov)+" --ovref "+str(ovref)+" -l "+str(newlabel)+" -g "+str(gate)+" -o "+opt.outputFolder+" --pedAllChannels " + str(opt.pedAllChannels)
         if (enabledCh!=""):
             commandRun = commandRun +" --enabledChannels " + str(enabledCh) 
-
     if(runtype == "PHYS"):
         commandRun = "python run_TOFPET.py -c "+ opt.configFile+" --runType PHYS -d my_acquire_sipm_data " + "-t "+ str(time)+" -v "+str(ov)+" --ovref "+str(ovref)+" -l "+str(newlabel)+" -g "+str(gate)+" -o "+opt.outputFolder
         if (enabledCh!=""):
@@ -88,8 +88,32 @@ def RUN(runtype,time,ov,ovref,gate,label,enabledCh="",thresholds="",thresholdsT1
                 commandRun = commandRun + " --energyThrT1 " + str(thresholdsT1)
 
     print commandRun
-    os.system(commandRun)
+    tags=newlabel.split('_')
+    print(tags)
+    posX=float(tags[4].replace('X',''))
+    posY=float(tags[5].replace('Y',''))
+    dbCommand = ". ~/AutoProcess/setup.sh; python3 ~/AutoProcess/insertRun.py --id=%s --type=%s --tag=%s --ov=%1.f --posx=%.1f --posy=%.1f "%(tags[0],runtype,newlabel,ov,posX,posY)
+    if (runtype == 'PHYS'):
+        dbCommand += ' --xtal=%s'%tags[2]
+    print(dbCommand)
+    insertDBStatus=os.WEXITSTATUS(os.system(dbCommand))
+    if (not insertDBStatus==0):
+        print('Error writing %s to runDB. Giving up'%tags[0])
+        return
 
+#    commandRun='sleep 5'
+    exitStatus=os.WEXITSTATUS(os.system(commandRun))
+
+    if (exitStatus==0):
+        dbCommandCompleted = ". ~/AutoProcess/setup.sh; python3 ~/AutoProcess/updateRun.py --id=%s --status='%s'"%(tags[0],'DAQ COMPLETED')
+        print(dbCommandCompleted)
+        os.system(dbCommandCompleted)
+        if (not insertDBStatus==0):
+            print('Error writing %s to runDB. Giving up'%tags[0])
+            return
+        else:
+            print('%s successfully inserted into RunDB'%tags[0])
+        
     return;
 
 ###################
@@ -169,10 +193,10 @@ nseq = 1
 ########################
 
 #Reference Bar 
-posFirstBarX = 24.0
-posFirstBarY = 24.3
-posPixelX = 23.1
-posPixelY = 24.3
+posFirstBarX = 24.9
+posFirstBarY = 24.4
+posPixelX = 22.5
+posPixelY = 24.8
 
 dict_PosScan = {
     #DEFAULT
@@ -245,6 +269,7 @@ print "Position scan" , dict_PosScan
 ########################### Run DAQ ############################### 
 ###################################################################
 
+#
 aMover=XYMover(8820)
 print (aMover.estimatedPosition())
 
@@ -263,7 +288,7 @@ for seq in range(0,nseq):
                     print "++++ Done +++++"                    
 
                     thisname = name+"_POS"+str(posStep)+"_X"+str(posInfo[0])+"_Y"+str(posInfo[1])+"_CH"+str(posInfo[2]).replace("_","-")+"_ETHR"+str(posInfo[3]).replace("_","-")+"_T1THR"+str(posInfo[4]).replace("_","-")
-
+                    print(thisname)
                     #============================================
                     RUN("PED",t_ped,ov,ovref,gate,thisname,posInfo[2],"","")
                     RUN("PHYS",t_phys,ov,ovref,gate,thisname,posInfo[2],posInfo[3],posInfo[4]) 
