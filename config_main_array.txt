@@ -60,7 +60,7 @@ OVERWRITE_OV 7
 
 # Source Position 305
 #  ID	NHV    VBR    OV    NCHIP    NCH    VTH_1    VTH_2    VTH_E    SIPM_CODE    SIPM_TYPE     X    Y    Z    CRYSTAL	
-CH 0	11     52.25  7.00  0	     59	    20	     20	      15       10579	    S13360-3025CS 23.1   24.3   170  LYSO_3_3_5
+CH 0	11     52.25  7.00  0	     59	    20	     20	      15       10579	    S13360-3025CS 22.5   24.8   170  LYSO_3_3_5
 #array 3025
 # SiPM channels connected to the same bar in the array: CH1-CH17 , CH2-CH18, CH3-CH19, ... , CH16-CH32
 # Connector 1
