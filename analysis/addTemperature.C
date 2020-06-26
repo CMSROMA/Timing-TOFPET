@@ -98,7 +98,7 @@ void addTemperature::Loop()
 
        //scan sequentially thorugh the temperature file 
        int nLoop=0;
-       while ( abs(unixTime-previousTime)>2 && nLoop<2 )
+       while ( abs(unixTime-previousTime)>20 && nLoop<2 )
        	 {
        	   tempEntry++;
        	   previousTime=tempEntry->first;
