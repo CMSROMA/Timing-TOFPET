@@ -15,7 +15,7 @@ import re
 sys.path.insert(1, os.path.join(sys.path[0], './arduino/tablexy'))
 from xyMover import XYMover
 
-usage = "usage: run from Timing-TOFPET: \n python run_DAQ.py -c config_main_bar.txt -o /data/TOFPET/LYSOBARS -n BAR000028_WS1_NW_NC" 
+usage = "usage: run from Timing-TOFPET: \n python run_DAQ_alignBarInArray.py -c config_main_array.txt -o /media/cmsdaq/ext/data/ALIGNMENT/ALIGNARRAY_11_02_2020 -n ALIGNARRAY" 
 parser = optparse.OptionParser(usage)
 parser.add_option("-c", "--config", dest="configFile",
                   help="config file")
