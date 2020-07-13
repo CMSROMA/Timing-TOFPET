@@ -146,6 +146,7 @@ t_phys = 300 #s
 t_tot = 320  #s this is approximate (it is 20-30% less of true value due to cpu processing time to make root files)
 #t_tot = 7200  #s this is approximate (it is 20-30% less of true value due to cpu processing time to make root files)
 ov_values = [7] #V
+#ov_values = [3,5,6,7]
 ovref_values = [7] #V
 #ov_values = [4,5,7] #V
 gate_values = [15] # DeltaT[ns]/20: gate=15 -> DeltaT=300 ns 
@@ -202,7 +203,11 @@ dict_PosScan = {
     #DEFAULT
     0: (round(posFirstBarX,1),round(posFirstBarY,1),"0_1_2","0_0_0","20_10_10"),
 
-    #SCAN THRESHOLD T1 - BAR
+    #SCAN THRESHOLD T1 - BAR 
+    #0: (round(posFirstBarX,1),round(posFirstBarY,1),"0_1_2","0_0_0","20_10_10"),
+    #1: (round(posFirstBarX,1),round(posFirstBarY,1),"0_1_2","0_0_0","20_20_20"),
+    #2: (round(posFirstBarX,1),round(posFirstBarY,1),"0_1_2","0_0_0","20_40_40")
+
     #0: (round(posFirstBarX,1),round(posFirstBarY,1),"0_1_2","0_0_0","20_5_5"),
     #1: (round(posFirstBarX,1),round(posFirstBarY,1),"0_1_2","0_0_0","20_10_10"),
     #2: (round(posFirstBarX,1),round(posFirstBarY,1),"0_1_2","0_0_0","20_15_15"),
@@ -235,8 +240,8 @@ print "Position scan" , dict_PosScan
 
 #Reference Bar 
 refBar = 5 #REF BAR N. = 5 (start counting from 0) so it's the sixth bar
-posRefX = 32.7 
-posRefY = 20.3
+posRefX = 31.6 
+posRefY = 22.5
 stepX = 3.2 #3.2mm step from one crystal center to another in X direction
 posFirstBarX = posRefX + stepX*refBar 
 posFirstBarY = posRefY
