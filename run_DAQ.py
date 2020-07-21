@@ -55,7 +55,8 @@ def RUN(runtype,time,ov,ovref,gate,label,enabledCh="",thresholds="",thresholdsT1
     ## Update run number
     ####################
     currentRun = 0
-    outputFileName = opt.outputFolder+"/RunNumbers.txt"
+    #outputFileName = opt.outputFolder+"/RunNumbers.txt"
+    outputFileName = "/media/cmsdaq/ext/data/RunNumbers.txt"
     file_runs = open(outputFileName, 'a+')
     
     lastRun = subprocess.check_output(['tail', '-1', outputFileName])
@@ -137,7 +138,7 @@ gate_values = [15] # DeltaT[ns]/20: gate=15 -> DeltaT=300 ns
 name = opt.nameLabel
 '''
 
-
+'''
 #Main sequence (pixel+bar)
 n_ch = 3 #number of channels in config file (2 for 2 pixels, 3 for 1 pixel and 1 bar, ..)
 n_chip = 2 #number of active TOFPET2 chips
@@ -155,8 +156,9 @@ gate_values = [15] # DeltaT[ns]/20: gate=15 -> DeltaT=300 ns
 #name = "PEDESTAL_WS1_NW_NC_GATESCAN_1"
 #name = "BAR000028_WS1_NW_NC"
 name = opt.nameLabel
-
 '''
+
+
 #Main sequence (pixel+array)
 n_ch = 33 #number of channels in config file (2 for 2 pixels, 3 for 1 pixel and 1 bar, ..)
 n_chip = 2 #number of active TOFPET2 chips
@@ -173,7 +175,7 @@ gate_values = [15] # DeltaT[ns]/20: gate=15 -> DeltaT=300 ns
 #name = "PEDESTAL_WS1_NW_NC_GATESCAN_1"
 #name = "BAR000028_WS1_NW_NC"
 name = opt.nameLabel
-'''
+
 
 #--------------------------------------------------------------------
 
@@ -188,7 +190,7 @@ nseq = 1
 
 #--------------------------------------------------------------------
 
-
+'''
 ########################
 #Scan for bar
 ########################
@@ -231,9 +233,9 @@ dict_PosScan = {
 
 }
 print "Position scan" , dict_PosScan
-
-
 '''
+
+
 ########################
 #Scan for array
 ########################
@@ -268,7 +270,7 @@ dict_PosScan = {
 
 }
 print "Position scan" , dict_PosScan
-'''
+
 
 ###################################################################
 ########################### Run DAQ ############################### 
