@@ -311,6 +311,47 @@ CH 33 ....  31.6 22.5 ...
 .........................
 
 
+----------------------
+ALIGN SINGLE BAR IN ARRAY (WITH REF BAR):
+----------------------
+
+By default we decided to align the bar N. 5 (start counting from 0, so it's the sixth bar).
+
+* Put the radioactive source in the box.
+
+* Align the reference bar (see previous step).
+
+* Collect raw data (bar position scan):
+python run_DAQ_alignBarInArray_with_barRef.py -c config_main_array_and_barRef.txt -o /media/cmsdaq/ext/data/ALIGNMENT/ALIGNARRAYWITHBARREF_22_07_2020 -n ALIGNARRAYWITHBARREF
+
+* Process data (34 runs by default):
+python process_runs.py -r 1-34 -d /media/cmsdaq/ext/data/ALIGNMENT/ALIGNARRAYWITHBARREF_22_07_2020
+
+* Analyze data:
+python analysis/analyze_alignArray_with_barRef.py -i /media/cmsdaq/ext/data/ALIGNMENT/ALIGNARRAYWITHBARREF_22_07_2020 -o /media/cmsdaq/ext/data/ALIGNMENT/ALIGNARRAYWITHBARREF_22_07_2020
+
+* Display results:
+display /media/cmsdaq/ext/data/ALIGNMENT/ALIGNARRAYWITHBARREF_22_07_2020/*.png
+The x and y of the pixel alinged with the radioactive source are printed on the screen and on the plots: 
+==== maxX, maxY:  31.5405468804 22.0694892826
+
+* Update the configuration files:
+Update the new maxX and maxY positions (31.5 and 22.1 in this example) 
+in the following files:
+
+run_DAQ.py:
+.....TO BE UPDATED.....
+
+
+config_main_array_and_barRef.txt:
+........... X   Y  ......
+CH 6 .....  31.5 22.1 ...
+.........................
+.........................
+CH 22 ....  31.5 22.1 ...
+.........................
+
+
 ##################
 5) Process data
 ##################
