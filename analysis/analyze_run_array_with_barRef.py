@@ -623,8 +623,6 @@ c1_energy = TCanvas("c1_energy_barRef", "", 900, 700)
 fitResults = {}
 
 ## Setup singles
-#minEnergy = 4
-#maxEnergy = 120
 minEnergy = 15
 maxEnergy = 250
 n_paramameters = 19
@@ -643,48 +641,22 @@ fitSpectrum(h1_energyTot_bar,fTot_bar,minEnergy,maxEnergy,c1_energyTot_bar,fitRe
 '''
 
 ## Setup coincidences
-'''
-n_paramameters_coinc = 10
-
-## Pixel
-#minEnergy_coinc = 4
-#maxEnergy_coinc = 65
-minEnergy_coinc = 15
-maxEnergy_coinc = 160
-
-fTot_pixel_coinc = TF1("fTot_pixel_coinc",totalFunction_coinc,minEnergy_coinc,maxEnergy_coinc,n_paramameters_coinc)
-fTot_pixel_coinc.SetNpx(1000)
-fitSpectrum_coinc(histos['h1_energy_pixel_coinc%d'%alignedBar],fTot_pixel_coinc,minEnergy_coinc,maxEnergy_coinc,c1_energy,fitResults,"pixelCoinc",opt.arrayCode,alignedBar,opt.run,opt.outputDir)
-
-histos['h1_energy_pixel_coinc%d'%alignedBar].Write()
-'''
-
-'''
-## Bar
-#minEnergy_coinc = 4
-#maxEnergy_coinc = 45
-minEnergy_coinc = 7
-maxEnergy_coinc = 100 #no optical grease
-#maxEnergy_coinc = 160 #with optical grease
-
-fTot_bar_coinc = TF1("fTot_bar_coinc",totalFunction_coinc,minEnergy_coinc,maxEnergy_coinc,n_paramameters_coinc)
-fTot_bar_coinc.SetNpx(1000)
-fitSpectrum_coinc(histos['h1_energyTot_bar_coinc%d'%alignedBar],fTot_bar_coinc,minEnergy_coinc,maxEnergy_coinc,c1_energy,fitResults,"barCoinc",opt.arrayCode,alignedBar,opt.run,opt.outputDir)
-
-histos['h1_energyTot_bar_coinc%d'%alignedBar].Write()
-'''
-
 n_paramameters_coinc = 10
 minEnergy_coinc = 15
 maxEnergy_coinc = 180
 
+## Bars in array
+dead_channels = []
+
 fTot_bar_coinc = TF1("fTot_bar_coinc",totalFunction_coinc,minEnergy_coinc,maxEnergy_coinc,n_paramameters_coinc)
 fTot_bar_coinc.SetNpx(1000)
+
 for barId in range(0,16):
 
     if (histos['h1_energyTot_bar_coinc%d'%barId].GetEntries()<50):
         print "ERROR: Too few events ("+ str(histos['h1_energyTot_bar_coinc%d'%barId].GetEntries()) +") in histogram "+histos['h1_energyTot_bar_coinc%d'%barId].GetName()
         print "Skip bar..."
+        dead_channels.append(barId)
         continue
     
     fitSpectrum_coinc(histos['h1_energyTot_bar_coinc%d'%barId],fTot_bar_coinc,minEnergy_coinc,maxEnergy_coinc,c1_energy,fitResults,'barCoinc%d'%barId,opt.arrayCode,barId,opt.run,opt.outputDir)
@@ -692,54 +664,43 @@ for barId in range(0,16):
 
 tfileoutput.Close()
 
-sys.exit()
-
-'''
-################################################
-## 7) Fit response vs photon energy
-################################################
-
-## Setup
-minE = 0.
-maxE = 1300.
-
-## Pixel (ref)
-fExpo_pixel = TF1("fExpo_pixel","[0]*(1-TMath::Exp(-[1]*x))",minE,maxE)
-fitSaturation(fExpo_pixel,minE,maxE,c1_sat_pixel,fitResults,"pixel")
-
-## Bar (ref)
-fExpo_bar = TF1("fExpo_bar","[0]*(1-TMath::Exp(-[1]*x))",minE,maxE)
-fitSaturation(fExpo_bar,minE,maxE,c1_sat_bar,fitResults,"bar")
-'''
+print "List of bars with at least one dead channel", dead_channels
 
 ######################################################
 ## 7) Coincidence time resolution (CTR) and cross-talk
 ######################################################
 
-print "Cuts for CTR calculation:"
-print fitResults[('pixelCoinc',"peak1","mean","value")] - fitResults[('pixelCoinc',"peak1","sigma","value")]
-print fitResults[('pixelCoinc',"peak1","mean","value")] + fitResults[('pixelCoinc',"peak1","sigma","value")]
-print fitResults[('barCoinc',"peak1","mean","value")] - fitResults[('barCoinc',"peak1","sigma","value")]
-print fitResults[('barCoinc',"peak1","mean","value")] + fitResults[('barCoinc',"peak1","sigma","value")]
-
-
-gROOT.ProcessLine(".L /home/cmsdaq/Workspace/TOFPET/Timing-TOFPET/analysis/ctrAnalysis.C+")
+gROOT.ProcessLine(".L /home/cmsdaq/Workspace/TOFPET/Timing-TOFPET/analysis/ctrAnalysisWithBarRef.C+")
 gROOT.ProcessLine('TFile* f = new TFile("%s");'%input_filename_coinc)
 gROOT.ProcessLine('TTree* tree; f->GetObject("data",tree);')
-gROOT.ProcessLine("ctrAnalysis ctAnalysis(tree);")
+gROOT.ProcessLine("ctrAnalysisWithBarRef ctrAnalysis(tree);")
 
-gROOT.ProcessLine('ctAnalysis.LoadPedestals("%s");'%(opt.outputDir+"/"+"ped_Run"+run+"_ARRAY"+str(str(opt.arrayCode).zfill(6))+".root"))
-gROOT.ProcessLine('ctAnalysis.outputFile="%s";'%(opt.outputDir+"/"+"histo_Run"+run+"_ARRAY"+str(str(opt.arrayCode).zfill(6))+".root"))
-gROOT.ProcessLine('ctAnalysis.pixel_511Peak_mean=%f;'%fitResults[('pixelCoinc',"peak1","mean","value")])
-gROOT.ProcessLine('ctAnalysis.pixel_511Peak_sigma=%f;'%fitResults[('pixelCoinc',"peak1","sigma","value")])
-gROOT.ProcessLine('ctAnalysis.alignedBar_511Peak_mean=%f;'%fitResults[('barCoinc',"peak1","mean","value")])
-gROOT.ProcessLine('ctAnalysis.alignedBar_511Peak_sigma=%f;'%fitResults[('barCoinc',"peak1","sigma","value")])
-gROOT.ProcessLine('ctAnalysis.alignedBar=%d;'%alignedBar)
+gROOT.ProcessLine('ctrAnalysis.LoadPedestals("%s");'%(opt.outputDir+"/"+"ped_Run"+run+"_ARRAY"+str(str(opt.arrayCode).zfill(6))+".root"))
+gROOT.ProcessLine('ctrAnalysis.outputFile="%s";'%(opt.outputDir+"/"+"histo_Run"+run+"_ARRAY"+str(str(opt.arrayCode).zfill(6))+".root"))
+gROOT.ProcessLine('ctrAnalysis.barRef_511Peak_mean=%f;'%fitResults[('barRef',"peak1","mean","value")])
+gROOT.ProcessLine('ctrAnalysis.barRef_511Peak_sigma=%f;'%fitResults[('barRef',"peak1","sigma","value")])
 
-gBenchmark.Start( 'ctrAnalysis' )
-gROOT.ProcessLine("ctAnalysis.Loop();")
-gBenchmark.Show( 'ctrAnalysis' )
+for barId in range(0,16):
 
+    if barId in dead_channels:
+        gROOT.ProcessLine('ctrAnalysis.alignedBar_511Peak_mean.push_back(-9);')
+        gROOT.ProcessLine('ctrAnalysis.alignedBar_511Peak_sigma.push_back(-9);')
+        continue
+
+    print "barId%d -- Cuts for CTR calculation:"%barId
+    print fitResults[('barRef',"peak1","mean","value")] - fitResults[('barRef',"peak1","sigma","value")]
+    print fitResults[('barRef',"peak1","mean","value")] + fitResults[('barRef',"peak1","sigma","value")]
+    print fitResults[('barCoinc%d'%barId,"peak1","mean","value")] - fitResults[('barCoinc%d'%barId,"peak1","sigma","value")]
+    print fitResults[('barCoinc%d'%barId,"peak1","mean","value")] + fitResults[('barCoinc%d'%barId,"peak1","sigma","value")]
+    print "mean, sigma: ", fitResults[('barCoinc%d'%barId,"peak1","mean","value")], fitResults[('barCoinc%d'%barId,"peak1","sigma","value")]
+    gROOT.ProcessLine('ctrAnalysis.alignedBar_511Peak_mean.push_back(%f);'%fitResults[('barCoinc%d'%barId,"peak1","mean","value")])
+    gROOT.ProcessLine('ctrAnalysis.alignedBar_511Peak_sigma.push_back(%f);'%fitResults[('barCoinc%d'%barId,"peak1","sigma","value")])
+
+gBenchmark.Start( 'ctrAnalysisWithBarRef' )
+gROOT.ProcessLine("ctrAnalysis.Loop();")
+gBenchmark.Show( 'ctrAnalysisWithBarRef' )
+
+sys.exit()
 
 ##CTR
 tfileoutput = TFile( opt.outputDir+"/"+"histo_Run"+run+"_ARRAY"+str(str(opt.arrayCode).zfill(6))+".root", "update" )
