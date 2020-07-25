@@ -158,7 +158,7 @@ gate_values = [15] # DeltaT[ns]/20: gate=15 -> DeltaT=300 ns
 name = opt.nameLabel
 '''
 
-
+'''
 #Main sequence (pixel+array)
 n_ch = 33 #number of channels in config file (2 for 2 pixels, 3 for 1 pixel and 1 bar, ..)
 n_chip = 2 #number of active TOFPET2 chips
@@ -175,7 +175,24 @@ gate_values = [15] # DeltaT[ns]/20: gate=15 -> DeltaT=300 ns
 #name = "PEDESTAL_WS1_NW_NC_GATESCAN_1"
 #name = "BAR000028_WS1_NW_NC"
 name = opt.nameLabel
+'''
 
+#Main sequence (bar+array)
+n_ch = 34 #number of channels in config file (2 for 2 pixels, 3 for 1 pixel and 1 bar, ..)
+n_chip = 2 #number of active TOFPET2 chips
+t_ped = 0.3 #s
+t_phys = 450 #s
+t_tot = 450  #s this is approximate (it is 20-30% less of true value due to cpu processing time to make root files)
+#t_tot = 7200  #s this is approximate (it is 20-30% less of true value due to cpu processing time to make root files)
+ov_values = [7] #V
+ovref_values = [7] #V
+#ov_values = [4,5,7] #V
+gate_values = [15] # DeltaT[ns]/20: gate=15 -> DeltaT=300 ns 
+#gate_values = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25] 
+#name = "TEST_WS1_NW_NC"
+#name = "PEDESTAL_WS1_NW_NC_GATESCAN_1"
+#name = "BAR000028_WS1_NW_NC"
+name = opt.nameLabel
 
 #--------------------------------------------------------------------
 
@@ -235,7 +252,7 @@ dict_PosScan = {
 print "Position scan" , dict_PosScan
 '''
 
-
+'''
 ########################
 #Scan for array
 ########################
@@ -270,6 +287,29 @@ dict_PosScan = {
 
 }
 print "Position scan" , dict_PosScan
+'''
+
+########################
+#Scan for array (with reference bar)
+########################
+
+#Reference Bar 
+refBar = 5 #REF BAR N. = 5 (start counting from 0) so it's the sixth bar
+posRefX = 31.5 
+posRefY = 22.1
+stepX = 3.2 #3.2mm step from one crystal center to another in X direction
+posFirstBarX = posRefX + stepX*refBar 
+posFirstBarY = posRefY
+
+dict_PosScan = {
+
+    # center the array on the bar N = 4 (5th bar)
+    0: (round(posFirstBarX-4*stepX,1),round(posFirstBarY,1),"0_1_2_3_4_5_6_7_8_9_10_11_12_13_14_15_16_17_18_19_20_21_22_23_24_25_26_27_28_29_30_31_32_33","10_10_10_10_10_10_10_10_10_10_10_10_10_10_10_10_10_10_10_10_10_10_10_10_10_10_10_10_10_10_10_10_10_10","10_10_10_10_10_10_10_10_10_10_10_10_10_10_10_10_10_10_10_10_10_10_10_10_10_10_10_10_10_10_10_10_10_10"),
+
+}
+print "Position scan" , dict_PosScan
+
+
 
 
 ###################################################################
@@ -294,8 +334,15 @@ for seq in range(0,nseq):
                     print aMover.estimatedPosition()
                     print "++++ Done +++++"                    
 
-                    thisname = name+"_POS"+str(posStep)+"_X"+str(posInfo[0])+"_Y"+str(posInfo[1])+"_CH"+str(posInfo[2]).replace("_","-")+"_ETHR"+str(posInfo[3]).replace("_","-")+"_T1THR"+str(posInfo[4]).replace("_","-")
+                    #===
+                    #== full file name ==
+                    #thisname = name+"_POS"+str(posStep)+"_X"+str(posInfo[0])+"_Y"+str(posInfo[1])+"_CH"+str(posInfo[2]).replace("_","-")+"_ETHR"+str(posInfo[3]).replace("_","-")+"_T1THR"+str(posInfo[4]).replace("_","-")
+                    #print(thisname)
+                    #===
+                    #== short file name ==
+                    thisname = name+"_POS"+str(posStep)+"_X"+str(posInfo[0])+"_Y"+str(posInfo[1])
                     print(thisname)
+
                     #============================================
                     RUN("PED",t_ped,ov,ovref,gate,thisname,posInfo[2],"","")
                     RUN("PHYS",t_phys,ov,ovref,gate,thisname,posInfo[2],posInfo[3],posInfo[4]) 
