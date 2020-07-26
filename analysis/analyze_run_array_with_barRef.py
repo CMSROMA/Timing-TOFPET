@@ -667,7 +667,7 @@ tfileoutput.Close()
 print "List of bars with at least one dead channel", dead_channels
 
 ######################################################
-## 7) Coincidence time resolution (CTR) and cross-talk
+## 7) Coincidence time resolution (CTR)
 ######################################################
 
 gROOT.ProcessLine(".L /home/cmsdaq/Workspace/TOFPET/Timing-TOFPET/analysis/ctrAnalysisWithBarRef.C+")
@@ -700,50 +700,52 @@ gBenchmark.Start( 'ctrAnalysisWithBarRef' )
 gROOT.ProcessLine("ctrAnalysis.Loop();")
 gBenchmark.Show( 'ctrAnalysisWithBarRef' )
 
-sys.exit()
 
-##CTR
+## Time resolution
 tfileoutput = TFile( opt.outputDir+"/"+"histo_Run"+run+"_ARRAY"+str(str(opt.arrayCode).zfill(6))+".root", "update" )
 tfileoutput.cd()
 histos=Map(tfileoutput)
 
-#print histos
-
 c1_energy.cd()
 
-histos['h1_CTR'].Draw("PE")  
-#f_gaus = TF1("f_gaus","gaus",histos['h1_CTR'].GetMean()-2*histos['h1_CTR'].GetRMS(),histos['h1_CTR'].GetMean()+2*histos['h1_CTR'].GetRMS())
-#histos['h1_CTR'].Fit(f_gaus,"LR+0N","",histos['h1_CTR'].GetMean()-1*histos['h1_CTR'].GetRMS(),histos['h1_CTR'].GetMean()+1*histos['h1_CTR'].GetRMS())
-#histos['h1_CTR'].Fit(f_gaus,"LR+","",f_gaus.GetParameter(1)-3.5*f_gaus.GetParameter(2),f_gaus.GetParameter(1)+3.5*f_gaus.GetParameter(2))
-f_gaus = TF1("f_gaus","gaus",histos['h1_CTR'].GetBinCenter(histos['h1_CTR'].GetMaximumBin())-550.,histos['h1_CTR'].GetBinCenter(histos['h1_CTR'].GetMaximumBin())+550.)
-histos['h1_CTR'].Fit(f_gaus,"R+0N","",histos['h1_CTR'].GetBinCenter(histos['h1_CTR'].GetMaximumBin())-550.,histos['h1_CTR'].GetBinCenter(histos['h1_CTR'].GetMaximumBin())+550.)
-#f_gaus = TF1("f_gaus","gaus",histos['h1_CTR'].GetMean()-550.,histos['h1_CTR'].GetMean()+550.)
-#histos['h1_CTR'].Fit(f_gaus,"R+0N","",histos['h1_CTR'].GetMean()-550.,histos['h1_CTR'].GetMean()+550.)
+for barId in range(0,16):
 
+    if ( (barId in dead_channels) or histos[("h1_deltaT12_bar%d"%barId)].GetEntries()<300 ) :
+        fitResults[('barCoinc%d'%barId,"deltaT12_bar","mean","value")]=-9
+        fitResults[('barCoinc%d'%barId,"deltaT12_bar","mean","sigma")]=-9
+        fitResults[('barCoinc%d'%barId,"deltaT12_bar","sigma","value")]=-9
+        fitResults[('barCoinc%d'%barId,"deltaT12_bar","sigma","sigma")]=-9
+        print "== No time resolution plots of bar%d"%barId
+        continue
 
-histos['h1_CTR'].Fit(f_gaus,"R+","",f_gaus.GetParameter(1)-550.,f_gaus.GetParameter(1)+550.)
-histos['h1_CTR'].GetXaxis().SetRangeUser(f_gaus.GetParameter(1)-550.,f_gaus.GetParameter(1)+550.)
-histos['h1_CTR'].GetXaxis().SetTitle("t_{bar} - t_{pixel} [ps]")
-histos['h1_CTR'].GetYaxis().SetTitle("Events")
-histos['h1_CTR'].GetYaxis().SetTitleOffset(1.6)
+    histos[("h1_deltaT12_bar%d"%barId)].Draw("PE")
+    f_gaus = TF1("f_gaus","gaus",
+                 histos[("h1_deltaT12_bar%d"%barId)].GetBinCenter(histos[("h1_deltaT12_bar%d"%barId)].GetMaximumBin())-1000.,
+                 histos[("h1_deltaT12_bar%d"%barId)].GetBinCenter(histos[("h1_deltaT12_bar%d"%barId)].GetMaximumBin())+1000.)
+    histos[("h1_deltaT12_bar%d"%barId)].Fit(f_gaus,"R+0N","",histos[("h1_deltaT12_bar%d"%barId)].GetBinCenter(histos[("h1_deltaT12_bar%d"%barId)].GetMaximumBin())-2.5*histos[("h1_deltaT12_bar%d"%barId)].GetRMS(),histos[("h1_deltaT12_bar%d"%barId)].GetBinCenter(histos[("h1_deltaT12_bar%d"%barId)].GetMaximumBin())+2.5*histos[("h1_deltaT12_bar%d"%barId)].GetRMS())
+    histos[("h1_deltaT12_bar%d"%barId)].Fit(f_gaus,"R+","",f_gaus.GetParameter(1)-2.5*f_gaus.GetParameter(2),f_gaus.GetParameter(1)+2.5*f_gaus.GetParameter(2))
+    histos[("h1_deltaT12_bar%d"%barId)].GetXaxis().SetRangeUser(f_gaus.GetParameter(1)-1000.,f_gaus.GetParameter(1)+1000.)
+    histos[("h1_deltaT12_bar%d"%barId)].GetXaxis().SetTitle(("(t_{1} - t_{2}) bar%d [ps]"%barId))
+    histos[("h1_deltaT12_bar%d"%barId)].GetYaxis().SetTitle("Events")
+    histos[("h1_deltaT12_bar%d"%barId)].GetYaxis().SetTitleOffset(1.6)
 
-fitResults[("barCoinc","CTR","mean","value")]=f_gaus.GetParameter(1)
-fitResults[("barCoinc","CTR","mean","sigma")]=f_gaus.GetParError(1)
-fitResults[("barCoinc","CTR","sigma","value")]=f_gaus.GetParameter(2)
-fitResults[("barCoinc","CTR","sigma","sigma")]=f_gaus.GetParError(2)
+    fitResults[('barCoinc%d'%barId,"deltaT12_bar","mean","value")]=f_gaus.GetParameter(1)
+    fitResults[('barCoinc%d'%barId,"deltaT12_bar","mean","sigma")]=f_gaus.GetParError(1)
+    fitResults[('barCoinc%d'%barId,"deltaT12_bar","sigma","value")]=f_gaus.GetParameter(2)
+    fitResults[('barCoinc%d'%barId,"deltaT12_bar","sigma","sigma")]=f_gaus.GetParError(2)
 
-pt3 = TPaveText(0.100223,0.915556,0.613586,0.967407,"brNDC")
-text3 = pt3.AddText( "Run" + str(opt.run.zfill(6)) + " ARRAY" + str(opt.arrayCode.zfill(6)) + " BAR"+str(alignedBar))
-pt3.SetFillColor(0)
-pt3.Draw()
-#FIXME: check why it does not show the label on the canvas!
-c1_energy.cd()
-c1_energy.Update()
-c1_energy.SaveAs(opt.outputDir+"/"+"Run"+str(opt.run.zfill(6))+"_ARRAY"+str(opt.arrayCode.zfill(6))+"_BAR"+str(alignedBar)+"_CTR"+".pdf")
-c1_energy.SaveAs(opt.outputDir+"/"+"Run"+str(opt.run.zfill(6))+"_ARRAY"+str(opt.arrayCode.zfill(6))+"_BAR"+str(alignedBar)+"_CTR"+".png")
-c1_energy.Write()
-histos['h1_CTR'].Write()
+    pt3 = TPaveText(0.100223,0.915556,0.613586,0.967407,"brNDC")
+    text3 = pt3.AddText( "Run" + str(opt.run.zfill(6)) + " ARRAY" + str(opt.arrayCode.zfill(6)) + " BAR"+str(barId))
+    pt3.SetFillColor(0)
+    pt3.Draw()
+    c1_energy.cd()
+    c1_energy.Update()
+    c1_energy.SaveAs(opt.outputDir+"/"+"Run"+str(opt.run.zfill(6))+"_ARRAY"+str(opt.arrayCode.zfill(6))+"_BAR"+str(barId)+"_deltaT12_bar"+".pdf")
+    c1_energy.SaveAs(opt.outputDir+"/"+"Run"+str(opt.run.zfill(6))+"_ARRAY"+str(opt.arrayCode.zfill(6))+"_BAR"+str(barId)+"_deltaT12_bar"+".png")
+    c1_energy.Write()
+    histos[("h1_deltaT12_bar%d"%barId)].Write()
 
+'''
 histos['h1_energySum_Xtalk'].Draw("PE") 
 f_cb=TF1("f_cb",crystalball_function,-10,100,5)
 f_cb.SetParameter(0,100)
@@ -869,11 +871,9 @@ else:
 
     fitResults[("barCoinc","XtalkRight","average","value")]=-1
     fitResults[("barCoinc","XtalkRight","RMS","value")]=-1
+'''
 
-###XTALK 
-#if(alignedBar>0 and alignedBar<7):
-#    e_1 = h1_energyTot_bar_Xtalk[ibar]
-#    e_2 = 
+sys.exit()
 
 ################################################
 ## 8) Write additional histograms

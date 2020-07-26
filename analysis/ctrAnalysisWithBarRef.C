@@ -82,7 +82,7 @@ void ctrAnalysisWithBarRef::Loop()
   channels[30]=297;
   channels[31]=301;
   channels[32]=311;   
-   
+
   std::vector<TObject*> objectsToStore;
   
   TH1F* h1_deltaT12[N_BARS];
@@ -92,17 +92,22 @@ void ctrAnalysisWithBarRef::Loop()
   for (int ibar=0;ibar<16;++ibar)
     {
 
-      h1_deltaT12[ibar] = new TH1F(Form("h1_deltaT12_bar%d",ibar), "", 800, -10000, 10000);
+      h1_deltaT12[ibar] = new TH1F(Form("h1_deltaT12_bar%d",ibar), "", 400, -10000, 10000);
       objectsToStore.push_back(h1_deltaT12[ibar]);
 
-      h1_CTR[ibar]  = new TH1F(Form("h1_CTR_bar%d",ibar), "", 800, -10000, 10000);
+      h1_CTR[ibar]  = new TH1F(Form("h1_CTR_bar%d",ibar), "", 400, -10000, 10000);
       objectsToStore.push_back(h1_CTR[ibar]);
 
-      h1_deltaT12_barRef[ibar] = new TH1F(Form("h1_deltaT12_barRef_coincBar%d",ibar), "", 800, -10000, 10000);
+      h1_deltaT12_barRef[ibar] = new TH1F(Form("h1_deltaT12_barRef_coincBar%d",ibar), "", 400, -10000, 10000);
       objectsToStore.push_back(h1_deltaT12_barRef[ibar]);
+
+      //cout << "IN LOOP: barId" << ibar << " -- Cuts for CTR calculation" << endl;
+      //cout << "IN LOOP: mean, sigma: " << alignedBar_511Peak_mean[ibar] << " " << alignedBar_511Peak_sigma[ibar] << endl;
+
     }
 
   Long64_t nentries = fChain->GetEntriesFast();
+  //Long64_t nentries = 2000000;
   
   Long64_t nbytes = 0, nb = 0;
   for (Long64_t jentry=0; jentry<nentries;jentry++) {
