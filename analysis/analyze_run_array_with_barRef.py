@@ -254,7 +254,7 @@ def fitSpectrum_coinc(histo,function,xmin,xmax,canvas,fitres,label,code,barId,ru
 
     histo.GetXaxis().SetRange(40,100)
     spectrum = TSpectrum(10)
-    nfound = spectrum.Search(histo , 2 ,"goff",0.3)
+    nfound = spectrum.Search(histo , 3 ,"new",0.25)
     xpeaks = spectrum.GetPositionX()
     posPeak = []
     for i in range(spectrum.GetNPeaks()):
