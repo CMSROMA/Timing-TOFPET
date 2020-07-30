@@ -14,6 +14,7 @@ def LYAnalysis(crystal,runInfo):
     ly, ctr, temp, posX, posY = array('d'), array('d'), array('d'), array('d'), array('d')
     for r in runInfo['runs']:
         files[r]=TFile.Open(args.data+"/"+r+".root")
+        print("Opened "+args.data+"/"+r+".root")
         treeInput = files[r].Get("results")
         nEntries = treeInput.GetEntries()
         if nEntries ==0 or nEntries>1 :
@@ -93,6 +94,7 @@ def ARRAY_LYAnalysis(crystal,runInfo,bar,lenght):
 
     for r in runInfo['runs']:
         files[r]=TFile.Open(args.dataArray+"/"+r+".root")
+        print("Opened "+args.dataArray+"/"+r+".root")
         treeInput = files[r].Get("results")
         nEntries = treeInput.GetEntries()
         if nEntries != lenght:
@@ -249,7 +251,10 @@ for crystal,crystalInfo in crystalsDB.items():
         print "Analysing array "+crystal
         for runInfo in crystalInfo['runs']:
             tag=runInfo['tag']
-            barList=runInfo['bars'].split(",")
+            if 'bars' in runInfo:
+                barList=runInfo['bars'].split(",")
+            else:
+                barList=['1','2','3','4','5']
             for bar in barList:
                 lyData=ARRAY_LYAnalysis(crystal,runInfo,bar,len(barList))
                 lyData.update({'tag':"%s"%tag})
