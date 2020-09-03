@@ -112,8 +112,8 @@ nseq = 1
 
 #Reference Bar 
 refBar = 5 #REF BAR N. = 5 (start counting from 0) so it's the sixth bar
-posRefX = 32.7 
-posRefY = 20.3
+posRefX = 31.2 
+posRefY = 21.8
 
 dict_PosScan = {
 

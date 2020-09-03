@@ -111,8 +111,8 @@ nseq = 1
 ########################
 
 #Reference Bar 
-posPixelX = 22.8
-posPixelY = 25.2
+posPixelX = 22.7
+posPixelY = 23.7
 
 dict_PosScan = {
     #YSCAN - PIXEL
