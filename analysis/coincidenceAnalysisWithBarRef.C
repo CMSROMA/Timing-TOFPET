@@ -82,6 +82,10 @@ void coincidenceAnalysisWithBarRef::Loop()
   channels[31]=301;
   channels[32]=311;
 
+  TH1F* h1_temp_pixel;
+  TH1F* h1_temp_bar;
+  TH1F* h1_temp_int;
+
   TH1F* h1_energyTot_barRef;
   TH1F* h1_energy1_barRef;
   TH1F* h1_energy2_barRef;
@@ -108,6 +112,13 @@ void coincidenceAnalysisWithBarRef::Loop()
   */
 
   std::vector<TObject*> objectsToStore;
+
+  h1_temp_pixel=new TH1F("h1_temp_pixel", "", 1000, 15, 50);
+  objectsToStore.push_back(h1_temp_pixel);
+  h1_temp_bar=new TH1F("h1_temp_bar", "", 1000, 15, 50);
+  objectsToStore.push_back(h1_temp_bar);
+  h1_temp_int=new TH1F("h1_temp_int", "", 1000, 15, 50);
+  objectsToStore.push_back(h1_temp_int);
 
   h1_energyTot_barRef=new TH1F("h1_energyTot_barRef", "", 250, 0, 250);
   objectsToStore.push_back(h1_energyTot_barRef); 
@@ -172,6 +183,10 @@ void coincidenceAnalysisWithBarRef::Loop()
       Long64_t ientry = LoadTree(jentry);
       if (ientry < 0) break;
       nb = fChain->GetEntry(jentry);   nbytes += nb;
+
+      h1_temp_pixel->Fill(tempSiPMRef);
+      h1_temp_bar->Fill(tempSiPMTest);
+      h1_temp_int->Fill(tempInt);
 
       float energyBarRef1 = energy[0]-pedMean->GetBinContent(channels[0]*4+tacID[0]+1);
       float energyBarRef2 = energy[33]-pedMean->GetBinContent(channels[33]*4+tacID[33]+1);

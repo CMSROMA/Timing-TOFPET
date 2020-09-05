@@ -683,8 +683,8 @@ gROOT.ProcessLine('ctrAnalysis.barRef_511Peak_sigma=%f;'%fitResults[('barRef',"p
 for barId in range(0,16):
 
     if barId in dead_channels:
-        gROOT.ProcessLine('ctrAnalysis.alignedBar_511Peak_mean.push_back(-9);')
-        gROOT.ProcessLine('ctrAnalysis.alignedBar_511Peak_sigma.push_back(-9);')
+        gROOT.ProcessLine('ctrAnalysis.alignedBar_511Peak_mean.push_back(-9.);')
+        gROOT.ProcessLine('ctrAnalysis.alignedBar_511Peak_sigma.push_back(-9.);')
         continue
 
     print "barId%d -- Cuts for CTR calculation:"%barId
@@ -708,9 +708,14 @@ histos=Map(tfileoutput)
 
 c1_energy.cd()
 
+lowStat_channels = []
+
 for barId in range(0,16):
 
-    if ( (barId in dead_channels) or histos[("h1_deltaT12_bar%d"%barId)].GetEntries()<300 ) :
+    if( histos[("h1_deltaT12_bar%d"%barId)].GetEntries()<300 ):
+        lowStat_channels.append(barId)
+
+    if ( (barId in dead_channels) or (barId in lowStat_channels) ) :
         fitResults[('barCoinc%d'%barId,"deltaT12_bar","mean","value")]=-9
         fitResults[('barCoinc%d'%barId,"deltaT12_bar","mean","sigma")]=-9
         fitResults[('barCoinc%d'%barId,"deltaT12_bar","sigma","value")]=-9
@@ -873,8 +878,6 @@ else:
     fitResults[("barCoinc","XtalkRight","RMS","value")]=-1
 '''
 
-sys.exit()
-
 ################################################
 ## 8) Write additional histograms
 ################################################
@@ -889,55 +892,14 @@ for ch in channels:
     histos_Ped1[ch].Write()
     histos_Ped2[ch].Write()
     histos_PedTot[ch].Write()
-    print "--- Channel = "+str(ch).zfill(3)+" ---"
+    #print "--- Channel = "+str(ch).zfill(3)+" ---"
 
-    for tac in range(0,4):
-        print "====" 
-        print "TacID ", tac 
-        print "Pedestal1 "+str(mean_Ped1[(ch,tac)])+" "+str(rms_Ped1[(ch,tac)]) 
-        print "Pedestal2 "+str(mean_Ped2[(ch,tac)])+" "+str(rms_Ped2[(ch,tac)]) 
-        print "PedestalTot "+str(mean_PedTot[(ch,tac)])+" "+str(rms_PedTot[(ch,tac)]) 
-
-#Pixel
-print "--- Pixel ---"
-print "Pixel Peak 1: "+str(fitResults[('pixel',"peak1","mean","value")])+" +/- "+str(fitResults[('pixel',"peak1","mean","sigma")]) 
-print "Pixel Peak 2: "+str(fitResults[('pixel',"peak2","mean","value")])+" +/- "+str(fitResults[('pixel',"peak2","mean","sigma")]) 
-print "Pixel Backpeak : "+str(fitResults[('pixel',"backpeak","mean","value")])+" +/- "+str(fitResults[('pixel',"backpeak","mean","sigma")]) 
-print "Pixel Peak 1 Coinc: "+str(fitResults[('pixelCoinc',"peak1","mean","value")])+" +/- "+str(fitResults[('pixelCoinc',"peak1","mean","sigma")]) 
-#print "Pixel Alpha: "+str(fitResults[('pixel',"peak12","alpha","value")])+" +/- "+str(fitResults[('pixel',"peak12","alpha","sigma")]) 
-#print "Pixel Beta: "+str(fitResults[('pixel',"peak12","beta","value")])+" +/- "+str(fitResults[('pixel',"peak12","beta","sigma")]) 
-
-print "--- Bar ---"
-#print "Bar Peak 1: "+str(fitResults[('bar',"peak1","mean","value")])+" +/- "+str(fitResults[('bar',"peak1","mean","sigma")]) 
-#print "Bar Peak 2: "+str(fitResults[('bar',"peak2","mean","value")])+" +/- "+str(fitResults[('bar',"peak2","mean","sigma")]) 
-#print "Bar Backpeak : "+str(fitResults[('bar',"backpeak","mean","value")])+" +/- "+str(fitResults[('bar',"backpeak","mean","sigma")]) 
-print "Bar Peak 1 Coinc: "+str(fitResults[('barCoinc',"peak1","mean","value")])+" +/- "+str(fitResults[('barCoinc',"peak1","mean","sigma")]) 
-#print "Pixel Alpha: "+str(fitResults[('bar',"peak12","alpha","value")])+" +/- "+str(fitResults[('bar',"peak12","alpha","sigma")]) 
-#print "Pixel Beta: "+str(fitResults[('bar',"peak12","beta","value")])+" +/- "+str(fitResults[('bar',"peak12","beta","sigma")]) 
-
-print "--- CTR ---"
-print "CTR mean: "+str(fitResults[('barCoinc',"CTR","mean","value")])+" +/- "+str(fitResults[('barCoinc',"CTR","mean","sigma")]) 
-print "CTR sigma: "+str(fitResults[('barCoinc',"CTR","sigma","value")])+" +/- "+str(fitResults[('barCoinc',"CTR","sigma","sigma")]) 
-
-print "--- Xtalk ---"
-print "Xtalk mean: "+str(fitResults[('barCoinc',"Xtalk","mean","value")])+" +/- "+str(fitResults[('barCoinc',"Xtalk","mean","sigma")]) 
-print "Xtalk sigma: "+str(fitResults[('barCoinc',"Xtalk","sigma","value")])+" +/- "+str(fitResults[('barCoinc',"Xtalk","sigma","sigma")]) 
-print "Xtalk ChiSquareOverNdf / probChiSquare: "+str(fitResults[('barCoinc',"Xtalk","ChiSquareOverNdf","value")])+" / "+str(fitResults[('barCoinc',"Xtalk","probChiSquare","value")]) 
-print "Xtalk average / RMS: "+str(fitResults[('barCoinc',"Xtalk","average","value")])+" / "+str(fitResults[('barCoinc',"Xtalk","RMS","value")]) 
-print "XtalkNhits average / RMS: "+str(fitResults[('barCoinc',"XtalkNhits","average","value")])+" / "+str(fitResults[('barCoinc',"XtalkNhits","RMS","value")]) 
-print "XtalkNbars average / RMS: "+str(fitResults[('barCoinc',"XtalkNbars","average","value")])+" / "+str(fitResults[('barCoinc',"XtalkNbars","RMS","value")]) 
-
-print "--- Xtalk Left ---"
-print "XtalkLeft mean: "+str(fitResults[('barCoinc',"XtalkLeft","mean","value")])+" +/- "+str(fitResults[('barCoinc',"XtalkLeft","mean","sigma")]) 
-print "XtalkLeft sigma: "+str(fitResults[('barCoinc',"XtalkLeft","sigma","value")])+" +/- "+str(fitResults[('barCoinc',"XtalkLeft","sigma","sigma")]) 
-print "XtalkLeft ChiSquareOverNdf / probChiSquare: "+str(fitResults[('barCoinc',"XtalkLeft","ChiSquareOverNdf","value")])+" / "+str(fitResults[('barCoinc',"XtalkLeft","probChiSquare","value")]) 
-print "XtalkLeft average / RMS: "+str(fitResults[('barCoinc',"XtalkLeft","average","value")])+" / "+str(fitResults[('barCoinc',"XtalkLeft","RMS","value")]) 
-
-print "--- Xtalk Right ---"
-print "XtalkRight mean: "+str(fitResults[('barCoinc',"XtalkRight","mean","value")])+" +/- "+str(fitResults[('barCoinc',"XtalkRight","mean","sigma")]) 
-print "XtalkRight sigma: "+str(fitResults[('barCoinc',"XtalkRight","sigma","value")])+" +/- "+str(fitResults[('barCoinc',"XtalkRight","sigma","sigma")]) 
-print "XtalkRight ChiSquareOverNdf / probChiSquare: "+str(fitResults[('barCoinc',"XtalkRight","ChiSquareOverNdf","value")])+" / "+str(fitResults[('barCoinc',"XtalkRight","probChiSquare","value")]) 
-print "XtalkRight average / RMS: "+str(fitResults[('barCoinc',"XtalkRight","average","value")])+" / "+str(fitResults[('barCoinc',"XtalkRight","RMS","value")]) 
+    #for tac in range(0,4):
+        #print "====" 
+        #print "TacID ", tac 
+        #print "Pedestal1 "+str(mean_Ped1[(ch,tac)])+" "+str(rms_Ped1[(ch,tac)]) 
+        #print "Pedestal2 "+str(mean_Ped2[(ch,tac)])+" "+str(rms_Ped2[(ch,tac)]) 
+        #print "PedestalTot "+str(mean_PedTot[(ch,tac)])+" "+str(rms_PedTot[(ch,tac)]) 
 
 Temp_pixel = histos['h1_temp_pixel'].GetMean()
 Temp_bar = histos['h1_temp_bar'].GetMean()
@@ -953,50 +915,39 @@ tfilePed2.Close()
 ## 9) Write root tree with measurements
 ################################################
 
-tfileoutputtree = TFile( opt.outputDir+"/"+"tree_Run"+run+"_ARRAY"+str(str(opt.arrayCode).zfill(6))+"_BAR"+str(alignedBar)+".root", "recreate" )
+tfileoutputtree = TFile( opt.outputDir+"/"+"tree_Run"+run+"_ARRAY"+str(str(opt.arrayCode).zfill(6))+".root", "recreate" )
 tfileoutputtree.cd()
 
 treeOutput = TTree( 'results', 'root tree with measurements' )
 
-peak1_mean_pixel = array( 'd', [ -999. ] )
-err_peak1_mean_pixel = array( 'd', [ -999. ] )
-peak2_mean_pixel = array( 'd', [ -999. ] )
-err_peak2_mean_pixel = array( 'd', [ -999. ] )
-peak1_sigma_pixel = array( 'd', [ -999. ] )
-err_peak1_sigma_pixel = array( 'd', [ -999. ] )
-peak2_sigma_pixel = array( 'd', [ -999. ] )
-err_peak2_sigma_pixel = array( 'd', [ -999. ] )
-alpha_pixel = array( 'd', [ -999. ] )
-err_alpha_pixel = array( 'd', [ -999. ] )
-beta_pixel = array( 'd', [ -999. ] )
-err_beta_pixel = array( 'd', [ -999. ] )
-peak1_mean_pixelCoinc = array( 'd', [ -999. ] )
-err_peak1_mean_pixelCoinc = array( 'd', [ -999. ] )
-peak1_sigma_pixelCoinc = array( 'd', [ -999. ] )
-err_peak1_sigma_pixelCoinc = array( 'd', [ -999. ] )
+#----------------------
+
 #
-peak1_mean_bar = array( 'd', [ -999. ] )
-err_peak1_mean_bar = array( 'd', [ -999. ] )
-peak2_mean_bar = array( 'd', [ -999. ] )
-err_peak2_mean_bar = array( 'd', [ -999. ] )
-peak1_sigma_bar = array( 'd', [ -999. ] )
-err_peak1_sigma_bar = array( 'd', [ -999. ] )
-peak2_sigma_bar = array( 'd', [ -999. ] )
-err_peak2_sigma_bar = array( 'd', [ -999. ] )
-alpha_bar = array( 'd', [ -999. ] )
-err_alpha_bar = array( 'd', [ -999. ] )
-beta_bar = array( 'd', [ -999. ] )
-err_beta_bar = array( 'd', [ -999. ] )
-peak1_mean_barCoinc = array( 'd', [ -999. ] )
-err_peak1_mean_barCoinc = array( 'd', [ -999. ] )
-peak1_sigma_barCoinc = array( 'd', [ -999. ] )
-err_peak1_sigma_barCoinc = array( 'd', [ -999. ] )
+temp_pixel = array( 'd', [ -999. ] )
+temp_bar = array( 'd', [ -999. ] )
+temp_int = array( 'd', [ -999. ] )
+pos_X = array( 'd', [ -999. ] )
+pos_Y = array( 'd', [ -999. ] )
 #
-CTR_mean_barCoinc = array( 'd', [ -999. ] )
-err_CTR_mean_barCoinc = array( 'd', [ -999. ] )
-CTR_sigma_barCoinc = array( 'd', [ -999. ] )
-err_CTR_sigma_barCoinc = array( 'd', [ -999. ] )
+code_array = array( 'i', [ -999 ] )
+runNumber = array( 'i', [ -999 ] )
 #
+peak1_mean_barRef = array( 'd', [ -999. ] )
+err_peak1_mean_barRef = array( 'd', [ -999. ] )
+peak1_sigma_barRef = array( 'd', [ -999. ] )
+err_peak1_sigma_barRef = array( 'd', [ -999. ] )
+#
+peak1_mean_barCoinc = array( 'd', [ -999. ]*16 )
+err_peak1_mean_barCoinc = array( 'd', [ -999. ]*16 )
+peak1_sigma_barCoinc = array( 'd', [ -999. ]*16 )
+err_peak1_sigma_barCoinc = array( 'd', [ -999. ]*16 )
+#
+deltaT12_mean_barCoinc = array( 'd', [ -999. ]*16 )
+err_deltaT12_mean_barCoinc = array( 'd', [ -999. ]*16 )
+deltaT12_sigma_barCoinc = array( 'd', [ -999. ]*16 )
+err_deltaT12_sigma_barCoinc = array( 'd', [ -999. ]*16 )
+
+'''
 Xtalk_mean_barCoinc = array( 'd', [ -999. ] )
 err_Xtalk_mean_barCoinc = array( 'd', [ -999. ] )
 Xtalk_sigma_barCoinc = array( 'd', [ -999. ] )
@@ -1028,87 +979,10 @@ XtalkRight_ChiSquareOverNdf_barCoinc = array( 'd', [ -999. ] )
 XtalkRight_probChiSquare_barCoinc = array( 'd', [ -999. ] )
 XtalkRight_average_barCoinc = array( 'd', [ -999. ] )
 XtalkRight_RMS_barCoinc = array( 'd', [ -999. ] )
-#
-temp_pixel = array( 'd', [ -999. ] )
-temp_bar = array( 'd', [ -999. ] )
-temp_int = array( 'd', [ -999. ] )
-pos_X = array( 'd', [ -999. ] )
-pos_Y = array( 'd', [ -999. ] )
-#
-bar = array( 'i', [ -9 ] )
-code_array = array( 'i', [ -9 ] )
-runNumber = array( 'i', [ -9 ] )
+'''
 
-treeOutput.Branch( 'peak1_mean_pixel', peak1_mean_pixel, 'peak1_mean_pixel/D' )
-treeOutput.Branch( 'err_peak1_mean_pixel', err_peak1_mean_pixel, 'err_peak1_mean_pixel/D' )
-treeOutput.Branch( 'peak2_mean_pixel', peak2_mean_pixel, 'peak2_mean_pixel/D' )
-treeOutput.Branch( 'err_peak2_mean_pixel', err_peak2_mean_pixel, 'err_peak2_mean_pixel/D' )
-treeOutput.Branch( 'peak1_sigma_pixel', peak1_sigma_pixel, 'peak1_sigma_pixel/D' )
-treeOutput.Branch( 'err_peak1_sigma_pixel', err_peak1_sigma_pixel, 'err_peak1_sigma_pixel/D' )
-treeOutput.Branch( 'peak2_sigma_pixel', peak2_sigma_pixel, 'peak2_sigma_pixel/D' )
-treeOutput.Branch( 'err_peak2_sigma_pixel', err_peak2_sigma_pixel, 'err_peak2_sigma_pixel/D' )
-#treeOutput.Branch( 'alpha_pixel', alpha_pixel, 'alpha_pixel/D' )
-#treeOutput.Branch( 'err_alpha_pixel', err_alpha_pixel, 'err_alpha_pixel/D' )
-#treeOutput.Branch( 'beta_pixel', beta_pixel, 'beta_pixel/D' )
-#treeOutput.Branch( 'err_beta_pixel', err_beta_pixel, 'err_beta_pixel/D' )
-treeOutput.Branch( 'peak1_mean_pixelCoinc', peak1_mean_pixelCoinc, 'peak1_mean_pixelCoinc/D' )
-treeOutput.Branch( 'err_peak1_mean_pixelCoinc', err_peak1_mean_pixelCoinc, 'err_peak1_mean_pixelCoinc/D' )
-treeOutput.Branch( 'peak1_sigma_pixelCoinc', peak1_sigma_pixelCoinc, 'peak1_sigma_pixelCoinc/D' )
-treeOutput.Branch( 'err_peak1_sigma_pixelCoinc', err_peak1_sigma_pixelCoinc, 'err_peak1_sigma_pixelCoinc/D' )
-#
-#treeOutput.Branch( 'peak1_mean_bar', peak1_mean_bar, 'peak1_mean_bar/D' )
-#treeOutput.Branch( 'err_peak1_mean_bar', err_peak1_mean_bar, 'err_peak1_mean_bar/D' )
-#treeOutput.Branch( 'peak2_mean_bar', peak2_mean_bar, 'peak2_mean_bar/D' )
-#treeOutput.Branch( 'err_peak2_mean_bar', err_peak2_mean_bar, 'err_peak2_mean_bar/D' )
-#treeOutput.Branch( 'peak1_sigma_bar', peak1_sigma_bar, 'peak1_sigma_bar/D' )
-#treeOutput.Branch( 'err_peak1_sigma_bar', err_peak1_sigma_bar, 'err_peak1_sigma_bar/D' )
-#treeOutput.Branch( 'peak2_sigma_bar', peak2_sigma_bar, 'peak2_sigma_bar/D' )
-#treeOutput.Branch( 'err_peak2_sigma_bar', err_peak2_sigma_bar, 'err_peak2_sigma_bar/D' )
-#treeOutput.Branch( 'alpha_bar', alpha_bar, 'alpha_bar/D' )
-#treeOutput.Branch( 'err_alpha_bar', err_alpha_bar, 'err_alpha_bar/D' )
-#treeOutput.Branch( 'beta_bar', beta_bar, 'beta_bar/D' )
-#treeOutput.Branch( 'err_beta_bar', err_beta_bar, 'err_beta_bar/D' )
-treeOutput.Branch( 'peak1_mean_barCoinc', peak1_mean_barCoinc, 'peak1_mean_barCoinc/D' )
-treeOutput.Branch( 'err_peak1_mean_barCoinc', err_peak1_mean_barCoinc, 'err_peak1_mean_barCoinc/D' )
-treeOutput.Branch( 'peak1_sigma_barCoinc', peak1_sigma_barCoinc, 'peak1_sigma_barCoinc/D' )
-treeOutput.Branch( 'err_peak1_sigma_barCoinc', err_peak1_sigma_barCoinc, 'err_peak1_sigma_barCoinc/D' )
-#
-treeOutput.Branch( 'CTR_mean_barCoinc', CTR_mean_barCoinc, 'CTR_mean_barCoinc/D' )
-treeOutput.Branch( 'err_CTR_mean_barCoinc', err_CTR_mean_barCoinc, 'err_CTR_mean_barCoinc/D' )
-treeOutput.Branch( 'CTR_sigma_barCoinc', CTR_sigma_barCoinc, 'CTR_sigma_barCoinc/D' )
-treeOutput.Branch( 'err_CTR_sigma_barCoinc', err_CTR_sigma_barCoinc, 'err_CTR_sigma_barCoinc/D' )
-#
-treeOutput.Branch( 'Xtalk_mean_barCoinc', Xtalk_mean_barCoinc, 'Xtalk_mean_barCoinc/D' )
-treeOutput.Branch( 'err_Xtalk_mean_barCoinc', err_Xtalk_mean_barCoinc, 'err_Xtalk_mean_barCoinc/D' )
-treeOutput.Branch( 'Xtalk_sigma_barCoinc', Xtalk_sigma_barCoinc, 'Xtalk_sigma_barCoinc/D' )
-treeOutput.Branch( 'err_Xtalk_sigma_barCoinc', err_Xtalk_sigma_barCoinc, 'err_Xtalk_sigma_barCoinc/D' )
-treeOutput.Branch( 'Xtalk_ChiSquareOverNdf_barCoinc', Xtalk_ChiSquareOverNdf_barCoinc, 'Xtalk_ChiSquareOverNdf_barCoinc/D' )
-treeOutput.Branch( 'Xtalk_probChiSquare_barCoinc', Xtalk_probChiSquare_barCoinc, 'Xtalk_probChiSquare_barCoinc/D' )
-treeOutput.Branch( 'Xtalk_average_barCoinc', Xtalk_average_barCoinc, 'Xtalk_average_barCoinc/D' )
-treeOutput.Branch( 'Xtalk_RMS_barCoinc', Xtalk_RMS_barCoinc, 'Xtalk_RMS_barCoinc/D' )
-#
-treeOutput.Branch( 'XtalkNhits_average_barCoinc', XtalkNhits_average_barCoinc, 'XtalkNhits_average_barCoinc/D' )
-treeOutput.Branch( 'XtalkNhits_RMS_barCoinc', XtalkNhits_RMS_barCoinc, 'XtalkNhits_RMS_barCoinc/D' )
-treeOutput.Branch( 'XtalkNbars_average_barCoinc', XtalkNbars_average_barCoinc, 'XtalkNbars_average_barCoinc/D' )
-treeOutput.Branch( 'XtalkNbars_RMS_barCoinc', XtalkNbars_RMS_barCoinc, 'XtalkNbars_RMS_barCoinc/D' )
-#
-treeOutput.Branch( 'XtalkLeft_mean_barCoinc', XtalkLeft_mean_barCoinc, 'XtalkLeft_mean_barCoinc/D' )
-treeOutput.Branch( 'err_XtalkLeft_mean_barCoinc', err_XtalkLeft_mean_barCoinc, 'err_XtalkLeft_mean_barCoinc/D' )
-treeOutput.Branch( 'XtalkLeft_sigma_barCoinc', XtalkLeft_sigma_barCoinc, 'XtalkLeft_sigma_barCoinc/D' )
-treeOutput.Branch( 'err_XtalkLeft_sigma_barCoinc', err_XtalkLeft_sigma_barCoinc, 'err_XtalkLeft_sigma_barCoinc/D' )
-treeOutput.Branch( 'XtalkLeft_ChiSquareOverNdf_barCoinc', XtalkLeft_ChiSquareOverNdf_barCoinc, 'XtalkLeft_ChiSquareOverNdf_barCoinc/D' )
-treeOutput.Branch( 'XtalkLeft_probChiSquare_barCoinc', XtalkLeft_probChiSquare_barCoinc, 'XtalkLeft_probChiSquare_barCoinc/D' )
-treeOutput.Branch( 'XtalkLeft_average_barCoinc', XtalkLeft_average_barCoinc, 'XtalkLeft_average_barCoinc/D' )
-treeOutput.Branch( 'XtalkLeft_RMS_barCoinc', XtalkLeft_RMS_barCoinc, 'XtalkLeft_RMS_barCoinc/D' )
-#
-treeOutput.Branch( 'XtalkRight_mean_barCoinc', XtalkRight_mean_barCoinc, 'XtalkRight_mean_barCoinc/D' )
-treeOutput.Branch( 'err_XtalkRight_mean_barCoinc', err_XtalkRight_mean_barCoinc, 'err_XtalkRight_mean_barCoinc/D' )
-treeOutput.Branch( 'XtalkRight_sigma_barCoinc', XtalkRight_sigma_barCoinc, 'XtalkRight_sigma_barCoinc/D' )
-treeOutput.Branch( 'err_XtalkRight_sigma_barCoinc', err_XtalkRight_sigma_barCoinc, 'err_XtalkRight_sigma_barCoinc/D' )
-treeOutput.Branch( 'XtalkRight_ChiSquareOverNdf_barCoinc', XtalkRight_ChiSquareOverNdf_barCoinc, 'XtalkRight_ChiSquareOverNdf_barCoinc/D' )
-treeOutput.Branch( 'XtalkRight_probChiSquare_barCoinc', XtalkRight_probChiSquare_barCoinc, 'XtalkRight_probChiSquare_barCoinc/D' )
-treeOutput.Branch( 'XtalkRight_average_barCoinc', XtalkRight_average_barCoinc, 'XtalkRight_average_barCoinc/D' )
-treeOutput.Branch( 'XtalkRight_RMS_barCoinc', XtalkRight_RMS_barCoinc, 'XtalkRight_RMS_barCoinc/D' )
+#----------------------
+
 #
 treeOutput.Branch( 'temp_pixel', temp_pixel, 'temp_pixel/D' )
 treeOutput.Branch( 'temp_bar', temp_bar, 'temp_bar/D' )
@@ -1116,80 +990,27 @@ treeOutput.Branch( 'temp_int', temp_int, 'temp_int/D' )
 treeOutput.Branch( 'pos_X', pos_X, 'pos_X/D' )
 treeOutput.Branch( 'pos_Y', pos_Y, 'pos_Y/D' )
 #
-treeOutput.Branch( 'bar', bar, 'bar/I' )
 treeOutput.Branch( 'code_array', code_array, 'code_array/I' )
 treeOutput.Branch( 'runNumber', runNumber, 'runNumber/I' )
+#
+treeOutput.Branch( 'peak1_mean_barRef', peak1_mean_barRef, 'peak1_mean_barRef/D' )
+treeOutput.Branch( 'err_peak1_mean_barRef', err_peak1_mean_barRef, 'err_peak1_mean_barRef/D' )
+treeOutput.Branch( 'peak1_sigma_barRef', peak1_sigma_barRef, 'peak1_sigma_barRef/D' )
+treeOutput.Branch( 'err_peak1_sigma_barRef', err_peak1_sigma_barRef, 'err_peak1_sigma_barRef/D' )
+#
+treeOutput.Branch( 'peak1_mean_barCoinc', peak1_mean_barCoinc, 'peak1_mean_barCoinc[16]/D' )
+treeOutput.Branch( 'err_peak1_mean_barCoinc', err_peak1_mean_barCoinc, 'err_peak1_mean_barCoinc[16]/D' )
+treeOutput.Branch( 'peak1_sigma_barCoinc', peak1_sigma_barCoinc, 'peak1_sigma_barCoinc[16]/D' )
+treeOutput.Branch( 'err_peak1_sigma_barCoinc', err_peak1_sigma_barCoinc, 'err_peak1_sigma_barCoinc[16]/D' )
+#
+treeOutput.Branch( 'deltaT12_mean_barCoinc', deltaT12_mean_barCoinc, 'deltaT12_mean_barCoinc[16]/D' )
+treeOutput.Branch( 'err_deltaT12_mean_barCoinc', err_deltaT12_mean_barCoinc, 'err_deltaT12_mean_barCoinc[16]/D' )
+treeOutput.Branch( 'deltaT12_sigma_barCoinc', deltaT12_sigma_barCoinc, 'deltaT12_sigma_barCoinc[16]/D' )
+treeOutput.Branch( 'err_deltaT12_sigma_barCoinc', err_deltaT12_sigma_barCoinc, 'err_deltaT12_sigma_barCoinc[16]/D' )
+#
 
-peak1_mean_pixel[0] = fitResults[('pixel',"peak1","mean","value")]
-err_peak1_mean_pixel[0] = fitResults[('pixel',"peak1","mean","sigma")]
-peak2_mean_pixel[0] = fitResults[('pixel',"peak2","mean","value")]
-err_peak2_mean_pixel[0] = fitResults[('pixel',"peak2","mean","sigma")]
-peak1_sigma_pixel[0] = fitResults[('pixel',"peak1","sigma","value")]
-err_peak1_sigma_pixel[0] = fitResults[('pixel',"peak1","sigma","sigma")]
-peak2_sigma_pixel[0] = fitResults[('pixel',"peak2","sigma","value")]
-err_peak2_sigma_pixel[0] = fitResults[('pixel',"peak2","sigma","sigma")]
-#alpha_pixel[0] = fitResults[('pixel',"peak12","alpha","value")]
-#err_alpha_pixel[0] = fitResults[('pixel',"peak12","alpha","sigma")]
-#beta_pixel[0] = fitResults[('pixel',"peak12","beta","value")]
-#err_beta_pixel[0] = fitResults[('pixel',"peak12","beta","sigma")]
-peak1_mean_pixelCoinc[0] = fitResults[('pixelCoinc',"peak1","mean","value")]
-err_peak1_mean_pixelCoinc[0] = fitResults[('pixelCoinc',"peak1","mean","sigma")]
-peak1_sigma_pixelCoinc[0] = fitResults[('pixelCoinc',"peak1","sigma","value")]
-err_peak1_sigma_pixelCoinc[0] = fitResults[('pixelCoinc',"peak1","sigma","sigma")]
-#
-#peak1_mean_bar[0] = fitResults[('bar',"peak1","mean","value")]
-#err_peak1_mean_bar[0] = fitResults[('bar',"peak1","mean","sigma")]
-#peak2_mean_bar[0] = fitResults[('bar',"peak2","mean","value")]
-#err_peak2_mean_bar[0] = fitResults[('bar',"peak2","mean","sigma")]
-#peak1_sigma_bar[0] = fitResults[('bar',"peak1","sigma","value")]
-#err_peak1_sigma_bar[0] = fitResults[('bar',"peak1","sigma","sigma")]
-#peak2_sigma_bar[0] = fitResults[('bar',"peak2","sigma","value")]
-#err_peak2_sigma_bar[0] = fitResults[('bar',"peak2","sigma","sigma")]
-#alpha_bar[0] = fitResults[('bar',"peak12","alpha","value")]
-#err_alpha_bar[0] = fitResults[('bar',"peak12","alpha","sigma")]
-#beta_bar[0] = fitResults[('bar',"peak12","beta","value")]
-#err_beta_bar[0] = fitResults[('bar',"peak12","beta","sigma")]
-peak1_mean_barCoinc[0] = fitResults[('barCoinc',"peak1","mean","value")]
-err_peak1_mean_barCoinc[0] = fitResults[('barCoinc',"peak1","mean","sigma")]
-peak1_sigma_barCoinc[0] = fitResults[('barCoinc',"peak1","sigma","value")]
-err_peak1_sigma_barCoinc[0] = fitResults[('barCoinc',"peak1","sigma","sigma")]
-#
-CTR_mean_barCoinc[0] = fitResults[('barCoinc',"CTR","mean","value")]
-err_CTR_mean_barCoinc[0] = fitResults[('barCoinc',"CTR","mean","sigma")]
-CTR_sigma_barCoinc[0] = fitResults[('barCoinc',"CTR","sigma","value")]
-err_CTR_sigma_barCoinc[0] = fitResults[('barCoinc',"CTR","sigma","sigma")]
-#
-Xtalk_mean_barCoinc[0] = fitResults[('barCoinc',"Xtalk","mean","value")]
-err_Xtalk_mean_barCoinc[0] = fitResults[('barCoinc',"Xtalk","mean","sigma")]
-Xtalk_sigma_barCoinc[0] = fitResults[('barCoinc',"Xtalk","sigma","value")]
-err_Xtalk_sigma_barCoinc[0] = fitResults[('barCoinc',"Xtalk","sigma","sigma")]
-Xtalk_ChiSquareOverNdf_barCoinc[0] = fitResults[('barCoinc',"Xtalk","ChiSquareOverNdf","value")]
-Xtalk_probChiSquare_barCoinc[0] = fitResults[('barCoinc',"Xtalk","probChiSquare","value")]
-Xtalk_average_barCoinc[0] = fitResults[('barCoinc',"Xtalk","average","value")]
-Xtalk_RMS_barCoinc[0] = fitResults[('barCoinc',"Xtalk","RMS","value")]
-#
-XtalkNhits_average_barCoinc[0] = fitResults[('barCoinc',"XtalkNhits","average","value")]
-XtalkNhits_RMS_barCoinc[0] = fitResults[('barCoinc',"XtalkNhits","RMS","value")]
-XtalkNbars_average_barCoinc[0] = fitResults[('barCoinc',"XtalkNbars","average","value")]
-XtalkNbars_RMS_barCoinc[0] = fitResults[('barCoinc',"XtalkNbars","RMS","value")]
-#
-XtalkLeft_mean_barCoinc[0] = fitResults[('barCoinc',"XtalkLeft","mean","value")]
-err_XtalkLeft_mean_barCoinc[0] = fitResults[('barCoinc',"XtalkLeft","mean","sigma")]
-XtalkLeft_sigma_barCoinc[0] = fitResults[('barCoinc',"XtalkLeft","sigma","value")]
-err_XtalkLeft_sigma_barCoinc[0] = fitResults[('barCoinc',"XtalkLeft","sigma","sigma")]
-XtalkLeft_ChiSquareOverNdf_barCoinc[0] = fitResults[('barCoinc',"XtalkLeft","ChiSquareOverNdf","value")]
-XtalkLeft_probChiSquare_barCoinc[0] = fitResults[('barCoinc',"XtalkLeft","probChiSquare","value")]
-XtalkLeft_average_barCoinc[0] = fitResults[('barCoinc',"XtalkLeft","average","value")]
-XtalkLeft_RMS_barCoinc[0] = fitResults[('barCoinc',"XtalkLeft","RMS","value")]
-#
-XtalkRight_mean_barCoinc[0] = fitResults[('barCoinc',"XtalkRight","mean","value")]
-err_XtalkRight_mean_barCoinc[0] = fitResults[('barCoinc',"XtalkRight","mean","sigma")]
-XtalkRight_sigma_barCoinc[0] = fitResults[('barCoinc',"XtalkRight","sigma","value")]
-err_XtalkRight_sigma_barCoinc[0] = fitResults[('barCoinc',"XtalkRight","sigma","sigma")]
-XtalkRight_ChiSquareOverNdf_barCoinc[0] = fitResults[('barCoinc',"XtalkRight","ChiSquareOverNdf","value")]
-XtalkRight_probChiSquare_barCoinc[0] = fitResults[('barCoinc',"XtalkRight","probChiSquare","value")]
-XtalkRight_average_barCoinc[0] = fitResults[('barCoinc',"XtalkRight","average","value")]
-XtalkRight_RMS_barCoinc[0] = fitResults[('barCoinc',"XtalkRight","RMS","value")]
+#----------------------
+
 #
 temp_pixel[0] = Temp_pixel
 temp_bar[0] = Temp_bar
@@ -1197,80 +1018,47 @@ temp_int[0] = Temp_internal
 pos_X[0] = posX
 pos_Y[0] = posY
 #
-bar[0] = int(alignedBar)
 runNumber[0] = int(opt.run)
 if opt.arrayCode:
     code_array[0] = int(opt.arrayCode)
+#
+peak1_mean_barRef[0] = fitResults[('barRef',"peak1","mean","value")]
+err_peak1_mean_barRef[0] = fitResults[('barRef',"peak1","mean","sigma")]
+peak1_sigma_barRef[0] = fitResults[('barRef',"peak1","sigma","value")]
+err_peak1_sigma_barRef[0] = fitResults[('barRef',"peak1","sigma","sigma")]
+#
+for barId in range(0,16):
+
+    print "=== barId%d ===="%barId
+
+    if ( barId in dead_channels ) :
+        continue
+
+    print "barId%d -- Store LO in root tree:"%barId
+    peak1_mean_barCoinc[barId] = fitResults[('barCoinc%d'%barId,"peak1","mean","value")]
+    err_peak1_mean_barCoinc[barId] = fitResults[('barCoinc%d'%barId,"peak1","mean","sigma")]
+    peak1_sigma_barCoinc[barId] = fitResults[('barCoinc%d'%barId,"peak1","sigma","value")]
+    err_peak1_sigma_barCoinc[barId] = fitResults[('barCoinc%d'%barId,"peak1","sigma","sigma")]
+
+    if ( barId in lowStat_channels ) :
+        continue
+
+    print "barId%d -- Store time resolution in root tree:"%barId
+    deltaT12_mean_barCoinc[barId] = fitResults[('barCoinc%d'%barId,"deltaT12_bar","mean","value")]
+    err_deltaT12_mean_barCoinc[barId] = fitResults[('barCoinc%d'%barId,"deltaT12_bar","mean","sigma")]
+    deltaT12_sigma_barCoinc[barId] = fitResults[('barCoinc%d'%barId,"deltaT12_bar","sigma","value")]
+    err_deltaT12_sigma_barCoinc[barId] = fitResults[('barCoinc%d'%barId,"deltaT12_bar","sigma","sigma")]
+
+    print "=== ==="
+
+#
+
+#----------------------
 
 treeOutput.Fill()
 tfileoutputtree.Write()
 tfileoutputtree.Close()
 
 
-'''
-
-f1_511keV_peak = TF1("f1_511keV_peak",f_511keV_peak,fTot.GetParameter(10)-5*fTot.GetParameter(11),fTot.GetParameter(10)+5*fTot.GetParameter(11),3)
-f1_511keV_peak.SetNpx(100000)
-f1_511keV_peak.SetLineColor(kGreen+1)
-f1_511keV_peak.SetLineStyle(7)
-f1_511keV_peak.SetParameter(0,fTot.GetParameter(0)*fTot.GetParameter(9))
-f1_511keV_peak.SetParameter(1,fTot.GetParameter(10))
-f1_511keV_peak.SetParameter(2,fTot.GetParameter(11))
-f1_511keV_peak.Draw("same")
-
-f1_1274keV_peak = TF1("f1_1274keV_peak",f_1274keV_peak,fTot.GetParameter(4)-15*fTot.GetParameter(5),fTot.GetParameter(4)+5*fTot.GetParameter(5),5)
-f1_1274keV_peak.SetNpx(100000)
-f1_1274keV_peak.SetLineColor(kGreen+1)
-f1_1274keV_peak.SetLineStyle(7)
-f1_1274keV_peak.SetParameter(0,fTot.GetParameter(0)*fTot.GetParameter(3))
-f1_1274keV_peak.SetParameter(1,fTot.GetParameter(4))
-f1_1274keV_peak.SetParameter(2,fTot.GetParameter(5))
-f1_1274keV_peak.SetParameter(3,fTot.GetParameter(17))
-f1_1274keV_peak.SetParameter(4,fTot.GetParameter(18))
-f1_1274keV_peak.Draw("same")
-
-f1_backscatter_peak_times_turnon = TF1("f1_backscatter_peak_times_turnon",f_backscatter_peak_times_turnon,minEnergy,fTot.GetParameter(15)+5*fTot.GetParameter(16),5)
-f1_backscatter_peak_times_turnon.SetNpx(100000)
-f1_backscatter_peak_times_turnon.SetLineColor(kGreen+1)
-f1_backscatter_peak_times_turnon.SetLineStyle(7)
-f1_backscatter_peak_times_turnon.SetParameter(0,fTot.GetParameter(0)*fTot.GetParameter(14))
-f1_backscatter_peak_times_turnon.SetParameter(1,fTot.GetParameter(15))
-f1_backscatter_peak_times_turnon.SetParameter(2,fTot.GetParameter(16))
-f1_backscatter_peak_times_turnon.SetParameter(3,fTot.GetParameter(12))
-f1_backscatter_peak_times_turnon.SetParameter(4,fTot.GetParameter(13))
-f1_backscatter_peak_times_turnon.Draw("same")
-
-f1_1274keV_compton = TF1("f1_1274keV_compton",f_1274keV_compton,minEnergy,maxEnergy,3)
-f1_1274keV_compton.SetNpx(100000)
-f1_1274keV_compton.SetLineColor(4)
-f1_1274keV_compton.SetParameter(0,fTot.GetParameter(0))
-f1_1274keV_compton.SetParameter(1,fTot.GetParameter(1))
-f1_1274keV_compton.SetParameter(2,fTot.GetParameter(2))
-#f1_1274keV_compton.Draw("same")
-
-f1_511keV_compton_times_turnon = TF1("f1_511keV_compton_times_turnon",f_511keV_compton_times_turnon,minEnergy,maxEnergy,5)
-f1_511keV_compton_times_turnon.SetNpx(100000)
-f1_511keV_compton_times_turnon.SetLineColor(5)
-f1_511keV_compton_times_turnon.SetParameter(0,fTot.GetParameter(0)*fTot.GetParameter(6))
-f1_511keV_compton_times_turnon.SetParameter(1,fTot.GetParameter(7))
-f1_511keV_compton_times_turnon.SetParameter(2,fTot.GetParameter(8))
-f1_511keV_compton_times_turnon.SetParameter(3,fTot.GetParameter(12))
-f1_511keV_compton_times_turnon.SetParameter(4,fTot.GetParameter(13))
-f1_511keV_compton_times_turnon.Draw("same")
-
-f1_background = TF1("f1_background",f_background,minEnergy,maxEnergy,8)
-f1_background.SetNpx(100000)
-f1_background.SetLineColor(kGreen+3)
-f1_background.SetParameter(0,fTot.GetParameter(0))
-f1_background.SetParameter(1,fTot.GetParameter(1))
-f1_background.SetParameter(2,fTot.GetParameter(2))
-f1_background.SetParameter(3,fTot.GetParameter(0)*fTot.GetParameter(6))
-f1_background.SetParameter(4,fTot.GetParameter(7))
-f1_background.SetParameter(5,fTot.GetParameter(8))
-f1_background.SetParameter(6,fTot.GetParameter(12))
-f1_background.SetParameter(7,fTot.GetParameter(13))
-#f1_background.Draw("same")
-
-'''
 
 
