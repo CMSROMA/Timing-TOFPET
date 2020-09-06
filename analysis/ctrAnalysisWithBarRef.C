@@ -85,13 +85,30 @@ void ctrAnalysisWithBarRef::Loop()
 
   std::vector<TObject*> objectsToStore;
   
+  //time resolution
   TH1F* h1_deltaT12[N_BARS];
   TH1F* h1_CTR[N_BARS];
   TH1F* h1_deltaT12_barRef[N_BARS];
 
+  //xtalk
+  TH1F* h1_energy1Left_Xtalk[N_BARS];
+  TH1F* h1_energy1Right_Xtalk[N_BARS];
+  TH1F* h1_energy2Left_Xtalk[N_BARS];
+  TH1F* h1_energy2Right_Xtalk[N_BARS];
+  TH1F* h1_energyLeft_Xtalk[N_BARS];
+  TH2F* h2_energyLeft_vs_energyBar_Xtalk[N_BARS];
+  TH1F* h1_energyRight_Xtalk[N_BARS];
+  TH2F* h2_energyRight_vs_energyBar_Xtalk[N_BARS];
+  TH1F* h1_nhits_Xtalk[N_BARS];
+  TH1F* h1_nbars_Xtalk[N_BARS];
+  TH2F* h2_nbars_vs_nhits_Xtalk[N_BARS];
+  TH1F* h1_energySum_Xtalk[N_BARS];
+  TH2F* h2_energySum_vs_energyBar_Xtalk[N_BARS];
+
   for (int ibar=0;ibar<16;++ibar)
     {
 
+      //time resolution
       h1_deltaT12[ibar] = new TH1F(Form("h1_deltaT12_bar%d",ibar), "", 400, -10000, 10000);
       objectsToStore.push_back(h1_deltaT12[ibar]);
 
@@ -101,9 +118,45 @@ void ctrAnalysisWithBarRef::Loop()
       h1_deltaT12_barRef[ibar] = new TH1F(Form("h1_deltaT12_barRef_coincBar%d",ibar), "", 400, -10000, 10000);
       objectsToStore.push_back(h1_deltaT12_barRef[ibar]);
 
-      //cout << "IN LOOP: barId" << ibar << " -- Cuts for CTR calculation" << endl;
-      //cout << "IN LOOP: mean, sigma: " << alignedBar_511Peak_mean[ibar] << " " << alignedBar_511Peak_sigma[ibar] << endl;
+      //xtalk
+      h1_energy1Left_Xtalk[ibar] = new TH1F(Form("h1_energy1Left_bar%d_Xtalk",ibar), "", 70, -20, 50);
+      objectsToStore.push_back(h1_energy1Left_Xtalk[ibar]);
 
+      h1_energy1Right_Xtalk[ibar] = new TH1F(Form("h1_energy1Right_bar%d_Xtalk",ibar), "", 70, -20, 50);
+      objectsToStore.push_back(h1_energy1Right_Xtalk[ibar]);
+
+      h1_energy2Left_Xtalk[ibar] = new TH1F(Form("h1_energy2Left_bar%d_Xtalk",ibar), "", 70, -20, 50);
+      objectsToStore.push_back(h1_energy2Left_Xtalk[ibar]);
+
+      h1_energy2Right_Xtalk[ibar] = new TH1F(Form("h1_energy2Right_bar%d_Xtalk",ibar), "", 70, -20, 50);
+      objectsToStore.push_back(h1_energy2Right_Xtalk[ibar]);
+
+      h1_energyLeft_Xtalk[ibar] = new TH1F(Form("h1_energyLeft_bar%d_Xtalk",ibar), "", 70, -20, 50);
+      objectsToStore.push_back(h1_energyLeft_Xtalk[ibar]);
+
+      h2_energyLeft_vs_energyBar_Xtalk[ibar] = new TH2F(Form("h2_energyLeft_vs_energyBar_bar%d_Xtalk",ibar), "", 250, -20, 230, 250, -20, 230);
+      objectsToStore.push_back(h2_energyLeft_vs_energyBar_Xtalk[ibar]);
+
+      h1_energyRight_Xtalk[ibar] = new TH1F(Form("h1_energyRight_bar%d_Xtalk",ibar), "", 70, -20, 50);
+      objectsToStore.push_back(h1_energyRight_Xtalk[ibar]);
+
+      h2_energyRight_vs_energyBar_Xtalk[ibar] = new TH2F(Form("h2_energyRight_vs_energyBar_bar%d_Xtalk",ibar), "", 250, -20, 230, 250, -20, 230);
+      objectsToStore.push_back(h2_energyRight_vs_energyBar_Xtalk[ibar]);
+
+      h1_nhits_Xtalk[ibar] = new TH1F(Form("h1_nhits_bar%d_Xtalk",ibar), "", 8, 0, 8);
+      objectsToStore.push_back(h1_nhits_Xtalk[ibar]);
+
+      h1_nbars_Xtalk[ibar] = new TH1F(Form("h1_nbars_bar%d_Xtalk",ibar), "", 4, 0, 4);
+      objectsToStore.push_back(h1_nbars_Xtalk[ibar]);
+
+      h2_nbars_vs_nhits_Xtalk[ibar] = new TH2F(Form("h2_nbars_vs_nhits_bar%d_Xtalk",ibar), "", 8, 0, 8, 4, 0, 4);
+      objectsToStore.push_back(h2_nbars_vs_nhits_Xtalk[ibar]);
+
+      h1_energySum_Xtalk[ibar] = new TH1F(Form("h1_energySum_bar%d_Xtalk",ibar), "", 70, -20, 50);
+      objectsToStore.push_back(h1_energySum_Xtalk[ibar]);
+
+      h2_energySum_vs_energyBar_Xtalk[ibar] = new TH2F(Form("h2_energySum_vs_energyBar_bar%d_Xtalk",ibar), "", 250, -20, 230, 250, -20, 230);
+      objectsToStore.push_back(h2_energySum_vs_energyBar_Xtalk[ibar]);
     }
 
   Long64_t nentries = fChain->GetEntriesFast();
@@ -141,8 +194,10 @@ void ctrAnalysisWithBarRef::Loop()
 	float energy1 = energy[ibar+1]-pedMean->GetBinContent(channels[ibar+1]*4+tacID[ibar+1]+1);
 	float energy2 = energy[ibar+17]-pedMean->GetBinContent(channels[ibar+17]*4+tacID[ibar+17]+1);
 	float energyBar =  energy1 + energy2;
+
 	
-	///Time resolution
+	/// === Time resolution ===
+
 	float NsigmaCut = 1;
 	//cout << "bar: " << ibar << " mean: " << alignedBar_511Peak_mean[ibar] << " sigma: " << alignedBar_511Peak_sigma[ibar] << endl;
 	if( (fabs(energyBarRef-barRef_511Peak_mean)/barRef_511Peak_sigma)<NsigmaCut
@@ -164,7 +219,110 @@ void ctrAnalysisWithBarRef::Loop()
 	    //CTR of barRef using barRef only
 	    double deltaT12Ref = time1Ref - time2Ref; 	  
 	    h1_deltaT12_barRef[ibar]->Fill(deltaT12Ref);
-	  }
+
+	  }// cut for time resolution
+
+
+	// === Cross-talk ===
+
+	int nhits_xtalk = 0;
+	int nbars_xtalk = 0;
+	float energySum_xtalk = 0.;
+	if( (fabs(energyBarRef-barRef_511Peak_mean)/barRef_511Peak_sigma)<NsigmaCut)
+	  //	    &&  (fabs(energyBar - alignedBar_511Peak_mean[ibar])/alignedBar_511Peak_sigma[ibar])<NsigmaCut)
+	  { 
+
+	    int At511Peak = 0; 
+	    if(	(fabs(energyBar - alignedBar_511Peak_mean[ibar])/alignedBar_511Peak_sigma[ibar])<NsigmaCut )
+	      At511Peak = 1;
+
+	      for (int idxbar=ibar-1;idxbar<ibar+2;++idxbar)
+		{
+		  if (idxbar<0 || idxbar>15)
+		    continue; //edges
+
+		  if (idxbar==ibar)
+                    continue; //central bar
+
+		  float energy1_xtalk=0;
+		  float energy2_xtalk=0;
+
+		  if( energy[idxbar+1]==-9. && energy[idxbar+17]==-9. )
+		    continue;
+
+		  nbars_xtalk++;
+
+		  //energy 1
+		  if( energy[idxbar+1]>-9. )
+		    {
+		      energy1_xtalk = energy[idxbar+1]-pedMean->GetBinContent(channels[idxbar+1]*4+tacID[idxbar+1]+1);
+
+		      if(idxbar == ibar-1 && At511Peak)
+			{
+			  h1_energy1Left_Xtalk[ibar]->Fill(energy1_xtalk);
+			}
+		      if(idxbar == ibar+1 && At511Peak)
+			{
+			  h1_energy1Right_Xtalk[ibar]->Fill(energy1_xtalk);
+			}
+
+		      ++nhits_xtalk;
+		    }
+
+		  //energy 2
+		  if( energy[idxbar+17]>-9. )
+		    {
+		      energy2_xtalk = energy[idxbar+17]-pedMean->GetBinContent(channels[idxbar+17]*4+tacID[idxbar+17]+1);
+
+		      if(idxbar == ibar-1 && At511Peak)
+			{
+			  h1_energy2Left_Xtalk[ibar]->Fill(energy2_xtalk);
+			}
+		      if(idxbar == ibar+1 && At511Peak)
+			{
+			  h1_energy2Right_Xtalk[ibar]->Fill(energy2_xtalk);
+			}
+
+		      ++nhits_xtalk;
+		    }
+		  
+		  float energyBar_xtalk =  energy1_xtalk + energy2_xtalk;
+
+		  if(idxbar == ibar-1)
+		    {
+		      if(At511Peak)
+			h1_energyLeft_Xtalk[ibar]->Fill(energyBar_xtalk);
+
+		      h2_energyLeft_vs_energyBar_Xtalk[ibar]->Fill(energyBar,energyBar_xtalk);
+		    }
+
+		  if(idxbar == ibar+1)
+		    {		     
+		      if(At511Peak) 
+			h1_energyRight_Xtalk[ibar]->Fill(energyBar_xtalk);
+
+		      h2_energyRight_vs_energyBar_Xtalk[ibar]->Fill(energyBar,energyBar_xtalk);
+		    }
+
+		  energySum_xtalk += energyBar_xtalk;	
+
+		}
+
+	      if(At511Peak)
+		{
+		  h1_nhits_Xtalk[ibar]->Fill(nhits_xtalk);           
+		  h1_nbars_Xtalk[ibar]->Fill(nbars_xtalk);           
+		  h2_nbars_vs_nhits_Xtalk[ibar]->Fill(nhits_xtalk,nbars_xtalk);
+		}	  
+
+	      if(nhits_xtalk>0)
+		{
+		  if(At511Peak)
+		    h1_energySum_Xtalk[ibar]->Fill(energySum_xtalk);
+
+		  h2_energySum_vs_energyBar_Xtalk[ibar]->Fill(energyBar,energySum_xtalk);
+		}
+	  } //cut for xtalk
 
       }//loop over bars
  

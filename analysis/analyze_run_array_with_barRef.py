@@ -701,7 +701,8 @@ gROOT.ProcessLine("ctrAnalysis.Loop();")
 gBenchmark.Show( 'ctrAnalysisWithBarRef' )
 
 
-## Time resolution
+### Time resolution ###
+
 tfileoutput = TFile( opt.outputDir+"/"+"histo_Run"+run+"_ARRAY"+str(str(opt.arrayCode).zfill(6))+".root", "update" )
 tfileoutput.cd()
 histos=Map(tfileoutput)
@@ -750,133 +751,77 @@ for barId in range(0,16):
     c1_energy.Write()
     histos[("h1_deltaT12_bar%d"%barId)].Write()
 
-'''
-histos['h1_energySum_Xtalk'].Draw("PE") 
-f_cb=TF1("f_cb",crystalball_function,-10,100,5)
-f_cb.SetParameter(0,100)
-f_cb.SetParameter(1,5)
-f_cb.SetParameter(2,2)
-f_cb.FixParameter(3,-2)
-f_cb.SetParameter(4,20)
 
-histos['h1_energySum_Xtalk'].Fit(f_cb,"R+","",0,50)
-histos['h1_energySum_Xtalk'].GetXaxis().SetRangeUser(-10,50)
-histos['h1_energySum_Xtalk'].GetXaxis().SetTitle("Energy Lateral (Left + Right)")
-histos['h1_energySum_Xtalk'].GetYaxis().SetTitle("Events")
-histos['h1_energySum_Xtalk'].GetYaxis().SetTitleOffset(1.6)
+### Cross talk ###
 
-fitResults[("barCoinc","Xtalk","mean","value")]=f_cb.GetParameter(1)
-fitResults[("barCoinc","Xtalk","mean","sigma")]=f_cb.GetParError(1)
-fitResults[("barCoinc","Xtalk","sigma","value")]=f_cb.GetParameter(2)
-fitResults[("barCoinc","Xtalk","sigma","sigma")]=f_cb.GetParError(2)
-fitResults[("barCoinc","Xtalk","ChiSquareOverNdf","value")]=f_cb.GetChisquare()/f_cb.GetNDF()
-fitResults[("barCoinc","Xtalk","probChiSquare","value")]=f_cb.GetProb()
+lowStat_channels_xtalk = []
 
-fitResults[("barCoinc","Xtalk","average","value")]=histos['h1_energySum_Xtalk'].GetMean()
-fitResults[("barCoinc","Xtalk","RMS","value")]=histos['h1_energySum_Xtalk'].GetRMS()
+for barId in range(0,16):
 
-fitResults[("barCoinc","XtalkNhits","average","value")]=histos['h1_nhits_Xtalk'].GetMean()
-fitResults[("barCoinc","XtalkNhits","RMS","value")]=histos['h1_nhits_Xtalk'].GetRMS()
-fitResults[("barCoinc","XtalkNbars","average","value")]=histos['h1_nbars_Xtalk'].GetMean()
-fitResults[("barCoinc","XtalkNbars","RMS","value")]=histos['h1_nbars_Xtalk'].GetRMS()
+    if( histos[("h1_nhits_bar%d_Xtalk"%barId)].GetEntries()<300 ):
+        lowStat_channels_xtalk.append(barId)
 
-pt3.Draw()
+    if ( (barId in dead_channels) or (barId in lowStat_channels_xtalk) 
+         or (barId-1 in dead_channels) or (barId+1 in dead_channels) ) :
+        fitResults[('barCoinc%d'%barId,"XtalkEnergyLeft","median","value")]=-9
+        fitResults[('barCoinc%d'%barId,"XtalkEnergyRight","median","value")]=-9
+        fitResults[('barCoinc%d'%barId,"XtalkLeft","median","value")]=-9
+        fitResults[('barCoinc%d'%barId,"XtalkRight","median","value")]=-9
+        print "== No xtalk info bar%d"%barId
+        continue
 
-c1_energy.cd()
-c1_energy.Update()
-c1_energy.SaveAs(opt.outputDir+"/"+"Run"+str(opt.run.zfill(6))+"_ARRAY"+str(opt.arrayCode.zfill(6))+"_BAR"+str(alignedBar)+"_Xtalk"+".pdf")
-c1_energy.SaveAs(opt.outputDir+"/"+"Run"+str(opt.run.zfill(6))+"_ARRAY"+str(opt.arrayCode.zfill(6))+"_BAR"+str(alignedBar)+"_Xtalk"+".png")
-c1_energy.Write()
-histos['h1_energySum_Xtalk'].Write()
+    # calculate median of xtalk left and right histograms
+    prob = array( 'd', [ 0.5 ] )
+    XtalkLeft_median = array( 'd' , [0.] )
+    XtalkRight_median = array( 'd' , [0.] )
+    histos[("h1_energyLeft_bar%d_Xtalk"%barId)].GetQuantiles(1,XtalkLeft_median,prob)
+    histos[("h1_energyRight_bar%d_Xtalk"%barId)].GetQuantiles(1,XtalkRight_median,prob)
 
-if (alignedBar-1>=0):
-    histos['h1_energyTot_bar_Xtalk%d'%(alignedBar-1)].Draw("PE") 
-    f_cb_Left=TF1("f_cb_Left",crystalball_function,-10,100,5)
-    f_cb_Left.SetParameter(0,100)
-    f_cb_Left.SetParameter(1,5)
-    f_cb_Left.SetParameter(2,2)
-    f_cb_Left.FixParameter(3,-2)
-    f_cb_Left.SetParameter(4,20)
+    # correct left and right energy for 511 keV peak position 
+    barIdLeft = barId-1
+    barIdRight = barId+1
+    if (barId != 0):
+        fitResults[('barCoinc%d'%barId,"XtalkEnergyLeft","median","value")]=XtalkLeft_median[0]
+        fitResults[('barCoinc%d'%barId,"XtalkLeft","median","value")]=XtalkLeft_median[0] / fitResults[('barCoinc%d'%barIdLeft,"peak1","mean","value")]
+    else:
+        fitResults[('barCoinc%d'%barId,"XtalkEnergyLeft","median","value")]=0.
+        fitResults[('barCoinc%d'%barId,"XtalkLeft","median","value")]=0.
 
-    histos['h1_energyTot_bar_Xtalk%d'%(alignedBar-1)].Fit(f_cb_Left,"R+","",0,50)
-    histos['h1_energyTot_bar_Xtalk%d'%(alignedBar-1)].GetXaxis().SetRangeUser(-10,50)
-    histos['h1_energyTot_bar_Xtalk%d'%(alignedBar-1)].GetXaxis().SetTitle("Energy Left")
-    histos['h1_energyTot_bar_Xtalk%d'%(alignedBar-1)].GetYaxis().SetTitle("Events")
-    histos['h1_energyTot_bar_Xtalk%d'%(alignedBar-1)].GetYaxis().SetTitleOffset(1.6)
+    if (barId != 15):
+        fitResults[('barCoinc%d'%barId,"XtalkEnergyRight","median","value")]=XtalkRight_median[0]
+        fitResults[('barCoinc%d'%barId,"XtalkRight","median","value")]=XtalkRight_median[0] / fitResults[('barCoinc%d'%barIdRight,"peak1","mean","value")]
+    else:
+        fitResults[('barCoinc%d'%barId,"XtalkEnergyRight","median","value")]=0.
+        fitResults[('barCoinc%d'%barId,"XtalkRight","median","value")]=0.
 
-    fitResults[("barCoinc","XtalkLeft","mean","value")]=f_cb_Left.GetParameter(1)
-    fitResults[("barCoinc","XtalkLeft","mean","sigma")]=f_cb_Left.GetParError(1)
-    fitResults[("barCoinc","XtalkLeft","sigma","value")]=f_cb_Left.GetParameter(2)
-    fitResults[("barCoinc","XtalkLeft","sigma","sigma")]=f_cb_Left.GetParError(2)
-    fitResults[("barCoinc","XtalkLeft","ChiSquareOverNdf","value")]=f_cb_Left.GetChisquare()/f_cb_Left.GetNDF()
-    fitResults[("barCoinc","XtalkLeft","probChiSquare","value")]=f_cb_Left.GetProb()
+    fitResults[('barCoinc%d'%barId,"Xtalk","median","value")] = fitResults[('barCoinc%d'%barId,"XtalkLeft","median","value")] + fitResults[('barCoinc%d'%barId,"XtalkRight","median","value")]
 
-    fitResults[("barCoinc","XtalkLeft","average","value")]=histos['h1_energyTot_bar_Xtalk%d'%(alignedBar-1)].GetMean()
-    fitResults[("barCoinc","XtalkLeft","RMS","value")]=histos['h1_energyTot_bar_Xtalk%d'%(alignedBar-1)].GetRMS()
-
-    pt3.Draw()
-
+    # plots
+    pt4 = TPaveText(0.100223,0.915556,0.613586,0.967407,"brNDC")
+    text4 = pt4.AddText( "Run" + str(opt.run.zfill(6)) + " ARRAY" + str(opt.arrayCode.zfill(6)) + " BAR"+str(barId))
+    pt4.SetFillColor(0)
+    pt4.Draw()
     c1_energy.cd()
     c1_energy.Update()
-    c1_energy.SaveAs(opt.outputDir+"/"+"Run"+str(opt.run.zfill(6))+"_ARRAY"+str(opt.arrayCode.zfill(6))+"_BAR"+str(alignedBar)+"_XtalkLeft"+".pdf")
-    c1_energy.SaveAs(opt.outputDir+"/"+"Run"+str(opt.run.zfill(6))+"_ARRAY"+str(opt.arrayCode.zfill(6))+"_BAR"+str(alignedBar)+"_XtalkLeft"+".png")
+    histos[("h1_energyLeft_bar%d_Xtalk"%barId)].Draw()
+    c1_energy.SaveAs(opt.outputDir+"/"+"Run"+str(opt.run.zfill(6))+"_ARRAY"+str(opt.arrayCode.zfill(6))+"_BAR"+str(barId)+"_XtalkEnergyLeft"+".pdf")
+    c1_energy.SaveAs(opt.outputDir+"/"+"Run"+str(opt.run.zfill(6))+"_ARRAY"+str(opt.arrayCode.zfill(6))+"_BAR"+str(barId)+"_XtalkEnergyLeft"+".png")
     c1_energy.Write()
-    histos['h1_energyTot_bar_Xtalk%d'%(alignedBar-1)].Write()
-else:
-    fitResults[("barCoinc","XtalkLeft","mean","value")]=-1
-    fitResults[("barCoinc","XtalkLeft","mean","sigma")]=-1
-    fitResults[("barCoinc","XtalkLeft","sigma","value")]=-1
-    fitResults[("barCoinc","XtalkLeft","sigma","sigma")]=-1
-    fitResults[("barCoinc","XtalkLeft","ChiSquareOverNdf","value")]=-1
-    fitResults[("barCoinc","XtalkLeft","probChiSquare","value")]=-1
 
-    fitResults[("barCoinc","XtalkLeft","average","value")]=-1
-    fitResults[("barCoinc","XtalkLeft","RMS","value")]=-1
-    
-if (alignedBar+1<16):
-    histos['h1_energyTot_bar_Xtalk%d'%(alignedBar+1)].Draw("PE") 
-    f_cb_Right=TF1("f_cb_Right",crystalball_function,-10,100,5)
-    f_cb_Right.SetParameter(0,100)
-    f_cb_Right.SetParameter(1,5)
-    f_cb_Right.SetParameter(2,2)
-    f_cb_Right.FixParameter(3,-2)
-    f_cb_Right.SetParameter(4,20)
-
-    histos['h1_energyTot_bar_Xtalk%d'%(alignedBar+1)].Fit(f_cb_Right,"R+","",0,50)
-    histos['h1_energyTot_bar_Xtalk%d'%(alignedBar+1)].GetXaxis().SetRangeUser(-10,50)
-    histos['h1_energyTot_bar_Xtalk%d'%(alignedBar+1)].GetXaxis().SetTitle("Energy Right")
-    histos['h1_energyTot_bar_Xtalk%d'%(alignedBar+1)].GetYaxis().SetTitle("Events")
-    histos['h1_energyTot_bar_Xtalk%d'%(alignedBar+1)].GetYaxis().SetTitleOffset(1.6)
-
-    fitResults[("barCoinc","XtalkRight","mean","value")]=f_cb_Right.GetParameter(1)
-    fitResults[("barCoinc","XtalkRight","mean","sigma")]=f_cb_Right.GetParError(1)
-    fitResults[("barCoinc","XtalkRight","sigma","value")]=f_cb_Right.GetParameter(2)
-    fitResults[("barCoinc","XtalkRight","sigma","sigma")]=f_cb_Right.GetParError(2)
-    fitResults[("barCoinc","XtalkRight","ChiSquareOverNdf","value")]=f_cb_Right.GetChisquare()/f_cb_Right.GetNDF()
-    fitResults[("barCoinc","XtalkRight","probChiSquare","value")]=f_cb_Right.GetProb()
-
-    fitResults[("barCoinc","XtalkRight","average","value")]=histos['h1_energyTot_bar_Xtalk%d'%(alignedBar+1)].GetMean()
-    fitResults[("barCoinc","XtalkRight","RMS","value")]=histos['h1_energyTot_bar_Xtalk%d'%(alignedBar+1)].GetRMS()
-
-    pt3.Draw()
-
-    c1_energy.cd()
     c1_energy.Update()
-    c1_energy.SaveAs(opt.outputDir+"/"+"Run"+str(opt.run.zfill(6))+"_ARRAY"+str(opt.arrayCode.zfill(6))+"_BAR"+str(alignedBar)+"_XtalkRight"+".pdf")
-    c1_energy.SaveAs(opt.outputDir+"/"+"Run"+str(opt.run.zfill(6))+"_ARRAY"+str(opt.arrayCode.zfill(6))+"_BAR"+str(alignedBar)+"_XtalkRight"+".png")
+    histos[("h1_energyRight_bar%d_Xtalk"%barId)].Draw()
+    c1_energy.SaveAs(opt.outputDir+"/"+"Run"+str(opt.run.zfill(6))+"_ARRAY"+str(opt.arrayCode.zfill(6))+"_BAR"+str(barId)+"_XtalkEnergyRight"+".pdf")
+    c1_energy.SaveAs(opt.outputDir+"/"+"Run"+str(opt.run.zfill(6))+"_ARRAY"+str(opt.arrayCode.zfill(6))+"_BAR"+str(barId)+"_XtalkEnergyRight"+".png")
     c1_energy.Write()
-    histos['h1_energyTot_bar_Xtalk%d'%(alignedBar+1)].Write()
-else:
-    fitResults[("barCoinc","XtalkRight","mean","value")]=-1
-    fitResults[("barCoinc","XtalkRight","mean","sigma")]=-1
-    fitResults[("barCoinc","XtalkRight","sigma","value")]=-1
-    fitResults[("barCoinc","XtalkRight","sigma","sigma")]=-1
-    fitResults[("barCoinc","XtalkRight","ChiSquareOverNdf","value")]=-1
-    fitResults[("barCoinc","XtalkRight","probChiSquare","value")]=-1
 
-    fitResults[("barCoinc","XtalkRight","average","value")]=-1
-    fitResults[("barCoinc","XtalkRight","RMS","value")]=-1
-'''
+    print ""
+    print "=== ", barId , "==="
+    print "XtalkEnergyLeft", fitResults[('barCoinc%d'%barId,"XtalkEnergyLeft","median","value")]
+    print "XtalkEnergyRight", fitResults[('barCoinc%d'%barId,"XtalkEnergyRight","median","value")]
+    print "XtalkLeft", fitResults[('barCoinc%d'%barId,"XtalkLeft","median","value")]
+    print "XtalkRight", fitResults[('barCoinc%d'%barId,"XtalkRight","median","value")]
+    print "Xtalk", fitResults[('barCoinc%d'%barId,"Xtalk","median","value")]
+    print "=== ==="
 
 ################################################
 ## 8) Write additional histograms
@@ -946,40 +891,10 @@ deltaT12_mean_barCoinc = array( 'd', [ -999. ]*16 )
 err_deltaT12_mean_barCoinc = array( 'd', [ -999. ]*16 )
 deltaT12_sigma_barCoinc = array( 'd', [ -999. ]*16 )
 err_deltaT12_sigma_barCoinc = array( 'd', [ -999. ]*16 )
-
-'''
-Xtalk_mean_barCoinc = array( 'd', [ -999. ] )
-err_Xtalk_mean_barCoinc = array( 'd', [ -999. ] )
-Xtalk_sigma_barCoinc = array( 'd', [ -999. ] )
-err_Xtalk_sigma_barCoinc = array( 'd', [ -999. ] )
-Xtalk_ChiSquareOverNdf_barCoinc = array( 'd', [ -999. ] )
-Xtalk_probChiSquare_barCoinc = array( 'd', [ -999. ] )
-Xtalk_average_barCoinc = array( 'd', [ -999. ] )
-Xtalk_RMS_barCoinc = array( 'd', [ -999. ] )
 #
-XtalkNhits_average_barCoinc = array( 'd', [ -999. ] )
-XtalkNhits_RMS_barCoinc = array( 'd', [ -999. ] )
-XtalkNbars_average_barCoinc = array( 'd', [ -999. ] )
-XtalkNbars_RMS_barCoinc = array( 'd', [ -999. ] )
-#
-XtalkLeft_mean_barCoinc = array( 'd', [ -999. ] )
-err_XtalkLeft_mean_barCoinc = array( 'd', [ -999. ] )
-XtalkLeft_sigma_barCoinc = array( 'd', [ -999. ] )
-err_XtalkLeft_sigma_barCoinc = array( 'd', [ -999. ] )
-XtalkLeft_ChiSquareOverNdf_barCoinc = array( 'd', [ -999. ] )
-XtalkLeft_probChiSquare_barCoinc = array( 'd', [ -999. ] )
-XtalkLeft_average_barCoinc = array( 'd', [ -999. ] )
-XtalkLeft_RMS_barCoinc = array( 'd', [ -999. ] )
-#
-XtalkRight_mean_barCoinc = array( 'd', [ -999. ] )
-err_XtalkRight_mean_barCoinc = array( 'd', [ -999. ] )
-XtalkRight_sigma_barCoinc = array( 'd', [ -999. ] )
-err_XtalkRight_sigma_barCoinc = array( 'd', [ -999. ] )
-XtalkRight_ChiSquareOverNdf_barCoinc = array( 'd', [ -999. ] )
-XtalkRight_probChiSquare_barCoinc = array( 'd', [ -999. ] )
-XtalkRight_average_barCoinc = array( 'd', [ -999. ] )
-XtalkRight_RMS_barCoinc = array( 'd', [ -999. ] )
-'''
+XtalkLeft_median_barCoinc = array( 'd', [ -999. ]*16 )
+XtalkRight_median_barCoinc = array( 'd', [ -999. ]*16 )
+Xtalk_median_barCoinc = array( 'd', [ -999. ]*16 )
 
 #----------------------
 
@@ -1008,6 +923,9 @@ treeOutput.Branch( 'err_deltaT12_mean_barCoinc', err_deltaT12_mean_barCoinc, 'er
 treeOutput.Branch( 'deltaT12_sigma_barCoinc', deltaT12_sigma_barCoinc, 'deltaT12_sigma_barCoinc[16]/D' )
 treeOutput.Branch( 'err_deltaT12_sigma_barCoinc', err_deltaT12_sigma_barCoinc, 'err_deltaT12_sigma_barCoinc[16]/D' )
 #
+treeOutput.Branch( 'XtalkLeft_median_barCoinc', XtalkLeft_median_barCoinc, 'XtalkLeft_median_barCoinc[16]/D' )
+treeOutput.Branch( 'XtalkRight_median_barCoinc', XtalkRight_median_barCoinc, 'XtalkRight_median_barCoinc[16]/D' )
+treeOutput.Branch( 'Xtalk_median_barCoinc', Xtalk_median_barCoinc, 'Xtalk_median_barCoinc[16]/D' )
 
 #----------------------
 
@@ -1031,6 +949,7 @@ for barId in range(0,16):
 
     print "=== barId%d ===="%barId
 
+    ## LO 
     if ( barId in dead_channels ) :
         continue
 
@@ -1040,17 +959,26 @@ for barId in range(0,16):
     peak1_sigma_barCoinc[barId] = fitResults[('barCoinc%d'%barId,"peak1","sigma","value")]
     err_peak1_sigma_barCoinc[barId] = fitResults[('barCoinc%d'%barId,"peak1","sigma","sigma")]
 
+    ## Time resolution
     if ( barId in lowStat_channels ) :
         continue
+    else:
+        print "barId%d -- Store time resolution in root tree:"%barId
+        deltaT12_mean_barCoinc[barId] = fitResults[('barCoinc%d'%barId,"deltaT12_bar","mean","value")]
+        err_deltaT12_mean_barCoinc[barId] = fitResults[('barCoinc%d'%barId,"deltaT12_bar","mean","sigma")]
+        deltaT12_sigma_barCoinc[barId] = fitResults[('barCoinc%d'%barId,"deltaT12_bar","sigma","value")]
+        err_deltaT12_sigma_barCoinc[barId] = fitResults[('barCoinc%d'%barId,"deltaT12_bar","sigma","sigma")]
 
-    print "barId%d -- Store time resolution in root tree:"%barId
-    deltaT12_mean_barCoinc[barId] = fitResults[('barCoinc%d'%barId,"deltaT12_bar","mean","value")]
-    err_deltaT12_mean_barCoinc[barId] = fitResults[('barCoinc%d'%barId,"deltaT12_bar","mean","sigma")]
-    deltaT12_sigma_barCoinc[barId] = fitResults[('barCoinc%d'%barId,"deltaT12_bar","sigma","value")]
-    err_deltaT12_sigma_barCoinc[barId] = fitResults[('barCoinc%d'%barId,"deltaT12_bar","sigma","sigma")]
+    ## Xtalk
+    if ( (barId in lowStat_channels_xtalk) or (barId-1 in dead_channels) or (barId+1 in dead_channels) ) :
+        continue
+    else:
+        print "barId%d -- Store xtalk in root tree:"%barId
+        XtalkLeft_median_barCoinc[barId] = fitResults[('barCoinc%d'%barId,"XtalkLeft","median","value")]
+        XtalkRight_median_barCoinc[barId] = fitResults[('barCoinc%d'%barId,"XtalkRight","median","value")]
+        Xtalk_median_barCoinc[barId] = fitResults[('barCoinc%d'%barId,"Xtalk","median","value")]
 
     print "=== ==="
-
 #
 
 #----------------------
