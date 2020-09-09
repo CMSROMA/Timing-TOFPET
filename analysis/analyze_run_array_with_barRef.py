@@ -260,6 +260,14 @@ def fitSpectrum_coinc(histo,function,xmin,xmax,canvas,fitres,label,code,barId,ru
     for i in range(spectrum.GetNPeaks()):
         posPeak.append(xpeaks[i])
     posPeak.sort()
+
+    if(len(posPeak)==0):
+        fitres[(label,"peak1","mean","value")]=-999
+        fitres[(label,"peak1","mean","sigma")]=-999
+        fitres[(label,"peak1","sigma","value")]=-999
+        fitres[(label,"peak1","sigma","sigma")]=-999
+        return 1
+
     peak  = posPeak[-1]
     print "peak positions:", posPeak
     print "peak, nfound, spectrum.GetNPeaks()", peak, nfound, spectrum.GetNPeaks() 
