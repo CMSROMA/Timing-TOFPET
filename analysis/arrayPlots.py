@@ -6,7 +6,6 @@ import numpy as np
 import os
 import sys
 
-
 #reading csv
 arraysData=R.TTree("arraysData","arraysData")
 arraysData.ReadFile("arraysDB_Milano_Sep2019.csv","name/C:prod/C:type/C:id/I:geo/C:tag/C:temp/F:barID/I:posX/F:posY/F:ly/F:ctr/F:lyRef/F:ctrRef/F:xtLeft/F:xtRight/F:xt/F")
@@ -27,21 +26,56 @@ histos = {}
 graphNames = {"ly_mean":{"min":50.,"max":80.,"nbinX":30,
                          "minPlot":50.,"maxPlot":80.,
                          "xtitle":"LO mean of array [a.u.]",
-                         "xtitleVsProd":"LO mean of array (+/- std. dev.) [a.u.]"},
+                         "xtitleVsProd":"LO mean of array (+/- std. dev.) [a.u.]",
+                         "thr":-9},
               "ly_relstd":{"min":0.,"max":20.,"nbinX":20,
                            "minPlot":0.,"maxPlot":15.,
                            "xtitle":"Relative spread of array LO [%]",
                            "xtitleVsProd":"Relative spread of array LO (+/- std. dev.) [%]",
-                           "thr":5,},
+                           "thr":5},
               "lyNorm_mean":{"min":0.75,"max":1.25,"nbinX":20,
                              "minPlot":0.75,"maxPlot":1.25,
                              "xtitle":"Norm. LO mean of array [a.u.]",
-                             "xtitleVsProd":"Norm. LO mean of array (+/- std. dev.) [a.u.]"},
+                             "xtitleVsProd":"Norm. LO mean of array (+/- std. dev.) [a.u.]",
+                             "thr":-9},
               "lyNorm_relstd":{"min":0.,"max":20.,"nbinX":20,
                                "minPlot":0.,"maxPlot":15.,
                                "xtitle":"Relative spread of norm. array LO [%]",
                                "xtitleVsProd":"Relative spread of norm. array LO (+/- std. dev.) [%]",
-                               "thr":5,},
+                               "thr":5},
+
+              "sigmat_mean":{"min":100.,"max":160.,"nbinX":20,
+                             "minPlot":100.,"maxPlot":160.,
+                             "xtitle":"#sigma_{t} mean of array [ps]",
+                             "xtitleVsProd":"#sigma_{t} mean of array (+/- std. dev.) [ps]",
+                             "thr":-9},
+              "sigmat_relstd":{"min":0.,"max":20.,"nbinX":20,
+                               "minPlot":0.,"maxPlot":15.,
+                               "xtitle":"Relative spread of array #sigma_{t} [%]",
+                               "xtitleVsProd":"Relative spread of array #sigma_{t} (+/- std. dev.) [%]",
+                               "thr":5},
+              "sigmatNorm_mean":{"min":0.75,"max":1.25,"nbinX":20,
+                                 "minPlot":0.75,"maxPlot":1.25,
+                                 "xtitle":"Norm. #sigma_{t} mean of array [a.u.]",
+                                 "xtitleVsProd":"Norm. #sigma_{t} mean of array (+/- std. dev.) [a.u.]",
+                                 "thr":-9},
+              "sigmatNorm_relstd":{"min":0.,"max":20.,"nbinX":20,
+                                   "minPlot":0.,"maxPlot":15.,
+                                   "xtitle":"Relative spread of norm. array #sigma_{t} [%]",
+                                   "xtitleVsProd":"Relative spread of norm. array #sigma_{t} (+/- std. dev.) [%]",
+                                   "thr":5},
+
+              "xt_mean":{"min":0.,"max":40,"nbinX":20,
+                         "minPlot":0.,"maxPlot":50,
+                         "xtitle":"Cross talk mean of array [%]",
+                         "xtitleVsProd":"Cross talk mean of array (+/- std. dev.) [%]",
+                         "thr":15},
+              
+              "xt_relstd":{"min":0.,"max":20.,"nbinX":20,
+                           "minPlot":0.,"maxPlot":15.,
+                           "xtitle":"Relative spread of array cross talk [%]",
+                           "xtitleVsProd":"Relative spread of array cross talk (+/- std. dev.) [%]",
+                           "thr":5}
           }
 
 print graphNames
@@ -78,7 +112,6 @@ for arr in arraysData:
 for prod in producers: 
     listArrayPreIRR[prod].sort()
     print listArrayPreIRR[prod]
-
 
 # 2) create dictionary dataPreIRR[prod][array]
 
@@ -133,25 +166,47 @@ for iprod,prod in enumerate(producers):
         #loop over bars in array
         ly = np.empty(nbars)
         lyNorm = np.empty(nbars)
+        sigmat = np.empty(nbars)
+        sigmatNorm = np.empty(nbars)        
+        xt = np.empty(nbars)
 
         for i,meas in enumerate(dataPreIRR[prod+str(arr)]):
             ly[i]=meas['ly']
             lyNorm[i]=meas['lyNorm']
-   
+            sigmat[i]=meas['sigmat']
+            sigmatNorm[i]=meas['sigmatNorm']
+            xt[i]=meas['xt']   
+
         #overall measurements for a given array
         #NOTE: check the dictionary "graphNames"
         ly_mean = ly.mean()
         ly_relstd = ly.std()/ly.mean()
         lyNorm_mean = lyNorm.mean()
         lyNorm_relstd = lyNorm.std()/lyNorm.mean()
-        
-        print ly_mean, ly_relstd, lyNorm_mean, lyNorm_relstd
+
+        sigmat_mean = sigmat.mean()
+        sigmat_relstd = sigmat.std()/sigmat.mean()
+        sigmatNorm_mean = sigmatNorm.mean()
+        sigmatNorm_relstd = sigmatNorm.std()/sigmatNorm.mean()
+
+        xt_mean = xt.mean()
+        xt_relstd = xt.std()/xt.mean()
+
+        print ly_mean, ly_relstd, lyNorm_mean, lyNorm_relstd, sigmat_mean, sigmat_relstd, sigmatNorm_mean, sigmatNorm_relstd, xt_mean, xt_relstd
 
         histos['ly_mean_'+prod].Fill(ly_mean)
         histos['ly_relstd_'+prod].Fill(ly_relstd*100)
         histos['lyNorm_mean_'+prod].Fill(lyNorm_mean)
         histos['lyNorm_relstd_'+prod].Fill(lyNorm_relstd*100)
+
+        histos['sigmat_mean_'+prod].Fill(sigmat_mean)
+        histos['sigmat_relstd_'+prod].Fill(sigmat_relstd*100)
+        histos['sigmatNorm_mean_'+prod].Fill(sigmatNorm_mean)
+        histos['sigmatNorm_relstd_'+prod].Fill(sigmatNorm_relstd*100)
         
+        histos['xt_mean_'+prod].Fill(xt_mean*100)
+        histos['xt_relstd_'+prod].Fill(xt_relstd*100)
+
     #-- Draw plots --#
 
     #== plots for each producers
@@ -175,9 +230,10 @@ for var, values in graphNames.items():
     histos[var+'_VsProd'].GetYaxis().SetTitle(values["xtitleVsProd"])
     histos[var+'_VsProd'].GetYaxis().SetLimits(values["minPlot"],values["maxPlot"])
     histos[var+'_VsProd'].GetYaxis().SetRangeUser(values["minPlot"],values["maxPlot"])
+    histos[var+'_VsProd'].GetYaxis().SetTitleOffset(1.4)
     histos[var+'_VsProd'].Draw("ape")
 
-    if("relstd" in var):
+    if( ("relstd" in var) or ("xt_mean" in var) ):
         minX = histos[var+'_VsProd'].GetXaxis().GetXmin()
         maxX = histos[var+'_VsProd'].GetXaxis().GetXmax()
         line = R.TLine(minX,values["thr"],maxX,values["thr"]);
