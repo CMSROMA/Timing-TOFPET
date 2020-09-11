@@ -48,7 +48,7 @@ graphNames = {"ly_mean":{"min":50.,"max":80.,"nbinX":30,
                              "minPlot":100.,"maxPlot":160.,
                              "xtitle":"#sigma_{t} mean of array [ps]",
                              "xtitleVsProd":"#sigma_{t} mean of array (+/- std. dev.) [ps]",
-                             "thr":-9},
+                             "thr":150},
               "sigmat_relstd":{"min":0.,"max":20.,"nbinX":20,
                                "minPlot":0.,"maxPlot":15.,
                                "xtitle":"Relative spread of array #sigma_{t} [%]",
@@ -71,11 +71,35 @@ graphNames = {"ly_mean":{"min":50.,"max":80.,"nbinX":30,
                          "xtitleVsProd":"Cross talk mean of array (+/- std. dev.) [%]",
                          "thr":15},
               
-              "xt_relstd":{"min":0.,"max":20.,"nbinX":20,
-                           "minPlot":0.,"maxPlot":15.,
+              "xt_relstd":{"min":0.,"max":100.,"nbinX":20,
+                           "minPlot":0.,"maxPlot":100.,
                            "xtitle":"Relative spread of array cross talk [%]",
                            "xtitleVsProd":"Relative spread of array cross talk (+/- std. dev.) [%]",
-                           "thr":5}
+                           "thr":5},
+
+              "xtLeft_mean":{"min":0.,"max":40,"nbinX":20,
+                             "minPlot":0.,"maxPlot":50,
+                             "xtitle":"Cross talk (left) mean of array [%]",
+                             "xtitleVsProd":"Cross talk (left) mean of array (+/- std. dev.) [%]",
+                             "thr":7.5},
+              
+              "xtLeft_relstd":{"min":0.,"max":100.,"nbinX":20,
+                               "minPlot":0.,"maxPlot":100.,
+                               "xtitle":"Relative spread of array cross talk (left) [%]",
+                               "xtitleVsProd":"Relative spread of array cross talk (left) (+/- std. dev.) [%]",
+                               "thr":5},
+
+              "xtRight_mean":{"min":0.,"max":40,"nbinX":20,
+                             "minPlot":0.,"maxPlot":50,
+                             "xtitle":"Cross talk (right) mean of array [%]",
+                             "xtitleVsProd":"Cross talk (right) mean of array (+/- std. dev.) [%]",
+                             "thr":7.5},
+              
+              "xtRight_relstd":{"min":0.,"max":100.,"nbinX":20,
+                               "minPlot":0.,"maxPlot":100.,
+                               "xtitle":"Relative spread of array cross talk (right) [%]",
+                               "xtitleVsProd":"Relative spread of array cross talk (right) (+/- std. dev.) [%]",
+                               "thr":5}
           }
 
 print graphNames
@@ -134,7 +158,8 @@ for arr in arraysData:
     
     if("IRR0" in tag):
         if (arr.barID not in blacklistBars):
-            dataPreIRR[prod+str(ID)].append({'name':arr.name.rstrip('\x00'), 'type':arr.type.rstrip('\x00'), 'geo' :arr.geo.rstrip('\x00'), 'id':ID, 'barID': arr.barID, 
+            dataPreIRR[prod+str(ID)].append({'name':arr.name.rstrip('\x00'), 'type':arr.type.rstrip('\x00'), 
+                                             'geo' :arr.geo.rstrip('\x00'), 'id':ID, 'barID': arr.barID, 
                                              'ly': arr.ly, 'lyNorm': arr.ly/arr.lyRef, 
                                              'sigmat': arr.ctr/2., 'sigmatNorm': (arr.ctr/2.) / (arr.ctrRef/2.), 
                                              'xtLeft': arr.xtLeft, 'xtRight': arr.xtRight, 'xt':arr.xt})
@@ -169,6 +194,8 @@ for iprod,prod in enumerate(producers):
         sigmat = np.empty(nbars)
         sigmatNorm = np.empty(nbars)        
         xt = np.empty(nbars)
+        xtLeft = np.empty(nbars)
+        xtRight = np.empty(nbars)
 
         for i,meas in enumerate(dataPreIRR[prod+str(arr)]):
             ly[i]=meas['ly']
@@ -176,6 +203,8 @@ for iprod,prod in enumerate(producers):
             sigmat[i]=meas['sigmat']
             sigmatNorm[i]=meas['sigmatNorm']
             xt[i]=meas['xt']   
+            xtLeft[i]=meas['xtLeft']   
+            xtRight[i]=meas['xtRight']   
 
         #overall measurements for a given array
         #NOTE: check the dictionary "graphNames"
@@ -191,8 +220,12 @@ for iprod,prod in enumerate(producers):
 
         xt_mean = xt.mean()
         xt_relstd = xt.std()/xt.mean()
+        xtLeft_mean = xtLeft.mean()
+        xtLeft_relstd = xtLeft.std()/xtLeft.mean()
+        xtRight_mean = xtRight.mean()
+        xtRight_relstd = xtRight.std()/xtRight.mean()
 
-        print ly_mean, ly_relstd, lyNorm_mean, lyNorm_relstd, sigmat_mean, sigmat_relstd, sigmatNorm_mean, sigmatNorm_relstd, xt_mean, xt_relstd
+        print ly_mean, ly_relstd, lyNorm_mean, lyNorm_relstd, sigmat_mean, sigmat_relstd, sigmatNorm_mean, sigmatNorm_relstd, xt_mean, xt_relstd, xtLeft_mean, xtLeft_relstd,xtRight_mean, xtRight_relstd
 
         histos['ly_mean_'+prod].Fill(ly_mean)
         histos['ly_relstd_'+prod].Fill(ly_relstd*100)
@@ -206,6 +239,10 @@ for iprod,prod in enumerate(producers):
         
         histos['xt_mean_'+prod].Fill(xt_mean*100)
         histos['xt_relstd_'+prod].Fill(xt_relstd*100)
+        histos['xtLeft_mean_'+prod].Fill(xtLeft_mean*100)
+        histos['xtLeft_relstd_'+prod].Fill(xtLeft_relstd*100)
+        histos['xtRight_mean_'+prod].Fill(xtRight_mean*100)
+        histos['xtRight_relstd_'+prod].Fill(xtRight_relstd*100)
 
     #-- Draw plots --#
 
@@ -233,7 +270,8 @@ for var, values in graphNames.items():
     histos[var+'_VsProd'].GetYaxis().SetTitleOffset(1.4)
     histos[var+'_VsProd'].Draw("ape")
 
-    if( ("relstd" in var) or ("xt_mean" in var) ):
+    if( ("relstd" in var) or ("xt_mean" in var) or ("xtLeft_mean" in var) or ("xtRight_mean" in var) 
+        or ("sigmat_mean" in var) ):
         minX = histos[var+'_VsProd'].GetXaxis().GetXmin()
         maxX = histos[var+'_VsProd'].GetXaxis().GetXmax()
         line = R.TLine(minX,values["thr"],maxX,values["thr"]);
