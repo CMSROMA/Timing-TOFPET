@@ -35,8 +35,8 @@ graphNames = {"ly_mean":{"min":50.,"max":80.,"nbinX":30,
                            "thr":5},
               "lyNorm_mean":{"min":0.75,"max":1.25,"nbinX":20,
                              "minPlot":0.75,"maxPlot":1.25,
-                             "xtitle":"Norm. LO mean of array [a.u.]",
-                             "xtitleVsProd":"Norm. LO mean of array (+/- std. dev.) [a.u.]",
+                             "xtitle":"Norm. LO mean of array",
+                             "xtitleVsProd":"Norm. LO mean of array (+/- std. dev.)",
                              "thr":-9},
               "lyNorm_relstd":{"min":0.,"max":20.,"nbinX":20,
                                "minPlot":0.,"maxPlot":15.,
@@ -56,8 +56,8 @@ graphNames = {"ly_mean":{"min":50.,"max":80.,"nbinX":30,
                                "thr":5},
               "sigmatNorm_mean":{"min":0.75,"max":1.25,"nbinX":20,
                                  "minPlot":0.75,"maxPlot":1.25,
-                                 "xtitle":"Norm. #sigma_{t} mean of array [a.u.]",
-                                 "xtitleVsProd":"Norm. #sigma_{t} mean of array (+/- std. dev.) [a.u.]",
+                                 "xtitle":"Norm. #sigma_{t} mean of array",
+                                 "xtitleVsProd":"Norm. #sigma_{t} mean of array (+/- std. dev.)",
                                  "thr":-9},
               "sigmatNorm_relstd":{"min":0.,"max":20.,"nbinX":20,
                                    "minPlot":0.,"maxPlot":15.,
@@ -65,38 +65,33 @@ graphNames = {"ly_mean":{"min":50.,"max":80.,"nbinX":30,
                                    "xtitleVsProd":"Relative spread of norm. array #sigma_{t} (+/- std. dev.) [%]",
                                    "thr":5},
 
-              "xt_mean":{"min":0.,"max":40,"nbinX":20,
+              "xt_mean":{"min":0.,"max":50,"nbinX":20,
                          "minPlot":0.,"maxPlot":50,
                          "xtitle":"Cross talk mean of array [%]",
                          "xtitleVsProd":"Cross talk mean of array (+/- std. dev.) [%]",
-                         "thr":15},
-              
+                         "thr":15},              
               "xt_relstd":{"min":0.,"max":100.,"nbinX":20,
-                           "minPlot":0.,"maxPlot":100.,
+                           "minPlot":0.,"maxPlot":50.,
                            "xtitle":"Relative spread of array cross talk [%]",
                            "xtitleVsProd":"Relative spread of array cross talk (+/- std. dev.) [%]",
                            "thr":5},
-
-              "xtLeft_mean":{"min":0.,"max":40,"nbinX":20,
+              "xtLeft_mean":{"min":0.,"max":50,"nbinX":20,
                              "minPlot":0.,"maxPlot":50,
                              "xtitle":"Cross talk (left) mean of array [%]",
                              "xtitleVsProd":"Cross talk (left) mean of array (+/- std. dev.) [%]",
-                             "thr":7.5},
-              
+                             "thr":7.5},                            
               "xtLeft_relstd":{"min":0.,"max":100.,"nbinX":20,
-                               "minPlot":0.,"maxPlot":100.,
+                               "minPlot":0.,"maxPlot":50.,
                                "xtitle":"Relative spread of array cross talk (left) [%]",
                                "xtitleVsProd":"Relative spread of array cross talk (left) (+/- std. dev.) [%]",
                                "thr":5},
-
-              "xtRight_mean":{"min":0.,"max":40,"nbinX":20,
+              "xtRight_mean":{"min":0.,"max":50,"nbinX":20,
                              "minPlot":0.,"maxPlot":50,
                              "xtitle":"Cross talk (right) mean of array [%]",
                              "xtitleVsProd":"Cross talk (right) mean of array (+/- std. dev.) [%]",
-                             "thr":7.5},
-              
+                             "thr":7.5},              
               "xtRight_relstd":{"min":0.,"max":100.,"nbinX":20,
-                               "minPlot":0.,"maxPlot":100.,
+                               "minPlot":0.,"maxPlot":50.,
                                "xtitle":"Relative spread of array cross talk (right) [%]",
                                "xtitleVsProd":"Relative spread of array cross talk (right) (+/- std. dev.) [%]",
                                "thr":5}
@@ -104,12 +99,54 @@ graphNames = {"ly_mean":{"min":50.,"max":80.,"nbinX":30,
 
 print graphNames
 
+graphNamesAllBars = {"ly_allbars":{"min":50.,"max":80.,"nbinX":30,
+                                   "minPlot":50.,"maxPlot":80.,
+                                   "xtitle":"LO bars",
+                                   "unit":" [a.u.]",
+                                   "thrRms":10,
+                                   "relStdMax":15.},
+                     "lyNorm_allbars":{"min":0.75,"max":1.25,"nbinX":20,
+                                       "minPlot":0.75,"maxPlot":1.25,
+                                       "xtitle":"Norm. LO bars",
+                                       "unit":"",
+                                       "thrRms":10,
+                                       "relStdMax":15.},
+
+                     "sigmat_allbars":{"min":100.,"max":160.,"nbinX":20,
+                                       "minPlot":100.,"maxPlot":160.,
+                                       "xtitle":"#sigma_{t} bars",
+                                       "unit":" [ps]",
+                                       "thrRms":10,
+                                       "relStdMax":15.},
+                     "sigmatNorm_allbars":{"min":0.75,"max":1.25,"nbinX":20,
+                                           "minPlot":0.75,"maxPlot":1.25,
+                                           "xtitle":"Norm. #sigma_{t} bars",
+                                           "unit":"",
+                                           "thrRms":10,
+                                           "relStdMax":15.},
+
+                     "xt_allbars":{"min":0.,"max":50,"nbinX":20,
+                                   "minPlot":0.,"maxPlot":50,
+                                   "xtitle":"Cross talk",
+                                   "unit":" [%]",
+                                   "thrRms":10,
+                                   "relStdMax":50.},
+                     
+                     }
+
 for var, values in graphNames.items():
     print var, values
     histos[var+'_VsProd']=R.TGraphErrors(len(producers)) 
 
+for var, values in graphNamesAllBars.items():
+    print var, values
+    histos[var+'_mean_VsProd']=R.TGraphErrors(len(producers)) 
+    histos[var+'_relstd_VsProd']=R.TGraphErrors(len(producers)) 
+
 for prod in producers:
     for var, values in graphNames.items():
+        histos[var+'_'+prod]=R.TH1F(var+'_'+prod,var+'_'+prod,values["nbinX"],values["min"],values["max"])        
+    for var, values in graphNamesAllBars.items():
         histos[var+'_'+prod]=R.TH1F(var+'_'+prod,var+'_'+prod,values["nbinX"],values["min"],values["max"])        
 
 #########################################################
@@ -140,7 +177,7 @@ for prod in producers:
 # 2) create dictionary dataPreIRR[prod][array]
 
 dataPreIRR = {}
-blacklistBars = [0]
+blacklistBars = [0,1]
 
 for prod in producers:
     for arr in listArrayPreIRR[prod]:
@@ -180,6 +217,11 @@ for iprod,prod in enumerate(producers):
     print "---------------------------------- producer ", prod, "----------------------------------"
 
     #-- Fill histograms --#
+    lyAll = []
+    lyNormAll = []
+    sigmatAll = []
+    sigmatNormAll = []
+    xtAll = []
 
     #loop over arrays
     for arr in listArrayPreIRR[prod]:
@@ -206,6 +248,13 @@ for iprod,prod in enumerate(producers):
             xtLeft[i]=meas['xtLeft']   
             xtRight[i]=meas['xtRight']   
 
+            #data from all arrays
+            lyAll.append(meas['ly'])
+            lyNormAll.append(meas['lyNorm'])
+            sigmatAll.append(meas['sigmat'])
+            sigmatNormAll.append(meas['sigmatNorm'])
+            xtAll.append(meas['xt'])
+
         #overall measurements for a given array
         #NOTE: check the dictionary "graphNames"
         ly_mean = ly.mean()
@@ -227,6 +276,7 @@ for iprod,prod in enumerate(producers):
 
         print ly_mean, ly_relstd, lyNorm_mean, lyNorm_relstd, sigmat_mean, sigmat_relstd, sigmatNorm_mean, sigmatNorm_relstd, xt_mean, xt_relstd, xtLeft_mean, xtLeft_relstd,xtRight_mean, xtRight_relstd
 
+        #NOTE: check the dictionary "graphNames"
         histos['ly_mean_'+prod].Fill(ly_mean)
         histos['ly_relstd_'+prod].Fill(ly_relstd*100)
         histos['lyNorm_mean_'+prod].Fill(lyNorm_mean)
@@ -244,11 +294,30 @@ for iprod,prod in enumerate(producers):
         histos['xtRight_mean_'+prod].Fill(xtRight_mean*100)
         histos['xtRight_relstd_'+prod].Fill(xtRight_relstd*100)
 
+    #-- Histograms with all bars
+    nbarsTot = len(lyAll) 
+    lyAll_np = np.asarray(lyAll)
+    lyNormAll_np = np.asarray(lyNormAll)
+    sigmatAll_np = np.asarray(sigmatAll)
+    sigmatNormAll_np = np.asarray(sigmatNormAll)
+    xtAll_np = np.asarray(xtAll)
+
+    for bar in range(0,nbarsTot):
+        #NOTE: check the dictionary "graphNames"
+        histos['ly_allbars_'+prod].Fill(lyAll_np[bar])
+        histos['lyNorm_allbars_'+prod].Fill(lyNormAll_np[bar])
+
+        histos['sigmat_allbars_'+prod].Fill(sigmatAll_np[bar])
+        histos['sigmatNorm_allbars_'+prod].Fill(sigmatNormAll_np[bar])
+
+        histos['xt_allbars_'+prod].Fill(xtAll_np[bar]*100)
+
     #-- Draw plots --#
 
-    #== plots for each producers
+    #== plots for each producers (array values)
     for var, values in graphNames.items():
 
+        #measurements per array
         histos[var+'_'+prod].GetXaxis().SetTitle(values["xtitle"])    
         histos[var+'_'+prod].Draw("hist")
         for ext in ['.pdf','.png']:
@@ -257,8 +326,31 @@ for iprod,prod in enumerate(producers):
         histos[var+'_VsProd'].SetPoint(iprod,prodN,histos[var+'_'+prod].GetMean())
         histos[var+'_VsProd'].SetPointError(iprod,0.,histos[var+'_'+prod].GetRMS())
 
+    #== plots for each producers (all bars together)
+    for var, values in graphNamesAllBars.items():
+
+        #measurements from all bars together
+        histos[var+'_'+prod].GetXaxis().SetTitle(values["xtitle"])            
+        histos[var+'_'+prod].Draw("hist")        
+        for ext in ['.pdf','.png']:
+            c1.SaveAs(outputdir+"/"+var+'_'+prod+ext)
+
+        mean = histos[var+'_'+prod].GetMean()
+        rms = histos[var+'_'+prod].GetRMS()
+        sigma_mean = rms / mt.sqrt(histos[var+'_'+prod].GetEntries())
+        sigma_rms = rms / mt.sqrt( 2 * (histos[var+'_'+prod].GetEntries()-1) )
+        relsigma_mean = sigma_mean / mean
+        relsigma_rms = sigma_rms / rms
+        ratio = rms / mean
+        sigma_ratio = mt.sqrt(relsigma_mean**2 + relsigma_rms**2) * ratio
+        histos[var+'_mean_VsProd'].SetPoint(iprod,prodN, mean )
+        histos[var+'_mean_VsProd'].SetPointError(iprod,0., sigma_mean )
+        histos[var+'_relstd_VsProd'].SetPoint(iprod,prodN, ratio*100 )
+        histos[var+'_relstd_VsProd'].SetPointError(iprod,0., sigma_ratio*100 )
+
 # Summary plots vs producer
 
+# array values
 for var, values in graphNames.items():
 
     histos[var+'_VsProd'].SetMarkerStyle(20)
@@ -280,5 +372,42 @@ for var, values in graphNames.items():
 
     for ext in ['.pdf','.png']:
         c1.SaveAs(outputdir+"/"+var+'_VsProd'+ext)
+
+# all bars
+for var, values in graphNamesAllBars.items():
+
+    histos[var+'_mean_VsProd'].SetMarkerStyle(20)
+    histos[var+'_mean_VsProd'].GetXaxis().SetNdivisions(505)
+    histos[var+'_mean_VsProd'].GetXaxis().SetTitle("Vendor ID")
+    histos[var+'_mean_VsProd'].GetYaxis().SetTitle(values["xtitle"]+" - mean"+values["unit"])
+    histos[var+'_mean_VsProd'].GetYaxis().SetLimits(values["minPlot"],values["maxPlot"])
+    histos[var+'_mean_VsProd'].GetYaxis().SetRangeUser(values["minPlot"],values["maxPlot"])
+    histos[var+'_mean_VsProd'].GetYaxis().SetTitleOffset(1.4)
+    histos[var+'_mean_VsProd'].Draw("ape")
+
+    for ext in ['.pdf','.png']:
+        c1.SaveAs(outputdir+"/"+var+'_mean_VsProd'+ext)
+
+    histos[var+'_relstd_VsProd'].SetMarkerStyle(20)
+    histos[var+'_relstd_VsProd'].GetXaxis().SetNdivisions(505)
+    histos[var+'_relstd_VsProd'].GetXaxis().SetTitle("Vendor ID")
+    histos[var+'_relstd_VsProd'].GetYaxis().SetTitle(values["xtitle"]+" - rel. std. [%]")
+    histos[var+'_relstd_VsProd'].GetYaxis().SetLimits(0.,values["relStdMax"])
+    histos[var+'_relstd_VsProd'].GetYaxis().SetRangeUser(0.,values["relStdMax"])
+    histos[var+'_relstd_VsProd'].GetYaxis().SetTitleOffset(1.4)
+    histos[var+'_relstd_VsProd'].Draw("ape")
+
+    minX = histos[var+'_relstd_VsProd'].GetXaxis().GetXmin()
+    maxX = histos[var+'_relstd_VsProd'].GetXaxis().GetXmax()
+    line = R.TLine(minX,values["thrRms"],maxX,values["thrRms"]);
+    line.SetLineColor(2)
+    line.Draw("same")
+
+    for ext in ['.pdf','.png']:
+        c1.SaveAs(outputdir+"/"+var+'_relstd_VsProd'+ext)
+
+    
+
+
 
 
