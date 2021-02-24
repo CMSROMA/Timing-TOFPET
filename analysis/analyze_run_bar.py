@@ -28,7 +28,7 @@ def setParameters(function,Norm,Peak):
 
     ## Normalisation
     function.SetParameter(0,Norm)
-    function.SetParLimits(0,0.,Norm*1000.)
+    function.SetParLimits(0,0.1,Norm*1000.)
     
     ## 1274 KeV compton 
     function.SetParameter(1,0.4)
@@ -51,10 +51,10 @@ def setParameters(function,Norm,Peak):
     ## 511 KeV compton
     function.SetParameter(6,20.)
     function.SetParLimits(6,0.,1000.)
-    function.SetParameter(7,0.4)
-    function.SetParLimits(7,0.1,1)
-    function.SetParameter(8,0.7*Peak)
-    function.SetParLimits(8,0.6*Peak,0.85*Peak)
+    function.SetParameter(7,0.2)
+    function.SetParLimits(7,0.05,1)
+    function.SetParameter(8,0.6*Peak)
+    function.SetParLimits(8,0.3*Peak,Peak)
     
     ## Trigger turn on (Compton+BS)
     function.SetParameter(12,5.)
@@ -66,7 +66,7 @@ def setParameters(function,Norm,Peak):
     function.SetParameter(9,15.)
     function.SetParLimits(9,0.,1000.)
     function.SetParameter(10,Peak)
-    function.SetParLimits(10,0.9*Peak,1.1*Peak)
+    function.SetParLimits(10,0.8*Peak,1.2*Peak)
     function.SetParameter(11,0.05*Peak)
     function.SetParLimits(11,0.02*Peak,0.2*Peak)
     
@@ -74,41 +74,41 @@ def setParameters(function,Norm,Peak):
     function.SetParameter(14,0.01)
     function.SetParLimits(14,0.,10.)
     function.SetParameter(15,0.45*Peak)
-    function.SetParLimits(15,0.3*Peak,0.6*Peak)
+    function.SetParLimits(15,0.2*Peak,0.7*Peak)
     function.SetParameter(16,0.07*Peak)
-    function.SetParLimits(16,0.04*Peak,0.13*Peak)
+    function.SetParLimits(16,0.04*Peak,0.5*Peak)
     ##
 
 def setParameters_coinc(function,Norm,Peak):
 
     ## Normalisation
     function.SetParameter(0,Norm)
-    function.SetParLimits(0,0.,Norm*1000.)
+    function.SetParLimits(0,0.1,Norm*1000.)
     
     ## 511 KeV compton
     function.SetParameter(3,20.)
     function.SetParLimits(3,0.,1000.)
     function.SetParameter(4,0.4)
     function.SetParLimits(4,0.1,1)
-    function.SetParameter(5,0.6*Peak)
+    function.SetParameter(5,0.5*Peak)
     function.SetParLimits(5,0.05*Peak,1.3*Peak)
     
     ## Trigger turn on (Compton+BS)
     function.SetParameter(1,5.)
-    function.SetParLimits(1,0,10.)
+    function.SetParLimits(1,0,100.)
     function.SetParameter(2,5.)
     function.SetParLimits(2,0.1,10.)
     
     ## 511 KeV photoelectric
     function.SetParameter(6,15.)
-    function.SetParLimits(6,0.,1000.)
+    function.SetParLimits(6,5.,1000.)
     function.SetParameter(7,Peak)
-    function.SetParLimits(7,0.9*Peak,1.1*Peak)
+    function.SetParLimits(7,0.8*Peak,1.1*Peak)
     function.SetParameter(8,0.05*Peak)
     function.SetParLimits(8,0.02*Peak,0.2*Peak)
 
     #flat background
-    function.SetParameter(9,15.)
+    function.SetParameter(9,5.)
     function.SetParLimits(9,0.,1000.)
     
 def totalFunction(x,par):
@@ -436,14 +436,20 @@ tfilePed2 = TFile.Open(input_filename_ped2)
 treePed2 = tfilePed2.Get("data")
 
 histos_Ped1 = {} 
+histosVsTot_Ped1 = {} 
 mean_Ped1 = {} 
 rms_Ped1 = {} 
 histos_Ped2 = {} 
+histosVsTot_Ped2 = {} 
 mean_Ped2 = {} 
 rms_Ped2 = {} 
 histos_PedTot = {} 
+histosVsTot_PedTot = {} 
 mean_PedTot = {} 
 rms_PedTot = {} 
+value_PedTot = {} 
+slope_PedTot = {} 
+
 
 for ch in channels:
 
@@ -451,13 +457,23 @@ for ch in channels:
     #histo1 = TH1F("h1_ped1_energy_ch"+str(ch), "", 500, 0, 500)
     histos_Ped1[ch]=histo1
 
+    for tacID in range(0,4):
+        histo1 = TProfile("tprof_ped1_energyVsTot_ch%d_tac%d"%(ch,tacID), "", 100,-2., 2., 0, 500)
+        histosVsTot_Ped1[(ch,tacID)]=histo1
+
     histo2 = TProfile("tprof_ped2_energy_ch"+str(ch), "", 4, -0.5, 3.5, 0, 500,"s")
     #histo2 = TH1F("h1_ped2_energy_ch"+str(ch), "", 500, 0, 500)
     histos_Ped2[ch]=histo2
+    for tacID in range(0,4):
+        histo2 = TProfile("tprof_ped2_energyVsTot_ch%d_tac%d"%(ch,tacID), "", 100,-2., 2., 0, 500)
+        histosVsTot_Ped2[(ch,tacID)]=histo2
 
     histoTot = TProfile("tprof_pedTot_energy_ch"+str(ch), "", 4, -0.5, 3.5, 0, 500,"s")
     #histoTot = TH1F("h1_pedTot_energy_ch"+str(ch), "", 500, 0, 500)
     histos_PedTot[ch]=histoTot
+    for tacID in range(0,4):
+        histoTot = TProfile("tprof_pedTot_energyVsTot_ch%d_tac%d"%(ch,tacID), "", 100,-2.,2., 0, 500)
+        histosVsTot_PedTot[(ch,tacID)]=histoTot
 
     for tac in range (0,4):
         mean_Ped1[(ch,tac)]=-9 
@@ -466,25 +482,36 @@ for ch in channels:
         rms_Ped2[(ch,tac)]=-9 
         mean_PedTot[(ch,tac)]=-9 
         rms_PedTot[(ch,tac)]=-9 
+        value_PedTot[(ch,tac)]=-9 
+        slope_PedTot[(ch,tac)]=-9 
 
 tfilePed1.cd()
+totP1=treePed1.GetEntries()
 for event in range (0,treePed1.GetEntries()):
     treePed1.GetEntry(event)
-    for ch in channels:
-        if( treePed1.channelID==ch):
-            histos_Ped1[ch].Fill(treePed1.tacID,treePed1.energy)
-            histos_PedTot[ch].Fill(treePed1.tacID,treePed1.energy)
+    if (event%100000==0):
+        print "Ped1 %d/%d"%(event,totP1)
+    histos_Ped1[treePed1.channelID].Fill(treePed1.tacID,treePed1.energy)
+    histos_PedTot[treePed1.channelID].Fill(treePed1.tacID,treePed1.energy)
+    #in old TOFPET tot_ped is shifted by 1 clock unit... to align with PHYS remove 5ns
+    histosVsTot_Ped1[(treePed1.channelID,treePed1.tacID)].Fill((treePed1.tot/1000-310-5)/5,treePed1.energy)
+    histosVsTot_PedTot[(treePed1.channelID,treePed1.tacID)].Fill((treePed1.tot/1000-310-5)/5,treePed1.energy)
 
 tfilePed2.cd()
+totP2=treePed2.GetEntries()
 for event in range (0,treePed2.GetEntries()):
     treePed2.GetEntry(event)
-    for ch in channels:
-        if( treePed2.channelID==ch):
-            histos_Ped2[ch].Fill(treePed2.tacID,treePed2.energy)
-            histos_PedTot[ch].Fill(treePed2.tacID,treePed2.energy)
+    if (event%100000==0):
+        print "Ped2 %d/%d"%(event,totP2)
+    histos_Ped2[treePed2.channelID].Fill(treePed2.tacID,treePed2.energy)
+    histos_PedTot[treePed2.channelID].Fill(treePed2.tacID,treePed2.energy)
+    histosVsTot_Ped2[(treePed2.channelID,treePed2.tacID)].Fill((treePed2.tot/1000-310-5)/5,treePed2.energy)
+    histosVsTot_PedTot[(treePed2.channelID,treePed2.tacID)].Fill((treePed2.tot/1000-310-5)/5,treePed2.energy)
 
 h1_pedTotMean=TH1F("h1_pedTotMean","",3000,-0.5,2999.5)
 h1_pedTotRms=TH1F("h1_pedTotRms","",3000,-0.5,2999.5)
+h1_pedTotValue=TH1F("h1_pedTotValue","",10000,-0.5,9999.5)
+h1_pedTotSlope=TH1F("h1_pedTotSlope","",10000,-0.5,9999.5)
 
 for ch in channels:
     for tac in range (0,4):
@@ -498,10 +525,24 @@ for ch in channels:
         mean_PedTot[(ch,tac)]=histos_PedTot[ch].GetBinContent(tac+1)
         rms_PedTot[(ch,tac)]=histos_PedTot[ch].GetBinError(tac+1)
 
+        histosVsTot_PedTot[(ch,tac)].Print()
+        if ( histosVsTot_PedTot[(ch,tac)].GetEntries()>0):
+            histosVsTot_PedTot[(ch,tac)].Fit("pol1","Q+")
+            histosVsTot_PedTot[(ch,tac)].GetFunction("pol1").Print()
+            value_PedTot[(ch,tac)]=histosVsTot_PedTot[(ch,tac)].GetFunction("pol1").GetParameter(0)
+            slope_PedTot[(ch,tac)]=histosVsTot_PedTot[(ch,tac)].GetFunction("pol1").GetParameter(1)
+        else:
+            value_PedTot[(ch,tac)]=0
+            slope_PedTot[(ch,tac)]=0
+
         h1_pedTotMean.SetBinContent(ch*4+tac+1,mean_PedTot[(ch,tac)])
         h1_pedTotMean.SetBinError(ch*4+tac+1,0)
         h1_pedTotRms.SetBinContent(ch*4+tac+1,rms_PedTot[(ch,tac)])
         h1_pedTotRms.SetBinError(ch*4+tac+1,0)
+        h1_pedTotValue.SetBinContent(ch*4+tac+1,value_PedTot[(ch,tac)])
+        h1_pedTotValue.SetBinError(ch*4+tac+1,0)
+        h1_pedTotSlope.SetBinContent(ch*4+tac+1,slope_PedTot[(ch,tac)])
+        h1_pedTotSlope.SetBinError(ch*4+tac+1,0)
 
 commandOutputDir = "mkdir -p "+opt.outputDir
 print commandOutputDir
@@ -511,6 +552,8 @@ pedoutput = TFile( opt.outputDir+"/"+"ped_Run"+run+"_BAR"+str(str(opt.barCode).z
 pedoutput.cd()
 h1_pedTotMean.Write()
 h1_pedTotRms.Write()
+h1_pedTotValue.Write()
+h1_pedTotSlope.Write()
 pedoutput.Close()
 
 print "Pedestals analyzed"
@@ -675,29 +718,79 @@ histos=Map(tfileoutput)
 c1_CTR = TCanvas("c1_CTR", "", 900, 700)
 #c1_energy.cd()
 c1_CTR.cd()
-histos['h1_CTR'].Draw("PE")  
-#f_gaus = TF1("f_gaus","gaus",histos['h1_CTR'].GetMean()-2*histos['h1_CTR'].GetRMS(),histos['h1_CTR'].GetMean()+2*histos['h1_CTR'].GetRMS())
-#histos['h1_CTR'].Fit(f_gaus,"LR+0N","",histos['h1_CTR'].GetMean()-1*histos['h1_CTR'].GetRMS(),histos['h1_CTR'].GetMean()+1*histos['h1_CTR'].GetRMS())
-#histos['h1_CTR'].Fit(f_gaus,"LR+","",f_gaus.GetParameter(1)-3.5*f_gaus.GetParameter(2),f_gaus.GetParameter(1)+3.5*f_gaus.GetParameter(2))
-#fix fit range - Livia: changed from GetMean
-f_gaus = TF1("f_gaus","gaus",histos['h1_CTR'].GetBinCenter(histos['h1_CTR'].GetMaximumBin())-550.,histos['h1_CTR'].GetBinCenter(histos['h1_CTR'].GetMaximumBin())+550.)
-histos['h1_CTR'].Fit(f_gaus,"R+0N","",histos['h1_CTR'].GetBinCenter(histos['h1_CTR'].GetMaximumBin())-550.,histos['h1_CTR'].GetBinCenter(histos['h1_CTR'].GetMaximumBin())+550.)
-histos['h1_CTR'].Fit(f_gaus,"R+","",f_gaus.GetParameter(1)-550.,f_gaus.GetParameter(1)+550.)
+for hh in ['CTR','tDiff']:
+    histos['h1_%s'%hh].Draw("PE")  
+    #f_gaus = TF1("f_gaus","gaus",histos['h1_%s'%hh].GetMean()-2*histos['h1_%s'%hh].GetRMS(),histos['h1_%s'%hh].GetMean()+2*histos['h1_%s'%hh].GetRMS())
+    #histos['h1_%s'%hh].Fit(f_gaus,"LR+0N","",histos['h1_%s'%hh].GetMean()-1*histos['h1_%s'%hh].GetRMS(),histos['h1_%s'%hh].GetMean()+1*histos['h1_%s'%hh].GetRMS())
+    #histos['h1_%s'%hh].Fit(f_gaus,"LR+","",f_gaus.GetParameter(1)-3.5*f_gaus.GetParameter(2),f_gaus.GetParameter(1)+3.5*f_gaus.GetParameter(2))
+    #fix fit range - Livia: changed from GetMean
+    f_gaus = TF1("f_gaus","gaus",histos['h1_%s'%hh].GetBinCenter(histos['h1_%s'%hh].GetMaximumBin())-550.,histos['h1_%s'%hh].GetBinCenter(histos['h1_%s'%hh].GetMaximumBin())+550.)
+    histos['h1_%s'%hh].Fit(f_gaus,"R+0N","",histos['h1_%s'%hh].GetBinCenter(histos['h1_%s'%hh].GetMaximumBin())-550.,histos['h1_%s'%hh].GetBinCenter(histos['h1_%s'%hh].GetMaximumBin())+550.)
+    histos['h1_%s'%hh].Fit(f_gaus,"R+","",f_gaus.GetParameter(1)-550.,f_gaus.GetParameter(1)+550.)
 
-#f_gaus = TF1("f_gaus","gaus",histos['h1_CTR'].GetMean()-550.,histos['h1_CTR'].GetMean()+550.)
-#histos['h1_CTR'].Fit(f_gaus,"R+0N","",histos['h1_CTR'].GetMean()-550.,histos['h1_CTR'].GetMean()+550.)
-#histos['h1_CTR'].Fit(f_gaus,"R+","",f_gaus.GetParameter(1)-550.,f_gaus.GetParameter(1)+550.)
+    #f_gaus = TF1("f_gaus","gaus",histos['h1_%s'%hh].GetMean()-550.,histos['h1_%s'%hh].GetMean()+550.)
+    #histos['h1_%s'%hh].Fit(f_gaus,"R+0N","",histos['h1_%s'%hh].GetMean()-550.,histos['h1_%s'%hh].GetMean()+550.)
+    #histos['h1_%s'%hh].Fit(f_gaus,"R+","",f_gaus.GetParameter(1)-550.,f_gaus.GetParameter(1)+550.)
 
 
-histos['h1_CTR'].GetXaxis().SetRangeUser(f_gaus.GetParameter(1)-550.,f_gaus.GetParameter(1)+550.)
-histos['h1_CTR'].GetXaxis().SetTitle("t_{bar} - t_{pixel} [ps]")
-histos['h1_CTR'].GetYaxis().SetTitle("Events")
-histos['h1_CTR'].GetYaxis().SetTitleOffset(1.6)
+    histos['h1_%s'%hh].GetXaxis().SetRangeUser(f_gaus.GetParameter(1)-550.,f_gaus.GetParameter(1)+550.)
+    if (hh=='CTR'):
+        histos['h1_%s'%hh].GetXaxis().SetTitle("t_{bar} - t_{pixel} [ps]")
+    elif (hh=='tDiff'):
+        histos['h1_%s'%hh].GetXaxis().SetTitle("(t_{1} - t_{2})/2. [ps]")
+    histos['h1_%s'%hh].GetYaxis().SetTitle("Events")
+    histos['h1_%s'%hh].GetYaxis().SetTitleOffset(1.6)
 
-fitResults[("barCoinc","CTR","mean","value")]=f_gaus.GetParameter(1)
-fitResults[("barCoinc","CTR","mean","sigma")]=f_gaus.GetParError(1)
-fitResults[("barCoinc","CTR","sigma","value")]=f_gaus.GetParameter(2)
-fitResults[("barCoinc","CTR","sigma","sigma")]=f_gaus.GetParError(2)
+    if (hh=='CTR'):
+        fitResults[("barCoinc","CTR","mean","value")]=f_gaus.GetParameter(1)
+        fitResults[("barCoinc","CTR","mean","sigma")]=f_gaus.GetParError(1)
+        fitResults[("barCoinc","CTR","sigma","value")]=f_gaus.GetParameter(2)
+        fitResults[("barCoinc","CTR","sigma","sigma")]=f_gaus.GetParError(2)
+    elif (hh=='tDiff'):
+        fitResults[("barCoinc","TDIFF","mean","value")]=f_gaus.GetParameter(1)
+        fitResults[("barCoinc","TDIFF","mean","sigma")]=f_gaus.GetParError(1)
+        fitResults[("barCoinc","TDIFF","sigma","value")]=f_gaus.GetParameter(2)
+        fitResults[("barCoinc","TDIFF","sigma","sigma")]=f_gaus.GetParError(2)
+
+    pt3 = TPaveText(0.100223,0.915556,0.613586,0.967407,"brNDC")
+    text3 = pt3.AddText( "Run" + str(opt.run).zfill(6) + " BAR" + str(opt.barCode).zfill(6) )
+    pt3.SetFillColor(0)
+    pt3.Draw()
+    #FIXME: check why it does not show the label on the canvas!
+
+    tfileoutput.cd()
+    c1_CTR.cd()
+    c1_CTR.Update()
+    c1_CTR.SaveAs(opt.outputDir+"/"+"Run"+str(opt.run).zfill(6)+"_BAR"+str(opt.barCode).zfill(6)+"_%s"%hh+".pdf")
+    c1_CTR.SaveAs(opt.outputDir+"/"+"Run"+str(opt.run).zfill(6)+"_BAR"+str(opt.barCode).zfill(6)+"_%s"%hh+".png")
+    c1_CTR.Write()
+    histos['h1_%s'%hh].Write()
+
+c1_tDiff = TCanvas("c1_tDiff", "", 900, 700)
+#c1_energy.cd()
+c1_tDiff.cd()
+histos['h2_tDiffVsBarEnergy'].FitSlicesY()
+h2=gDirectory.FindObject('h2_tDiffVsBarEnergy_2')
+h2.Draw("PE")  
+f_res = TF1("f_res","TMath::Sqrt([0]*[0]/x+[1]*[1]/(x*x)+[2]*[2])",50,1000)
+f_res.SetParLimits(0,500,5000)
+f_res.SetParLimits(1,5000,50000)
+f_res.SetParLimits(2,0,500)
+f_res.SetParameter(0,2000)
+f_res.SetParameter(1,20000)
+f_res.FixParameter(2,20)
+h2.Fit(f_res,"0")
+h2.Fit(f_res,"+")
+
+h2.GetXaxis().SetTitle("Energy [KeV]")
+h2.GetYaxis().SetTitle("#sigma_{t} (bar) [ps]")
+h2.GetYaxis().SetRangeUser(0,700)
+h2.GetYaxis().SetTitleOffset(1.6)
+
+fitResults[("barCoinc","TDIFF","stoc","value")]=f_res.GetParameter(0)
+fitResults[("barCoinc","TDIFF","stoc","sigma")]=f_res.GetParError(0)
+fitResults[("barCoinc","TDIFF","noise","value")]=f_res.GetParameter(1)
+fitResults[("barCoinc","TDIFF","noise","sigma")]=f_res.GetParError(1)
 
 pt3 = TPaveText(0.100223,0.915556,0.613586,0.967407,"brNDC")
 text3 = pt3.AddText( "Run" + str(opt.run).zfill(6) + " BAR" + str(opt.barCode).zfill(6) )
@@ -706,12 +799,13 @@ pt3.Draw()
 #FIXME: check why it does not show the label on the canvas!
 
 tfileoutput.cd()
-c1_CTR.cd()
-c1_CTR.Update()
-c1_CTR.SaveAs(opt.outputDir+"/"+"Run"+str(opt.run).zfill(6)+"_BAR"+str(opt.barCode).zfill(6)+"_CTR"+".pdf")
-c1_CTR.SaveAs(opt.outputDir+"/"+"Run"+str(opt.run).zfill(6)+"_BAR"+str(opt.barCode).zfill(6)+"_CTR"+".png")
-c1_CTR.Write()
-histos['h1_CTR'].Write()
+c1_tDiff.cd()
+c1_tDiff.Update()
+c1_tDiff.SaveAs(opt.outputDir+"/"+"Run"+str(opt.run).zfill(6)+"_BAR"+str(opt.barCode).zfill(6)+"_tDiffVsEnergy"+".pdf")
+c1_tDiff.SaveAs(opt.outputDir+"/"+"Run"+str(opt.run).zfill(6)+"_BAR"+str(opt.barCode).zfill(6)+"_tDiffVsEnergy"+".png")
+c1_tDiff.Write()
+h2.Write()
+
 
 ################################################
 ## 9) Write histograms
@@ -720,6 +814,8 @@ histos['h1_CTR'].Write()
 #Pedestals
 h1_pedTotMean.Write()
 h1_pedTotRms.Write()
+h1_pedTotValue.Write()
+h1_pedTotSlope.Write()
 
 for ch in channels:
 
@@ -759,12 +855,18 @@ print "--- CTR ---"
 print "CTR mean: "+str(fitResults[('barCoinc',"CTR","mean","value")])+" +/- "+str(fitResults[('barCoinc',"CTR","mean","sigma")]) 
 print "CTR sigma: "+str(fitResults[('barCoinc',"CTR","sigma","value")])+" +/- "+str(fitResults[('barCoinc',"CTR","sigma","sigma")]) 
 
+#Bar+pixel
+print "--- TDIFF ---"
+print "TDIFF stoc: "+str(fitResults[('barCoinc',"TDIFF","stoc","value")])+" +/- "+str(fitResults[('barCoinc',"TDIFF","stoc","sigma")]) 
+print "TDIFF noise: "+str(fitResults[('barCoinc',"TDIFF","noise","value")])+" +/- "+str(fitResults[('barCoinc',"TDIFF","noise","sigma")]) 
+print "TDIFF sigma: "+str(fitResults[('barCoinc',"TDIFF","sigma","value")])+" +/- "+str(fitResults[('barCoinc',"TDIFF","sigma","sigma")]) 
+
 #Elog 
 print 
 print "--- COPY AND PASTE IN THE ELOG ---"
 print 
 #print "----"
-print "xtal:{0} RUN:{1} ly_bar:{2:.2f} Eres_bar:{3:.1f}% ctr_sigma:({4:.2f}+/-{5:.2f})ps ctr_mean:{6:.2f}ps -- ly_pixel:{7:.2f} Eres_pixel:{8:.1f}%".format(
+print "xtal:{0} RUN:{1} ly_bar:{2:.2f} Eres_bar:{3:.1f}% ctr_sigma:({4:.2f}+/-{5:.2f})ps ctr_mean:{6:.2f}ps tdiff_sigma:({7:.2f}+/-{8:.2f})ps stoc:({9:.2f}+/-{10:.2f})ps -- ly_pixel:{11:.2f} Eres_pixel:{12:.1f}%".format(
     opt.barCode,
     opt.run,
     fitResults[('barCoinc',"peak1","mean","value")],
@@ -772,6 +874,10 @@ print "xtal:{0} RUN:{1} ly_bar:{2:.2f} Eres_bar:{3:.1f}% ctr_sigma:({4:.2f}+/-{5
     fitResults[('barCoinc',"CTR","sigma","value")],
     fitResults[('barCoinc',"CTR","sigma","sigma")],
     fitResults[('barCoinc',"CTR","mean","value")],
+    fitResults[('barCoinc',"TDIFF","sigma","value")],
+    fitResults[('barCoinc',"TDIFF","sigma","sigma")],
+    fitResults[('barCoinc',"TDIFF","stoc","value")],
+    fitResults[('barCoinc',"TDIFF","stoc","sigma")],
     fitResults[('pixelCoinc',"peak1","mean","value")],
     100*fitResults[('pixelCoinc',"peak1","sigma","value")]/fitResults[('pixelCoinc',"peak1","mean","value")]   
 )
@@ -836,6 +942,15 @@ err_CTR_mean_barCoinc = array( 'd', [ -999. ] )
 CTR_sigma_barCoinc = array( 'd', [ -999. ] )
 err_CTR_sigma_barCoinc = array( 'd', [ -999. ] )
 #
+TDIFF_stoc_barCoinc = array( 'd', [ -999. ] )
+err_TDIFF_stoc_barCoinc = array( 'd', [ -999. ] )
+TDIFF_noise_barCoinc = array( 'd', [ -999. ] )
+err_TDIFF_noise_barCoinc = array( 'd', [ -999. ] )
+TDIFF_mean_barCoinc = array( 'd', [ -999. ] )
+err_TDIFF_mean_barCoinc = array( 'd', [ -999. ] )
+TDIFF_sigma_barCoinc = array( 'd', [ -999. ] )
+err_TDIFF_sigma_barCoinc = array( 'd', [ -999. ] )
+#
 temp_pixel = array( 'd', [ -999. ] )
 temp_bar = array( 'd', [ -999. ] )
 temp_int = array( 'd', [ -999. ] )
@@ -883,6 +998,15 @@ treeOutput.Branch( 'CTR_mean_barCoinc', CTR_mean_barCoinc, 'CTR_mean_barCoinc/D'
 treeOutput.Branch( 'err_CTR_mean_barCoinc', err_CTR_mean_barCoinc, 'err_CTR_mean_barCoinc/D' )
 treeOutput.Branch( 'CTR_sigma_barCoinc', CTR_sigma_barCoinc, 'CTR_sigma_barCoinc/D' )
 treeOutput.Branch( 'err_CTR_sigma_barCoinc', err_CTR_sigma_barCoinc, 'err_CTR_sigma_barCoinc/D' )
+#
+treeOutput.Branch( 'TDIFF_stoc_barCoinc', TDIFF_stoc_barCoinc, 'TDIFF_stoc_barCoinc/D' )
+treeOutput.Branch( 'err_TDIFF_stoc_barCoinc', err_TDIFF_stoc_barCoinc, 'err_TDIFF_stoc_barCoinc/D' )
+treeOutput.Branch( 'TDIFF_noise_barCoinc', TDIFF_noise_barCoinc, 'TDIFF_noise_barCoinc/D' )
+treeOutput.Branch( 'err_TDIFF_noise_barCoinc', err_TDIFF_noise_barCoinc, 'err_TDIFF_noise_barCoinc/D' )
+treeOutput.Branch( 'TDIFF_mean_barCoinc', TDIFF_mean_barCoinc, 'TDIFF_mean_barCoinc/D' )
+treeOutput.Branch( 'err_TDIFF_mean_barCoinc', err_TDIFF_mean_barCoinc, 'err_TDIFF_mean_barCoinc/D' )
+treeOutput.Branch( 'TDIFF_sigma_barCoinc', TDIFF_sigma_barCoinc, 'TDIFF_sigma_barCoinc/D' )
+treeOutput.Branch( 'err_TDIFF_sigma_barCoinc', err_TDIFF_sigma_barCoinc, 'err_TDIFF_sigma_barCoinc/D' )
 #
 treeOutput.Branch( 'temp_pixel', temp_pixel, 'temp_pixel/D' )
 treeOutput.Branch( 'temp_bar', temp_bar, 'temp_bar/D' )
@@ -932,6 +1056,16 @@ err_CTR_mean_barCoinc[0] = fitResults[('barCoinc',"CTR","mean","sigma")]
 CTR_sigma_barCoinc[0] = fitResults[('barCoinc',"CTR","sigma","value")]
 err_CTR_sigma_barCoinc[0] = fitResults[('barCoinc',"CTR","sigma","sigma")]
 #
+TDIFF_stoc_barCoinc[0] = fitResults[('barCoinc',"TDIFF","stoc","value")]
+err_TDIFF_stoc_barCoinc[0] = fitResults[('barCoinc',"TDIFF","stoc","sigma")]
+TDIFF_noise_barCoinc[0] = fitResults[('barCoinc',"TDIFF","noise","value")]
+err_TDIFF_noise_barCoinc[0] = fitResults[('barCoinc',"TDIFF","noise","sigma")]
+#
+TDIFF_mean_barCoinc[0] = fitResults[('barCoinc',"TDIFF","mean","value")]
+err_TDIFF_mean_barCoinc[0] = fitResults[('barCoinc',"TDIFF","mean","sigma")]
+TDIFF_sigma_barCoinc[0] = fitResults[('barCoinc',"TDIFF","sigma","value")]
+err_TDIFF_sigma_barCoinc[0] = fitResults[('barCoinc',"TDIFF","sigma","sigma")]
+
 temp_pixel[0] = Temp_pixel
 temp_bar[0] = Temp_bar
 temp_int[0] = Temp_internal

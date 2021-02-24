@@ -11,8 +11,10 @@ void coincidenceAnalysisBar::LoadPedestals(TString pedestalFile)
   f->ls();
   pedMean = (TH1F*) f->Get("h1_pedTotMean");
   pedRms = (TH1F*) f->Get("h1_pedTotRms");
+  pedValue = (TH1F*) f->Get("h1_pedTotValue");
+  pedSlope = (TH1F*) f->Get("h1_pedTotSlope");
   
-  if (!pedMean or !pedRms)
+  if (!pedMean or !pedRms or !pedValue or !pedSlope)
     std::cout << "Pedestal histograms not found in " << pedestalFile << std::endl;
 
   // return;
@@ -101,14 +103,17 @@ void coincidenceAnalysisBar::Loop()
       Long64_t ientry = LoadTree(jentry);
       if (ientry < 0) break;
       nb = fChain->GetEntry(jentry);   nbytes += nb;
-
-      float energyPixel = energy[0]-pedMean->GetBinContent(channels[0]*4+tacID[0]+1);
+      
+      float pedPixel=pedValue->GetBinContent(channels[0]*4+tacID[0]+1)+pedSlope->GetBinContent(channels[0]*4+tacID[0]+1)*(tot[0]/1000-310)/5.;
+      float energyPixel = energy[0]-pedPixel;
 
       if( energy[1]==-9. || energy[2]==-9. )
 	continue;
 
-      float energy1 = energy[1]-pedMean->GetBinContent(channels[1]*4+tacID[1]+1);
-      float energy2 = energy[2]-pedMean->GetBinContent(channels[2]*4+tacID[2]+1);
+      float ped1=pedValue->GetBinContent(channels[1]*4+tacID[1]+1)+pedSlope->GetBinContent(channels[1]*4+tacID[1]+1)*(tot[1]/1000-310)/5.;
+      float ped2=pedValue->GetBinContent(channels[2]*4+tacID[2]+1)+pedSlope->GetBinContent(channels[2]*4+tacID[2]+1)*(tot[2]/1000-310)/5.;
+      float energy1 = energy[1]-ped1;
+      float energy2 = energy[2]-ped2;
       float energyBar =  energy1 + energy2;
       h1_energyTot_bar->Fill(energyBar);
       h1_energy1_bar->Fill(energy1);

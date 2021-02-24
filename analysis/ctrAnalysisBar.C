@@ -11,8 +11,10 @@ void ctrAnalysisBar::LoadPedestals(TString pedestalFile)
   f->ls();
   pedMean = (TH1F*) f->Get("h1_pedTotMean");
   pedRms = (TH1F*) f->Get("h1_pedTotRms");
+  pedValue = (TH1F*) f->Get("h1_pedTotValue");
+  pedSlope = (TH1F*) f->Get("h1_pedTotSlope");
   
-  if (!pedMean or !pedRms)
+  if (!pedMean or !pedRms or !pedValue or !pedSlope)
     std::cout << "Pedestal histograms not found in " << pedestalFile << std::endl;
 
   // return;
@@ -53,7 +55,11 @@ void ctrAnalysisBar::Loop()
 
    std::vector<TObject*> objectsToStore;
    TH1F* h1_CTR = new TH1F("h1_CTR", "", 800, -10000, 10000);
+   TH1F* h1_tDiff = new TH1F("h1_tDiff", "", 1000, -5000, 5000);
+   TH2F* h2_tDiffVsBarEnergy = new TH2F("h2_tDiffVsBarEnergy", "", 10,50,600,100, -1000, 1000);
    objectsToStore.push_back(h1_CTR);
+   objectsToStore.push_back(h1_tDiff);
+   objectsToStore.push_back(h2_tDiffVsBarEnergy);
 
    Long64_t nentries = fChain->GetEntriesFast();
 
@@ -69,15 +75,22 @@ void ctrAnalysisBar::Loop()
       if( energy[1]==-9. || energy[2]==-9. )
 	continue;
 
-      float energy1 = energy[1]-pedMean->GetBinContent(channels[1]*4+tacID[1]+1);
-      float energy2 = energy[2]-pedMean->GetBinContent(channels[2]*4+tacID[2]+1);
+      float ped1=pedValue->GetBinContent(channels[1]*4+tacID[1]+1)+pedSlope->GetBinContent(channels[1]*4+tacID[1]+1)*(tot[1]/1000-310)/5.;
+      float ped2=pedValue->GetBinContent(channels[2]*4+tacID[2]+1)+pedSlope->GetBinContent(channels[2]*4+tacID[2]+1)*(tot[2]/1000-310)/5.;
+      float energy1 = energy[1]-ped1;
+      float energy2 = energy[2]-ped2;
       float energyBar =  energy1 + energy2;
+      float calibEnergyBar =  energyBar/bar_511Peak_mean*511.;
 
       double timeBar = (time[1]+time[2])/2.;
+      double tDiff = (time[1]-time[2])/2.;
       
       if (energy[0]>-9.)
 	{
-	  float energyPixel = energy[0]-pedMean->GetBinContent(channels[0]*4+tacID[0]+1);
+	  float pedPixel=pedValue->GetBinContent(channels[0]*4+tacID[0]+1)+pedSlope->GetBinContent(channels[0]*4+tacID[0]+1)*(tot[0]/1000-310)/5.;
+	  float energyPixel = energy[0]-pedPixel;
+	  float calibEnergyPixel= energyPixel/pixel_511Peak_mean*511;
+
 	  double timePixel = time[0];
 	  double deltaT = timeBar - timePixel;
 
@@ -86,7 +99,13 @@ void ctrAnalysisBar::Loop()
 	  if( (fabs(energyPixel-pixel_511Peak_mean)/pixel_511Peak_sigma)<NsigmaCut
               &&  (fabs(energyBar - bar_511Peak_mean)/bar_511Peak_sigma)<NsigmaCut)
 	    { 
-	      h1_CTR->Fill(deltaT);  
+	      h1_CTR->Fill(deltaT);
+	      h1_tDiff->Fill(tDiff);  
+	    }
+
+	  if (calibEnergyPixel>50. && calibEnergyPixel<600.)//no linearity corrections
+	    {
+	      h2_tDiffVsBarEnergy->Fill(calibEnergyBar,tDiff);
 	    }
 	}
    }

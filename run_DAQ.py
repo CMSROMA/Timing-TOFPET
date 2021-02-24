@@ -24,7 +24,10 @@ parser.add_option("-o", "--outFolder", dest="outputFolder",
 parser.add_option("--pedAllChannels", dest="pedAllChannels", default=0, 
                   help="Set to 1 to collect pedestals for all channels (default is 0)")
 parser.add_option("-n", "--name", dest="nameLabel",
-                  help="label for output files")
+                  help="number of BAR or ARRAY (BARXXXXXX)")
+parser.add_option("-t", "--tag", dest="tag",
+                  help="human readable tag")
+
 (opt, args) = parser.parse_args()
 if not opt.configFile:   
     parser.error('config file not provided')
@@ -156,6 +159,7 @@ gate_values = [15] # DeltaT[ns]/20: gate=15 -> DeltaT=300 ns
 #name = "BAR000028_WS1_NW_NC"
 name = opt.nameLabel
 
+
 '''
 #Main sequence (pixel+array)
 n_ch = 33 #number of channels in config file (2 for 2 pixels, 3 for 1 pixel and 1 bar, ..)
@@ -213,10 +217,10 @@ nseq = 1
 ########################
 
 #Reference Bar 
-posFirstBarX = 23.6
-posFirstBarY = 24.8
+posFirstBarX = 40.3
+posFirstBarY = 24.5
 posPixelX = 22.7
-posPixelY = 23.9
+posPixelY = 23.8
 
 dict_PosScan = {
     #DEFAULT
@@ -260,7 +264,7 @@ print "Position scan" , dict_PosScan
 #Reference Bar 
 refBar = 5 #REF BAR N. = 5 (start counting from 0) so it's the sixth bar
 posRefX = 31.2 
-posRefY = 21.8
+posRefY = 20.9
 stepX = 3.2 #3.2mm step from one crystal center to another in X direction
 posFirstBarX = posRefX + stepX*refBar 
 posFirstBarY = posRefY
@@ -288,6 +292,7 @@ dict_PosScan = {
 }
 print "Position scan" , dict_PosScan
 '''
+
 
 '''
 ########################
@@ -321,6 +326,8 @@ print "Position scan" , dict_PosScan
 aMover=XYMover(8820)
 print (aMover.estimatedPosition())
 
+sys.stdout.flush()
+
 for seq in range(0,nseq):
     for ov in ov_values:
         for ovref in ovref_values:
@@ -335,23 +342,30 @@ for seq in range(0,nseq):
                     print aMover.estimatedPosition()
                     print "++++ Done +++++"                    
 
+                    sys.stdout.flush()
                     #===
                     #== full file name ==
                     thisname = name+"_POS"+str(posStep)+"_X"+str(posInfo[0])+"_Y"+str(posInfo[1])+"_CH"+str(posInfo[2]).replace("_","-")+"_ETHR"+str(posInfo[3]).replace("_","-")+"_T1THR"+str(posInfo[4]).replace("_","-")
+
+                    if (opt.tag):
+                        thisname = thisname + "_%s"%opt.tag
+
                     print(thisname)
+
                     #===
                     #== short file name ==
                     #thisname = name+"_POS"+str(posStep)+"_X"+str(posInfo[0])+"_Y"+str(posInfo[1])
                     #print(thisname)
-
+                    sys.stdout.flush()
                     #============================================
                     RUN("PED",t_ped,ov,ovref,gate,thisname,posInfo[2],"","")
                     RUN("PHYS",t_phys,ov,ovref,gate,thisname,posInfo[2],posInfo[3],posInfo[4]) 
                     RUN("PED",t_ped,ov,ovref,gate,thisname,posInfo[2],"","")
                     #============================================
-
+                    sys.stdout.flush()
     #time.sleep(3600)
                     
                     ##RUN("PHYS",t_phys,ov,ovref,gate,thisname,"0_6_7_8_22_23_24","0_10_0_10_10_0_10") #trigger on a subset of channels
                     #RUN("PHYS",t_phys,ov,ovref,gate,thisname,"","") #trigger on all channels
                     
+sys.stdout.flush()

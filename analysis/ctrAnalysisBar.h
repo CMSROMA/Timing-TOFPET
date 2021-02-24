@@ -26,6 +26,8 @@ public :
     TString         outputFile;
     TH1F*           pedMean;
     TH1F*           pedRms;
+    TH1F*           pedValue;
+    TH1F*           pedSlope;
     
     float pixel_511Peak_mean;
     float pixel_511Peak_sigma;
@@ -42,6 +44,7 @@ public :
    Int_t           chId[33];   //[nch]
    Double_t        energy[33];   //[nch]
    Double_t        time[33];   //[nch]
+   Double_t        tot[33];   //[nch]
    Int_t           tacID[33];   //[nch]
    Long64_t        unixTime;
    Double_t        tempInt;
@@ -57,6 +60,7 @@ public :
    TBranch        *b_chId;   //!
    TBranch        *b_energy;   //!
    TBranch        *b_time;   //!
+   TBranch        *b_tot;   //!
    TBranch        *b_tacID;   //!
    TBranch        *b_unixTime;   //!
    TBranch        *b_tempInt;   //!
@@ -142,6 +146,7 @@ void ctrAnalysisBar::Init(TTree *tree)
    fChain->SetBranchAddress("chId", chId, &b_chId);
    fChain->SetBranchAddress("energy", energy, &b_energy);
    fChain->SetBranchAddress("time", time, &b_time);
+   fChain->SetBranchAddress("tot", tot, &b_tot);
    fChain->SetBranchAddress("tacID", tacID, &b_tacID);
    fChain->SetBranchAddress("unixTime", &unixTime, &b_unixTime);
    fChain->SetBranchAddress("tempInt", &tempInt, &b_tempInt);

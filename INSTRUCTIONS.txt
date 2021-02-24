@@ -115,7 +115,7 @@ OPEN NEW TERMINAL (can use the same for following runs)
 cd /home/cmsdaq/Workspace/TOFPET/Timing-TOFPET
 
 - Single bars:
-python run_DAQ.py -c config_main_bar.txt -o /media/cmsdaq/ext/data/LYSOBARS/ -n BAR000028_WS1_NW_NC
+python run_DAQ.py -c config_main_bar.txt -o /media/cmsdaq/ext/data/LYSOBARS/ -n BAR000028
 
 - Arrays:
 

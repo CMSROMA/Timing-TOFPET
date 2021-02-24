@@ -11,7 +11,7 @@ def LYAnalysis(crystal,runInfo):
     files={}
 
     #test crystal
-    ly, ctr, temp, posX, posY = array('d'), array('d'), array('d'), array('d'), array('d')
+    ly, ctr, temp, posX, posY,sigmaT = array('d'), array('d'), array('d'), array('d'), array('d'), array('d')
     for r in runInfo['runs']:
         files[r]=TFile.Open(args.data+"/"+r+".root")
         print("Opened "+args.data+"/"+r+".root")
@@ -23,6 +23,8 @@ def LYAnalysis(crystal,runInfo):
         treeInput.GetEntry(0)        
         ly.append(treeInput.peak1_mean_barCoinc)
         ctr.append(treeInput.CTR_sigma_barCoinc)
+        if (hasattr(treeInput,'TDIFF_sigma_barCoinc')):
+            sigmaT.append(treeInput.TDIFF_sigma_barCoinc)
         temp.append(treeInput.temp_bar)
         posX.append(treeInput.pos_X)
         posY.append(treeInput.pos_Y)
@@ -39,6 +41,12 @@ def LYAnalysis(crystal,runInfo):
         ctrAvg=-9999.
     else:
         ctrAvg=sum(ctr)/len(ctr)
+
+    if len(sigmaT)==0:
+        print "No good time resolution for test crystal "+crystal
+        sigmaTAvg=-9999.
+    else:
+        sigmaTAvg=sum(sigmaT)/len(sigmaT)
 
     if len(temp)==0:
         print "No good temperature for test crystal "+crystal
@@ -59,7 +67,7 @@ def LYAnalysis(crystal,runInfo):
         posYAvg=sum(posY)/len(posY)
 
     #ref crystal
-    lyRef, ctrRef = array('d'), array('d')
+    lyRef, ctrRef, sigmaTRef = array('d'), array('d'), array('d')
     for r in runInfo['refRuns']:
         files[r]=TFile.Open(args.data+"/"+r+".root")
         treeInput = files[r].Get("results")
@@ -70,6 +78,8 @@ def LYAnalysis(crystal,runInfo):
         treeInput.GetEntry(0)        
         lyRef.append(treeInput.peak1_mean_barCoinc)
         ctrRef.append(treeInput.CTR_sigma_barCoinc)
+        if (hasattr(treeInput,'TDIFF_sigma_barCoinc')):
+            sigmaTRef.append(treeInput.TDIFF_sigma_barCoinc)
         files[r].Close()
 
     if len(lyRef)==0:
@@ -84,7 +94,13 @@ def LYAnalysis(crystal,runInfo):
     else:
         ctrAvgRef=sum(ctrRef)/len(ctrRef)
 
-    return { 'bar':1, 'ly':lyAvg, 'ctr':ctrAvg, 'temp':tempAvg, 'posX':posXAvg, 'posY':posYAvg, 'lyRef':lyAvgRef, 'ctrRef':ctrAvgRef, 'xtLeft':-9999.0, 'xtRight':-9999.0 }
+    if len(sigmaTRef)==0:
+        print "No good time resolution for reference crystal "+crystal
+        sigmaTAvgRef=-9999.
+    else:
+        sigmaTAvgRef=sum(sigmaTRef)/len(sigmaTRef)
+
+    return { 'bar':1, 'ly':lyAvg, 'ctr':ctrAvg, 'sigmaT':sigmaTAvg, 'temp':tempAvg, 'posX':posXAvg, 'posY':posYAvg, 'lyRef':lyAvgRef, 'ctrRef':ctrAvgRef, 'sigmaTRef':sigmaTRef, 'xtLeft':-9999.0, 'xtRight':-9999.0 }
 
 def ARRAY_LYAnalysis(crystal,runInfo,bar,lenght):
     files={}
@@ -218,7 +234,7 @@ def ARRAY_LYAnalysis(crystal,runInfo,bar,lenght):
     else:
         ctrAvgRef=sum(ctrRef)/len(ctrRef)
 
-    return { 'bar': bar, 'ly':lyAvg, 'ctr':ctrAvg, 'temp':tempAvg, 'posX':posXAvg, 'posY':posYAvg, 'lyRef':lyAvgRef, 'ctrRef':ctrAvgRef, 'xtLeft':xtLeftAvg, 'xtRight':xtRightAvg }
+    return { 'bar': bar, 'ly':lyAvg, 'ctr':ctrAvg, 'sigmaT':-9999., 'temp':tempAvg, 'posX':posXAvg, 'posY':posYAvg, 'lyRef':lyAvgRef, 'ctrRef':ctrAvgRef, 'sigmaTRef':-9999., 'xtLeft':xtLeftAvg, 'xtRight':xtRightAvg }
 
 import argparse
 
@@ -269,7 +285,7 @@ import pandas as pd
 df=pd.DataFrame.from_dict(crystalsDB_withData,orient='index')
 #df=df.drop(columns=['runs','refRuns'])
 #df=df.drop(['runs','refRuns'],axis=1)
-df=df[['producer','type','id','geometry','tag','temp','bar','posX','posY','ly','ctr','lyRef','ctrRef','xtLeft','xtRight']]
+df=df[['producer','type','id','geometry','tag','temp','bar','posX','posY','ly','ctr','sigmaT','lyRef','ctrRef','sigmaTRef','xtLeft','xtRight']]
 #df.to_csv('lyAnalysisTOFPET.csv',header=False)
 #print df
 df.to_csv(args.output,header=False)

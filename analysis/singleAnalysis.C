@@ -15,10 +15,11 @@ void singleAnalysis::LoadPedestals(TString pedestalFile)
   f->ls();
   pedMean = (TH1F*) f->Get("h1_pedTotMean");
   pedRms = (TH1F*) f->Get("h1_pedTotRms");
+  pedValue = (TH1F*) f->Get("h1_pedTotValue");
+  pedSlope = (TH1F*) f->Get("h1_pedTotSlope");
   
-  if (!pedMean or !pedRms)
+  if (!pedMean or !pedRms or !pedValue or !pedSlope)
     std::cout << "Pedestal histograms not found in " << pedestalFile << std::endl;
-
   // return;
 }
 
@@ -80,7 +81,11 @@ void singleAnalysis::Loop()
       if( channelID != pixelChId )
 	continue;
 
-      h1_energy_pixel->Fill(energy-pedMean->GetBinContent(channelID*4+tacID+1));
+      float ped=pedValue->GetBinContent(channelID*4+tacID+1)+pedSlope->GetBinContent(channelID*4+tacID+1)*(tot/1000-310)/5.;
+      float en=energy-ped;
+
+      h1_energy_pixel->Fill(en);
+
       h1_temp_pixel->Fill(tempSiPMRef);
       h1_temp_bar->Fill(tempSiPMTest);
       h1_temp_int->Fill(tempInt);
@@ -88,7 +93,7 @@ void singleAnalysis::Loop()
 
    TFile *fOut=new TFile(outputFile,"RECREATE");
    fOut->cd();
-
+   
    for ( auto &obj : objectsToStore)
      obj->Write();
    // fOut->Write();

@@ -32,6 +32,8 @@ public :
    TString         outputFile;
    TH1F*           pedMean;
    TH1F*           pedRms;
+   TH1F*           pedValue;
+   TH1F*           pedSlope;
    /* pedestals       myPedestals;  */
    int             pixelChId;
    

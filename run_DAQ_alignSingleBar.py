@@ -111,8 +111,8 @@ nseq = 1
 ########################
 
 #Reference Bar 
-posRefX = 24.9 
-posRefY = 24.4
+posRefX = 37.4 
+posRefY = 23.8
 
 dict_PosScan = {
 
