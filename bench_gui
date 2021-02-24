@@ -1,0 +1,290 @@
+#!/usr/bin/env python3
+
+import gi
+import sys
+import time
+import os
+import signal
+from os import O_NONBLOCK, read
+import subprocess
+from fcntl import fcntl, F_GETFL, F_SETFL
+
+gi.require_version("Gtk", "3.0")
+
+from airtable import Airtable
+sys.path.insert(1, os.path.join(sys.path[0], '/home/cmsdaq/AutoProcess/'))
+import runDB
+
+from gi.repository import Gtk, GLib
+
+class GuiWindow(Gtk.Window):
+    def __init__(self, *args, **kwargs):
+        Gtk.Window.__init__(self, title="SiPM Bench GUI")
+        self.set_border_width(10)
+
+        self.processWindow = Gtk.Window(title="Output",can_focus=False,default_width=700,default_height=500)
+        self.processWindow.connect('delete-event', self.on_executeWindow_delete_event)
+        self.executeBox = Gtk.Box()
+        self.processWindow.add(self.executeBox)
+        
+        self.executeTextView = Gtk.TextView(editable=False,cursor_visible=False)
+        self.executeTextScroll = Gtk.ScrolledWindow()
+        self.executeTextScroll.set_hexpand(True)
+        self.executeTextScroll.set_vexpand(True)
+        self.executeTextScroll.add(self.executeTextView)
+        self.executeBox.add(self.executeTextScroll)
+        
+        self.mainBox = Gtk.Grid(row_spacing=6, column_spacing=2)
+        self.add(self.mainBox)
+
+        self.spinner = Gtk.Spinner()
+        self.mainBox.attach(self.spinner, 0, 0, 3, 1)
+
+        self.label = Gtk.Label()
+        self.mainBox.attach(self.label, 0, 1, 3, 1)
+
+        self.lscan = Gtk.CheckButton()
+        self.lscan.set_label("Longitudinal scan")
+        self.lscan.set_active(False)
+        self.mainBox.attach(self.lscan, 0, 2, 1, 1)
+        
+        self.tag_list = Gtk.ListStore(str)
+        self.populate_tag_list()
+        
+        self.tag_label = Gtk.Label(label="Tag:")
+        self.mainBox.attach(self.tag_label, 1, 2, 1, 1)
+        self.tag_entry_combo = Gtk.ComboBox.new_with_model_and_entry(model = self.tag_list)
+        self.tag_entry_combo.set_entry_text_column(0)
+        self.tag_entry_combo.connect('changed', self.tag_combo_changed)
+        self.tag_completion = Gtk.EntryCompletion()
+        self.tag_completion.set_model(self.tag_list) 
+        self.tag_completion.set_text_column(0)
+        self.tag_completion.set_match_func(self.tag_match_func)
+        self.tag_completion.connect ('match-selected', self.match_selected)
+        self.tag_entry = self.tag_entry_combo.get_child()
+        self.tag_entry.set_completion (self.tag_completion)
+        self.mainBox.attach(self.tag_entry_combo,2, 2, 1, 1)
+
+        self.array_list = Gtk.ListStore(str)
+        self.populate_array_list()
+        
+        self.array1_label = Gtk.Label(label="Crystal ID:")
+        self.mainBox.attach(self.array1_label, 0, 3, 1, 1)
+        self.array1_entry_combo = Gtk.ComboBox.new_with_model_and_entry(model = self.array_list)
+        self.array1_entry_combo.set_entry_text_column(0)
+        self.array1_entry_combo.connect('changed', self.array_combo_changed)
+        self.array1_completion = Gtk.EntryCompletion()
+        self.array1_completion.set_model(self.array_list) 
+        self.array1_completion.set_text_column(0)
+        self.array1_completion.set_match_func(self.array1_match_func)
+        self.array1_completion.connect ('match-selected', self.match_selected)
+        self.array1_entry = self.array1_entry_combo.get_child()
+        self.array1_entry.set_completion (self.array1_completion)
+        self.mainBox.attach(self.array1_entry_combo,1, 3, 2, 1)
+        
+        self.buttonStart = Gtk.Button(label="Start")
+        self.buttonStart.connect("clicked", self.on_buttonStart_clicked)
+        self.mainBox.attach(self.buttonStart, 1, 4, 2, 1)
+
+        self.buttonStop = Gtk.Button(label="Stop")
+        self.buttonStop.set_sensitive(False)
+        self.buttonStop.connect("clicked", self.on_buttonStop_clicked)
+        self.mainBox.attach(self.buttonStop, 0, 4, 1, 1)
+
+        self.timeout_id = None
+        self.connect("destroy", self.on_SpinnerWindow_destroy)
+
+    def array_combo_changed (self, combo):
+        _iter = combo.get_active_iter()
+        if _iter != None:
+            array = self.array_list[_iter][0]
+            print ('You selected array:', array)
+
+    def tag_combo_changed (self, combo):
+        _iter = combo.get_active_iter()
+        if _iter != None:
+            tag = self.tag_list[_iter][0]
+            print ('You selected tag:', tag)
+
+    def match_selected (self, completion, model, _iter):
+        print ('You selected:', model[_iter][0])
+
+    def tag_match_func (self, completion, string, _iter):
+        for word in string.split():
+            if word not in self.tag_list[_iter][0].lower(): #search is always lower case
+                return False
+        return True
+
+    def array1_match_func (self, completion, string, _iter):
+        for word in string.split():
+            if word not in self.array_list[_iter][0].lower(): #search is always lower case
+                return False
+        return True
+
+    def populate_tag_list(self):
+        self.tag_list.append(['REFDAILY'])
+        self.tag_list.append(['PREIRR'])
+        self.tag_list.append(['TEST'])
+
+    def populate_array_list(self):
+        records= runDB.airtables['Crystals'].get_all()
+        crystals=[ t['fields']['ID'] for t in records ]
+        crystals.sort(reverse=True)
+        for c in crystals:
+            self.array_list.append([c])
+
+    def on_buttonStart_clicked(self, widget, *args):
+        """ Handles "clicked" event of buttonStart. """
+        if self.show_confirmation_dialog("Starting the DAQ. Proceed?", "", self):
+            self.start_daq()
+
+    def on_buttonStop_clicked(self, widget, *args):
+        """ Handles "clicked" event of buttonStop. """
+        if self.show_confirmation_dialog("Stop the running process. Proceed?", "", self):
+            self.stop_daq("Run stopped")
+            self.processWindow.hide()
+
+    def on_SpinnerWindow_destroy(self, widget, *args):
+        """ Handles destroy event of main window. """
+        # ensure the timeout function is stopped
+        if self.timeout_id:
+            GLib.source_remove(self.timeout_id)
+            self.timeout_id = None
+        Gtk.main_quit()
+
+    def on_timeout(self, *args, **kwargs):
+        """ A timeout function.
+
+        Return True to stop it.
+        This is not a precise timer since next timeout
+        is recalculated based on the current time."""
+        self.counter += 1
+#        if self.counter <= 0:
+#            self.stop_daq("Run completed")
+#            return False
+        self.label.set_label("Running DAQ: " + str(int(self.counter / 4)))
+
+        if (self.sub_proc.poll() is not None):
+            self.sub_proc = None
+            self.stop_daq("Run completed")
+            return False
+        else:
+            return True
+        
+    def scroll_to_end(self,textview):
+        i = textview.props.buffer.get_end_iter()
+        mark = textview.props.buffer.get_insert()
+        textview.props.buffer.place_cursor(i)
+        textview.scroll_to_mark(mark, 0.0, True, 0.0, 1.0)
+
+    def non_block_read(self, output, condition):
+        if self.sub_proc is None:
+            return False
+        if condition == GLib.IO_IN:
+            op = output.read()
+            self.executeTextView.get_buffer().insert_at_cursor(op.decode('utf-8'))
+            self.scroll_to_end(self.executeTextView)
+            return True
+        
+    def start_daq(self):
+        """ Stop the timer. """
+        if self.timeout_id:
+            GLib.source_remove(self.timeout_id)
+            self.timeout_id = None
+        """ Start the timer. """
+        self.buttonStart.set_sensitive(False)
+        self.buttonStop.set_sensitive(True)
+        self.lscan.set_sensitive(False)
+        self.tag_entry_combo.set_sensitive(False)
+        self.array1_entry_combo.set_sensitive(False)
+        # time out will check every 250 miliseconds (1/4 of a second)
+        self.counter = 0
+        self.label.set_label("Running DAQ: " + str(int(self.counter / 4)))
+        runCommand="python run_DAQ.py -n "
+        if (self.array1_entry.get_text()):
+            runCommand+='%s'%self.array1_entry.get_text()
+        else:
+            runCommand+='-1'
+        if ('ARRAY' in self.array1_entry.get_text()):
+            runCommand+=' -c config_main_array.txt -o /media/cmsdaq/ext/data/LYSOARRAYS'
+        elif ('BAR' in self.array1_entry.get_text()):
+            runCommand+=' -c config_main_bar.txt -o /media/cmsdaq/ext/data/LYSOBARS'
+        if (self.tag_entry.get_text()):
+            runCommand+=' -t %s'%self.tag_entry.get_text()
+        if (self.lscan.get_active()):
+            runCommand+=' -l'
+
+        self.processWindow.set_title("%s (running)" % runCommand)
+
+#        runCommand="ping -c %d localhost"%int(self.array1_entry.get_text())
+        self.sub_proc = subprocess.Popen(runCommand, stdout=subprocess.PIPE, stderr=subprocess.PIPE,shell=True,bufsize=0,preexec_fn=os.setsid)
+
+        flags = fcntl(self.sub_proc.stdout, F_GETFL) # get current p.stdout flags
+        fcntl(self.sub_proc.stdout, F_SETFL, flags | O_NONBLOCK)
+        
+        flags = fcntl(self.sub_proc.stderr, F_GETFL) # get current p.stdout flags
+        fcntl(self.sub_proc.stderr, F_SETFL, flags | O_NONBLOCK)
+
+        GLib.io_add_watch(self.sub_proc.stdout, # file descriptor
+                          GLib.IO_IN,  # condition
+                          self.non_block_read ) # callback
+        
+        GLib.io_add_watch(self.sub_proc.stderr, # file descriptor
+                          GLib.IO_IN,  # condition
+                          self.non_block_read ) # callback
+
+        self.spinner.start()
+        self.executeTextView.get_buffer().set_text("")
+        self.processWindow.show_all()
+        self.timeout_id = GLib.timeout_add(250, self.on_timeout, None)
+
+    def stop_daq(self, alabeltext):
+        """ Stop the timer. """
+        if self.sub_proc is not None:
+            print("Killing process %d"%os.getpgid(self.sub_proc.pid))
+            os.killpg(os.getpgid(self.sub_proc.pid), signal.SIGINT)
+            self.sub_proc=None
+        if self.timeout_id:
+            GLib.source_remove(self.timeout_id)
+            self.timeout_id = None
+        self.spinner.stop()
+        self.buttonStart.set_sensitive(True)
+        self.buttonStop.set_sensitive(False)
+        self.lscan.set_sensitive(True)
+        self.tag_entry_combo.set_sensitive(True)
+        self.array1_entry_combo.set_sensitive(True)
+        self.label.set_label(alabeltext)
+        self.processWindow.set_title(alabeltext)
+#        self.processWindow.hide()
+        self.timeout_id = GLib.timeout_add(2000, self.reset_label, None)
+
+    def show_confirmation_dialog(self, query, title = "WARNING", parent = None):
+        if parent is None:
+            parent = self
+        dialog = Gtk.MessageDialog(parent, 0, Gtk.MessageType.QUESTION, Gtk.ButtonsType.YES_NO, title)
+        dialog.format_secondary_text(query)
+        rtn = dialog.run()
+        dialog.destroy()
+        return rtn == Gtk.ResponseType.YES
+    
+    def on_executeWindow_delete_event(self, window, data):
+        if self.sub_proc is not None:
+            if self.show_confirmation_dialog("Closing window will stop the running process. Proceed?", "", self.processWindow):
+                self.stop_daq("Run stopped")
+                self.processWindow.hide()
+        else:
+            if self.show_confirmation_dialog("","Close window?", self.processWindow):
+                self.processWindow.hide()
+        return True
+
+    def reset_label(self, label):
+        """ Stop the timer. """
+        if self.timeout_id:
+            GLib.source_remove(self.timeout_id)
+            self.timeout_id = None
+        self.label.set_label("")
+
+        
+win = GuiWindow()
+win.show_all()
+Gtk.main()

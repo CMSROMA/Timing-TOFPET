@@ -30,18 +30,18 @@ QDC_CALIB qdc_calibration.tsv
 
 #Run settings
 #DAQSCRIPT my_acquire_sipm_data PHYS
-DAQSCRIPT my_acquire_sipm_data PHYS
+DAQSCRIPT acquire_pedestal_data PED
 #DAQSCRIPT my_acquire_sipm_data PHYS
 CONVERTSINGLESCRIPT convert_raw_to_singles
 CONVERTCOINCIDENCESCRIPT analysis/find_coincidences.py
 #CONVERTCOINCIDENCESCRIPT convert_raw_to_coincidence
 TEMPERATUREFILE arduino/temperature/temperature_tmp.txt
 MODE qdc
-TIME 300
+TIME 0.3
 #TIME 1
 OUTPUT_DIR /media/cmsdaq/ext/data/LYSOBARS
 #OUTPUT_DIR output/Pedestal
-OUTPUT_LABEL Run003135_2021-02-24-17-22-31_BAR000028_POS0_X40.3_Y24.5_CH0-1-2_ETHR0-0-0_T1THR20-10-10_TEST
+OUTPUT_LABEL Run003139_2021-02-24-17-34-54_BAR000028_POS0_X40.3_Y24.5_CH0-1-2_ETHR0-0-0_T1THR20-10-10_TEST
 #OUTPUT_LABEL PedestalTest13_2ch_100000delay
 
 #Channels
