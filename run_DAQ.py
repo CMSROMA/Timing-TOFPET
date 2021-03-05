@@ -27,6 +27,8 @@ parser.add_option("-n", "--name", dest="nameLabel",
                   help="number of BAR or ARRAY (BARXXXXXX)")
 parser.add_option("-t", "--tag", dest="tag",
                   help="human readable tag")
+parser.add_option("-l", "--lscan", dest="lscan",action="store_true",default=False,
+                  help="longitudinal scan")
 
 (opt, args) = parser.parse_args()
 if not opt.configFile:   
@@ -217,42 +219,58 @@ nseq = 1
 ########################
 
 #Reference Bar 
-posFirstBarX = 40.3
-posFirstBarY = 24.5
+posFirstBarX = 42.2
+posFirstBarY = 23.9
 posPixelX = 22.7
 posPixelY = 23.8
 
-dict_PosScan = {
-    #DEFAULT
-    0: (round(posFirstBarX,1),round(posFirstBarY,1),"0_1_2","0_0_0","20_10_10"),
+if ('BAR' in name):
+    if (not opt.lscan):
+        dict_PosScan = {
+            #DEFAULT
+            0: (round(posFirstBarX,1),round(posFirstBarY,1),"0_1_2","0_0_0","20_10_10"),
+            
+            #SCAN THRESHOLD T1 - BAR 
+            #0: (round(posFirstBarX,1),round(posFirstBarY,1),"0_1_2","0_0_0","20_10_10"),
+            #1: (round(posFirstBarX,1),round(posFirstBarY,1),"0_1_2","0_0_0","20_20_20"),
+            #2: (round(posFirstBarX,1),round(posFirstBarY,1),"0_1_2","0_0_0","20_40_40")
+            
+            #0: (round(posFirstBarX,1),round(posFirstBarY,1),"0_1_2","0_0_0","20_5_5"),
+            #1: (round(posFirstBarX,1),round(posFirstBarY,1),"0_1_2","0_0_0","20_10_10"),
+            #2: (round(posFirstBarX,1),round(posFirstBarY,1),"0_1_2","0_0_0","20_15_15"),
+            #3: (round(posFirstBarX,1),round(posFirstBarY,1),"0_1_2","0_0_0","20_20_20"),
+            #4: (round(posFirstBarX,1),round(posFirstBarY,1),"0_1_2","0_0_0","20_25_25"),
+            #5: (round(posFirstBarX,1),round(posFirstBarY,1),"0_1_2","0_0_0","20_30_30"),
+            #6: (round(posFirstBarX,1),round(posFirstBarY,1),"0_1_2","0_0_0","20_35_35"),
+            #7: (round(posFirstBarX,1),round(posFirstBarY,1),"0_1_2","0_0_0","20_40_40"),
+            #8: (round(posFirstBarX,1),round(posFirstBarY,1),"0_1_2","0_0_0","20_45_45"),
+            #9: (round(posFirstBarX,1),round(posFirstBarY,1),"0_1_2","0_0_0","20_50_50"),
+            #10: (round(posFirstBarX,1),round(posFirstBarY,1),"0_1_2","0_0_0","20_55_55"),
+            #11: (round(posFirstBarX,1),round(posFirstBarY,1),"0_1_2","0_0_0","20_60_60")
 
-    #SCAN THRESHOLD T1 - BAR 
-    #0: (round(posFirstBarX,1),round(posFirstBarY,1),"0_1_2","0_0_0","20_10_10"),
-    #1: (round(posFirstBarX,1),round(posFirstBarY,1),"0_1_2","0_0_0","20_20_20"),
-    #2: (round(posFirstBarX,1),round(posFirstBarY,1),"0_1_2","0_0_0","20_40_40")
+            #SCAN THRESHOLD T1 - BAR in ARRAY (using BAR2 X=X40.1_Y23.0)
+            #0: (round(40.1,1),round(23.0,1),"0_1_2","0_0_0","20_5_5"),
+            #1: (round(40.1,1),round(23.0,1),"0_1_2","0_0_0","20_10_10"),
+            #2: (round(40.1,1),round(23.0,1),"0_1_2","0_0_0","20_15_15"),
+            #3: (round(40.1,1),round(23.0,1),"0_1_2","0_0_0","20_20_20"),
+            #4: (round(40.1,1),round(23.0,1),"0_1_2","0_0_0","20_25_25"),
+            #5: (round(40.1,1),round(23.0,1),"0_1_2","0_0_0","20_30_30")
+        }
+else:
+        dict_PosScan = {
+            #DEFAULT
+            0: (round(posFirstBarX,1),round(posFirstBarY,1),"0_1_2","0_0_0","20_10_10"),
+            
+            #SCAN THRESHOLD T1 - BAR 
+            -1: (round(posFirstBarX-4,1),round(posFirstBarY,1),"0_1_2","0_0_0","20_10_10"),
+            -2: (round(posFirstBarX-8,1),round(posFirstBarY,1),"0_1_2","0_0_0","20_10_10"),
+            -3: (round(posFirstBarX-12,1),round(posFirstBarY,1),"0_1_2","0_0_0","20_10_10"),
+            -4: (round(posFirstBarX-16,1),round(posFirstBarY,1),"0_1_2","0_0_0","20_10_10"),
+            -5: (round(posFirstBarX-20,1),round(posFirstBarY,1),"0_1_2","0_0_0","20_10_10"),
+            -6: (round(posFirstBarX-24,1),round(posFirstBarY,1),"0_1_2","0_0_0","20_10_10"),
+            -7: (round(posFirstBarX-28,1),round(posFirstBarY,1),"0_1_2","0_0_0","20_10_10"),
+        }
 
-    #0: (round(posFirstBarX,1),round(posFirstBarY,1),"0_1_2","0_0_0","20_5_5"),
-    #1: (round(posFirstBarX,1),round(posFirstBarY,1),"0_1_2","0_0_0","20_10_10"),
-    #2: (round(posFirstBarX,1),round(posFirstBarY,1),"0_1_2","0_0_0","20_15_15"),
-    #3: (round(posFirstBarX,1),round(posFirstBarY,1),"0_1_2","0_0_0","20_20_20"),
-    #4: (round(posFirstBarX,1),round(posFirstBarY,1),"0_1_2","0_0_0","20_25_25"),
-    #5: (round(posFirstBarX,1),round(posFirstBarY,1),"0_1_2","0_0_0","20_30_30"),
-    #6: (round(posFirstBarX,1),round(posFirstBarY,1),"0_1_2","0_0_0","20_35_35"),
-    #7: (round(posFirstBarX,1),round(posFirstBarY,1),"0_1_2","0_0_0","20_40_40"),
-    #8: (round(posFirstBarX,1),round(posFirstBarY,1),"0_1_2","0_0_0","20_45_45"),
-    #9: (round(posFirstBarX,1),round(posFirstBarY,1),"0_1_2","0_0_0","20_50_50"),
-    #10: (round(posFirstBarX,1),round(posFirstBarY,1),"0_1_2","0_0_0","20_55_55"),
-    #11: (round(posFirstBarX,1),round(posFirstBarY,1),"0_1_2","0_0_0","20_60_60")
-
-    #SCAN THRESHOLD T1 - BAR in ARRAY (using BAR2 X=X40.1_Y23.0)
-    #0: (round(40.1,1),round(23.0,1),"0_1_2","0_0_0","20_5_5"),
-    #1: (round(40.1,1),round(23.0,1),"0_1_2","0_0_0","20_10_10"),
-    #2: (round(40.1,1),round(23.0,1),"0_1_2","0_0_0","20_15_15"),
-    #3: (round(40.1,1),round(23.0,1),"0_1_2","0_0_0","20_20_20"),
-    #4: (round(40.1,1),round(23.0,1),"0_1_2","0_0_0","20_25_25"),
-    #5: (round(40.1,1),round(23.0,1),"0_1_2","0_0_0","20_30_30")
-
-}
 print "Position scan" , dict_PosScan
 
 

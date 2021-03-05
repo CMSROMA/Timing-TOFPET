@@ -866,7 +866,7 @@ print
 print "--- COPY AND PASTE IN THE ELOG ---"
 print 
 #print "----"
-print "xtal:{0} RUN:{1} ly_bar:{2:.2f} Eres_bar:{3:.1f}% ctr_sigma:({4:.2f}+/-{5:.2f})ps ctr_mean:{6:.2f}ps tdiff_sigma:({7:.2f}+/-{8:.2f})ps stoc:({9:.2f}+/-{10:.2f})ps -- ly_pixel:{11:.2f} Eres_pixel:{12:.1f}%".format(
+payload_text="xtal:{0} RUN:{1} ly_bar:{2:.2f} Eres_bar:{3:.1f}% ctr_sigma:({4:.2f}+/-{5:.2f})ps ctr_mean:{6:.2f}ps tdiff_sigma:({7:.2f}+/-{8:.2f})ps stoc:({9:.2f}+/-{10:.2f})ps -- ly_pixel:{11:.2f} Eres_pixel:{12:.1f}%".format(
     opt.barCode,
     opt.run,
     fitResults[('barCoinc',"peak1","mean","value")],
@@ -881,6 +881,27 @@ print "xtal:{0} RUN:{1} ly_bar:{2:.2f} Eres_bar:{3:.1f}% ctr_sigma:({4:.2f}+/-{5
     fitResults[('pixelCoinc',"peak1","mean","value")],
     100*fitResults[('pixelCoinc',"peak1","sigma","value")]/fitResults[('pixelCoinc',"peak1","mean","value")]   
 )
+print payload_text
+
+import requests
+def logMatterMost(incoming_hook_url,payload):
+    r = requests.post(incoming_hook_url, json=payload)
+    if r.status_code != 200:
+        raise RuntimeError(r.text)
+    else:
+        print(r.text)
+
+mattermost_hook=os.environ['WEB_HOOK']
+host='10.0.0.33'
+payload_text+= "\nhttp://%s/BARS/index.php?match=Run%s"%(host,str(int(opt.run)).zfill(6))
+
+this_payload={
+  "username": "sipm-bench",
+  "icon_url": "https://mattermost.org/wp-content/uploads/2016/04/icon.png",
+  "text": "#### Summary Run%s\n"%(str(opt.run).zfill(6))+payload_text
+}
+logMatterMost(mattermost_hook,this_payload)
+
 #print "setup info: ", input_filename_coinc
 #print "----"
 

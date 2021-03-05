@@ -100,7 +100,7 @@ def LYAnalysis(crystal,runInfo):
     else:
         sigmaTAvgRef=sum(sigmaTRef)/len(sigmaTRef)
 
-    return { 'bar':1, 'ly':lyAvg, 'ctr':ctrAvg, 'sigmaT':sigmaTAvg, 'temp':tempAvg, 'posX':posXAvg, 'posY':posYAvg, 'lyRef':lyAvgRef, 'ctrRef':ctrAvgRef, 'sigmaTRef':sigmaTRef, 'xtLeft':-9999.0, 'xtRight':-9999.0 }
+    return { 'bar':1, 'ly':lyAvg, 'ctr':ctrAvg, 'sigmaT':sigmaTAvg, 'temp':tempAvg, 'posX':posXAvg, 'posY':posYAvg, 'lyRef':lyAvgRef, 'ctrRef':ctrAvgRef, 'sigmaTRef':sigmaTAvgRef, 'xtLeft':-9999.0, 'xtRight':-9999.0 }
 
 def ARRAY_LYAnalysis(crystal,runInfo,bar,lenght):
     files={}
@@ -240,6 +240,7 @@ import argparse
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--output',dest='output')
+parser.add_argument('--json',dest='json')
 parser.add_argument('--db',dest='db')
 parser.add_argument('--data',dest='data')
 parser.add_argument('--dataArray',dest='dataArray')
@@ -289,3 +290,6 @@ df=df[['producer','type','id','geometry','tag','temp','bar','posX','posY','ly','
 #df.to_csv('lyAnalysisTOFPET.csv',header=False)
 #print df
 df.to_csv(args.output,header=False)
+if (args.json):
+    with open(args.json, 'w') as file:
+           file.write(json.dumps(json.loads(df.to_json(orient='records')), indent=4))

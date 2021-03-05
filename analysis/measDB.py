@@ -37,6 +37,6 @@ class MeasDB():
         if(len(self.db)==0):
             return
         with open(self.dbFile, 'w') as file:
-           file.write(json.dumps(self.db))
+           file.write(json.dumps(self.db,indent=4))
            print('Saved measDB into '+self.dbFile)
 
